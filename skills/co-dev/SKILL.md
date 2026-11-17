@@ -1,6 +1,6 @@
 ---
 name: co-dev
-description: Goals for developing software together with the user, in seven modes (design, plan, build, debug, review, explain and spike). Each mode says what to optimize for in that kind of work. Use when the user names a mode (`/co-dev design`, `/co-dev plan`, `/co-dev build`, `/co-dev debug`, `/co-dev review`, `/co-dev explain`, `/co-dev spike`). Not a procedure.
+description: Goals for developing software together with the user, in eight modes (design, plan, build, debug, review, explain, spike and learn). Each mode says what to optimize for in that kind of work. Use when the user names a mode (`/co-dev design`, `/co-dev plan`, `/co-dev build`, `/co-dev debug`, `/co-dev review`, `/co-dev explain`, `/co-dev spike`, `/co-dev learn`). Not a procedure.
 ---
 
 # Co-dev
@@ -13,7 +13,7 @@ This skill gives goals, not steps. The goals say what a good result of the work 
 
 ## Modes
 
-There are seven modes. Three follow one another as the stages of the work. The other four, debug, review, explain and spike, are side-kicks: the user turns to them from any stage, and returns from them. The user names the mode. If they have not, ask which one; do not infer it from the conversation.
+There are eight modes. Three follow one another as the stages of the work. The other five, debug, review, explain, spike and learn, are side-kicks: the user turns to them from any stage, and returns from them. The user names the mode. If they have not, ask which one; do not infer it from the conversation.
 
 | Mode | The work | It ends in |
 |---|---|---|
@@ -24,6 +24,7 @@ There are seven modes. Three follow one another as the stages of the work. The o
 | `review` | Reading finished work to find what is wrong with it | Findings, each shown and weighed |
 | `explain` | Bringing the user to understand a piece of code, a change or a system | An understanding the user can decide and act on |
 | `spike` | Answering a question about something that does not exist yet, with code meant to be thrown away | An answer, and the code gone |
+| `learn` | Turning what a piece of work taught into a change in how you work | A change that is in place |
 
 ## Using a mode
 

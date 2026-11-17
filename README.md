@@ -9,7 +9,7 @@ npx skills add kamilkonior/brain-kit
 | Skill | What it does |
 |---|---|
 | `co-design` | Designs something with you: an architecture, a feature, a process, a strategy, a document. Both of you contribute ideas, you decide what is yours to decide, and the result is a written design that can be built from without the agent. |
-| `co-dev` | Gives the agent goals for developing software with you, in seven modes: design, plan, build, debug, review, explain and spike. Each mode says what to optimize for in that kind of work, and the two directions in which it goes wrong. |
+| `co-dev` | Gives the agent goals for developing software with you, in eight modes: design, plan, build, debug, review, explain, spike and learn. Each mode says what to optimize for in that kind of work, and the two directions in which it goes wrong. |
 | `grill-me` | Interviews you about a design, one question at a time, until it's settled. You decide; the agent looks things up, recommends and keeps the order. |
 | `decision-tree` | A CLI memory for decisions: questions, options, selections and follow-ups in an append-only log. It answers what to decide next and what's already settled. |
 | `decision-tree-v2` | The next version of `decision-tree`: it adds statements, a reason on every judgement, several operations in one call, and a write result that says what each change displaced or brought back. Its log format is not compatible with `decision-tree`'s. |
@@ -54,6 +54,12 @@ To answer a question about something that does not exist yet, with code meant to
 
 ```
 /co-dev spike
+```
+
+To turn what a piece of work taught into a change in how you work:
+
+```
+/co-dev learn
 ```
 
 To pressure-test a plan you already have:
