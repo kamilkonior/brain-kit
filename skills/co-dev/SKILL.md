@@ -1,6 +1,6 @@
 ---
 name: co-dev
-description: Goals for developing software together with the user, in nine modes (design, plan, build, debug, review, explain, spike, learn and refactor). Each mode says what to optimize for in that kind of work. Use when the user names a mode (`/co-dev design`, `/co-dev plan`, `/co-dev build`, `/co-dev debug`, `/co-dev review`, `/co-dev explain`, `/co-dev spike`, `/co-dev learn`, `/co-dev refactor`). Not a procedure.
+description: Goals for developing software together with the user, in ten modes (design, plan, build, debug, review, explain, spike, learn, refactor and hunt). Each mode says what to optimize for in that kind of work. Use when the user names a mode (`/co-dev design`, `/co-dev plan`, `/co-dev build`, `/co-dev debug`, `/co-dev review`, `/co-dev explain`, `/co-dev spike`, `/co-dev learn`, `/co-dev refactor`, `/co-dev hunt`). Not a procedure.
 ---
 
 # Co-dev
@@ -13,7 +13,7 @@ This skill gives goals, not steps. The goals say what a good result of the work 
 
 ## Modes
 
-There are nine modes. Three follow one another as the stages of the work. The other six, debug, review, explain, spike, learn and refactor, are side-kicks: the user turns to them from any stage, and returns from them. The user names the mode. If they have not, ask which one; do not infer it from the conversation.
+There are ten modes. Three follow one another as the stages of the work. The other seven, debug, review, explain, spike, learn, refactor and hunt, are side-kicks: the user turns to them from any stage, and returns from them. The user names the mode. If they have not, ask which one; do not infer it from the conversation.
 
 | Mode | The work | It ends in |
 |---|---|---|
@@ -26,6 +26,7 @@ There are nine modes. Three follow one another as the stages of the work. The ot
 | `spike` | Answering a question about something that does not exist yet, with code meant to be thrown away | An answer, and the code gone |
 | `learn` | Turning what a piece of work taught into a change in how you work | A change that is in place |
 | `refactor` | Changing the structure of existing code while what it does stays the same | The same behavior in a new shape, and that shown |
+| `hunt` | Looking for the ways in which something that was built breaks, against a stated reference for what is right | Breaks that were shown, and what held |
 
 ## Using a mode
 
