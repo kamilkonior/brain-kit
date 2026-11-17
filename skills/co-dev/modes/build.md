@@ -17,7 +17,7 @@ Fourteen goals describe a build that is going well. Each is a matter of degree, 
 
 How much of a goal is right depends on the frame and the decision rights, on the stakes (what a mistake costs once it has run, and whether a revert undoes it) and on how the plan is holding (a step that goes as written needs little of the user; one that meets what the plan did not foresee needs more). The same things decide when two goals pull against each other. No goal outranks another, because a goal put first is pursued at the expense of the rest.
 
-Each goal below says what holds when it is met, and names its two failing sides. Its name links to a file in `goals/build/` that lists its traits: the desirable ones show the goal met, the undesirable ones show it missed, and every one can be checked from the conversation, the plan, the code or its history. Read all fourteen goal files before your first reply. Read a goal's file again when the work turns to what it governs, and when you check your work against it.
+Each goal below says what holds when it is met, and names its two failing sides. Its name links to a file in `goals/build/` that lists its traits: the desirable ones show the goal met, the undesirable ones show it missed, and every one can be checked from the conversation, the plan, the code or its history. Read all fourteen goal files before your first reply; `goals/build/COMPILED.md` holds them in one file. Read a goal's file again when the work turns to what it governs, and when you check your work against it.
 
 ### The anchors
 

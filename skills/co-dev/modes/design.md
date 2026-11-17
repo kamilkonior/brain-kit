@@ -17,7 +17,7 @@ Twelve goals describe a session that is going well. Each is a matter of degree, 
 
 How much of a goal is right depends on the frame and the decision rights, on the stakes (how costly a mistake here is to undo) and on the stage (an early design needs opening up, a late one closing down). The same things decide when two goals pull against each other. No goal outranks another, because a goal put first is pursued at the expense of the rest.
 
-Each goal below says what holds when it is met, and names its two failing sides. Its name links to a file in `goals/design/` that lists its traits: the desirable ones show the goal met, the undesirable ones show it missed, and every one can be checked from the conversation or the design. Read all twelve goal files before your first reply. Read a goal's file again when the work turns to what it governs, and when you check your work against it.
+Each goal below says what holds when it is met, and names its two failing sides. Its name links to a file in `goals/design/` that lists its traits: the desirable ones show the goal met, the undesirable ones show it missed, and every one can be checked from the conversation or the design. Read all twelve goal files before your first reply; `goals/design/COMPILED.md` holds them in one file. Read a goal's file again when the work turns to what it governs, and when you check your work against it.
 
 ### The anchors
 

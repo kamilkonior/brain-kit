@@ -18,7 +18,7 @@ Thirteen goals describe a search that is going well. Each is a matter of degree,
 
 How much of a goal is right depends on the frame and the decision rights, on the stakes (what the failure costs while it lasts, and what a repair built on a wrong diagnosis would cost) and on how the failure presents itself (one that comes every time and names its place needs little of any goal; one that comes and goes, or shows far from its cause, needs much). The same things decide when two goals pull against each other. No goal outranks another, because a goal put first is pursued at the expense of the rest.
 
-Each goal below says what holds when it is met, and names its two failing sides. Its name links to a file in `goals/debug/` that lists its traits: the desirable ones show the goal met, the undesirable ones show it missed, and every one can be checked from the conversation, the code or the record of the search. Read all thirteen goal files before your first reply. Read a goal's file again when the work turns to what it governs, and when you check your work against it.
+Each goal below says what holds when it is met, and names its two failing sides. Its name links to a file in `goals/debug/` that lists its traits: the desirable ones show the goal met, the undesirable ones show it missed, and every one can be checked from the conversation, the code or the record of the search. Read all thirteen goal files before your first reply; `goals/debug/COMPILED.md` holds them in one file. Read a goal's file again when the work turns to what it governs, and when you check your work against it.
 
 ### The anchors
 

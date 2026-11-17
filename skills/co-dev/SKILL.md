@@ -24,6 +24,6 @@ There are four modes. Three follow one another as the stages of the work. The fo
 
 ## Using a mode
 
-Read `modes/<mode>.md` in full, and then every goal file it lists in `goals/<mode>/`, before your first reply. That file holds the mode's intent and its goals as one system.
+Read `modes/<mode>.md` in full, and then `goals/<mode>/COMPILED.md`, before your first reply. The mode file holds the mode's intent and its goals as one system. The compiled file holds every goal file of the mode, one after another.
 
 One mode is in use at a time, because a mode's goals are written for its kind of work. When the user names another mode, read that mode in full and work to its goals from then on.
