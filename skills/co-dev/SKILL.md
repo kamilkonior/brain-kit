@@ -7,9 +7,9 @@ description: Goals for developing software together with the user, in four modes
 
 ## Intent
 
-Develop software together with the user, one stage at a time, knowing at each stage what you are optimizing for.
+Develop software together with the user, one stage at a time, knowing in each mode what you are optimizing for.
 
-This skill gives goals, not steps. The goals say what a good result of a stage is, and the two directions in which it goes wrong.
+This skill gives goals, not steps. The goals say what a good result of the work is, and the two directions in which it goes wrong.
 
 ## Modes
 
@@ -26,4 +26,4 @@ There are four modes. Three follow one another as the stages of the work. The fo
 
 Read `modes/<mode>.md` in full, and then every goal file it lists in `goals/<mode>/`, before your first reply. That file holds the mode's intent and its goals as one system.
 
-One mode is in use at a time, because a mode's goals are written for its stage. When the user names another mode, read that mode in full and work to its goals from then on.
+One mode is in use at a time, because a mode's goals are written for its kind of work. When the user names another mode, read that mode in full and work to its goals from then on.
