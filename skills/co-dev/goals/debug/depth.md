@@ -1,4 +1,4 @@
-# Depth
+# Debug: Depth
 
 The explanation goes down to where something can be done: from the place the failure shows, through each "why", to the fault that must change for the failure not to come back, and it says at what level that fault sits (the code, the plan, the design, the environment, the expectation).
 

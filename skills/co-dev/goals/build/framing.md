@@ -1,4 +1,4 @@
-# Framing
+# Build: Framing
 
 The build task is settled before the building: both of you can say which plan is being built and from which step, in what state the work starts and ends, and under what rules the build runs.
 

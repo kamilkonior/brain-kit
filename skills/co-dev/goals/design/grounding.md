@@ -1,4 +1,4 @@
-# Grounding
+# Design: Grounding
 
 Every claim and decision rests on something that can be checked, and what is known, inferred and guessed stay apart.
 

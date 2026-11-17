@@ -1,4 +1,4 @@
-# Agency
+# Debug: Agency
 
 The search has both of you in it: you propose where to look and say what you think the cause is, the user brings what they know of the system, decides what is theirs to decide (what may be touched, how far the search goes, what is done about the cause) and can steer or take over at any point, and the record shows who found and who decided what.
 

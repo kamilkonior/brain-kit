@@ -1,4 +1,4 @@
-# Economy
+# Plan: Economy
 
 Planning takes as little of the user's attention as the plan allows: what the design, the code or a quick check answers is not asked, and what reaches the user is the decisions that are theirs, point first.
 

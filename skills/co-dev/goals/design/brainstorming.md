@@ -1,4 +1,4 @@
-# Brainstorming
+# Design: Brainstorming
 
 A direction is chosen from a wide range of concrete ideas, aired before they are judged, with the user's own among them.
 

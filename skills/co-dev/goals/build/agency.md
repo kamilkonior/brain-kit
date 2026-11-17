@@ -1,4 +1,4 @@
-# Agency
+# Build: Agency
 
 The build has both of you in it: you make the calls the plan left to the builder and say what worries you, the user decides what is theirs to decide (a change to the plan or the design, a cut, a risk, a step that cannot be undone) and can steer or take over at any point, and the record shows who decided what.
 

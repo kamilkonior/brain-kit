@@ -1,4 +1,4 @@
-# Verification
+# Build: Verification
 
 A step is called done when its check has been run and seen to pass, on the code as it now stands, and at the end the checks together show what the design calls success.
 

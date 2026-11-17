@@ -1,4 +1,4 @@
-# Sequencing
+# Plan: Sequencing
 
 The steps come in an order that works: each rests only on what comes before it, what is risky or teaches most comes early, something that runs exists early and keeps running, and steps that do not depend on each other are marked.
 

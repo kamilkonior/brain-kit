@@ -1,4 +1,4 @@
-# Completeness
+# Build: Completeness
 
 The build goes the whole way to the agreed end state: every step in the extent is done, including the work around the code, nothing called done is a placeholder, and what was not built is named.
 

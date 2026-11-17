@@ -1,4 +1,4 @@
-# Economy
+# Design: Economy
 
 The exchange takes as little of the user's attention as the content allows: few words, few turns, few decisions, and the point first.
 

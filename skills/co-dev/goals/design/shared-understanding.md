@@ -1,4 +1,4 @@
-# Shared understanding
+# Design: Shared understanding
 
 You and the user mean the same thing by the goal, the terms and each decision, and that has been checked, not assumed.
 

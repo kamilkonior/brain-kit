@@ -1,4 +1,4 @@
-# Completeness
+# Debug: Completeness
 
 The diagnosis accounts for the whole failure: every symptom observed is explained or named as unexplained, it says how far the fault reaches (where else, since when, what it has already damaged), and what was found on the way is named.
 

@@ -1,4 +1,4 @@
-# Coherence
+# Design: Coherence
 
 The decisions make one design: a central idea and a few principles run through it, and no two parts contradict each other.
 

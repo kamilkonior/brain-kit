@@ -1,4 +1,4 @@
-# Hypothesis
+# Debug: Hypothesis
 
 The search works from explanations that could be wrong: each candidate cause says how it would produce the failure and what else would then be seen, more than one is held while the evidence fits more than one, and the user's are among them.
 

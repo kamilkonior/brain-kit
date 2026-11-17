@@ -1,4 +1,4 @@
-# Framing
+# Plan: Framing
 
 The planning task is settled before the planning: both of you can say which design the plan delivers and how much of it, in what state the work ends, who will build from the plan and what limits it must keep.
 

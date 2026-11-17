@@ -1,4 +1,4 @@
-# Decomposition
+# Plan: Decomposition
 
 The work is cut into steps the builder can take one at a time: each has one result that can be seen, says what changes and where, and leaves to the builder what is better decided with the code open.
 

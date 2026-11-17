@@ -1,4 +1,4 @@
-# Economy
+# Debug: Economy
 
 The search takes as little of the user's attention as the failure allows: what a run, the code or the logs answer is not asked, what only the user knows is asked early and at once, and reports give the state of the search, point first.
 

@@ -1,4 +1,4 @@
-# Economy
+# Build: Economy
 
 The build takes as little of the user's attention as the work allows: what the plan, the code or a run answers is not asked, interruptions keep to the agreed pauses and what cannot wait, and reports give the result, point first.
 

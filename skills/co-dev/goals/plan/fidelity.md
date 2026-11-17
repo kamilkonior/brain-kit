@@ -1,4 +1,4 @@
-# Fidelity
+# Plan: Fidelity
 
 The plan builds the design that was decided: every step can be traced to it, nothing in the plan contradicts it or adds to it, and where planning finds the design silent or wrong, the design is changed in the open, not in a step.
 

@@ -1,4 +1,4 @@
-# Containment
+# Build: Containment
 
 The build changes only what it is meant to change, and what it changes can be taken back: the user's work, their data and the systems around the code are as safe after a step as before it, and nothing that cannot be undone is run before its way back exists.
 

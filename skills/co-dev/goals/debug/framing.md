@@ -1,4 +1,4 @@
-# Framing
+# Debug: Framing
 
 The failure is settled before the search: both of you can say what was expected and what happens instead, where it shows, what work waits on the answer and at what point the search stops.
 

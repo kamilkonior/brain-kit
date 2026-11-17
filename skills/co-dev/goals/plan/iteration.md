@@ -1,4 +1,4 @@
-# Iteration
+# Plan: Iteration
 
 The user sees the plan early and coarse, reacts to it, and each round adds detail only below what has been agreed.
 

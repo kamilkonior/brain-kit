@@ -1,4 +1,4 @@
-# Craft
+# Build: Craft
 
 The code is well made: it is the simplest that does what the step needs, a reader of the project can follow it, it deals with the failures that will really occur, and it leaves nothing behind that the work did not need.
 

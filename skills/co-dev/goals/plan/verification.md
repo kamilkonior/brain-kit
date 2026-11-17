@@ -1,4 +1,4 @@
-# Verification
+# Plan: Verification
 
 Every step, and the plan as a whole, says how it will be shown to be done: by a check that can be run or observed and would fail if the work were wrong, and the checks together show what the design calls success.
 

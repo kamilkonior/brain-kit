@@ -1,4 +1,4 @@
-# Shared understanding
+# Debug: Shared understanding
 
 You and the user have the same picture of the search: they can say what the failure is, what has been ruled out, what is suspected and what is shown, and that picture rests on what was run and seen, not on what was claimed.
 

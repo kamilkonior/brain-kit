@@ -1,4 +1,4 @@
-# Shared understanding
+# Build: Shared understanding
 
 You and the user have the same picture of the build: they can say what works now, what does not yet, where it departs from the plan and what is asked of them, and that picture rests on what was run and shown, not on what was claimed.
 

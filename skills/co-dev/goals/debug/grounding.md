@@ -1,4 +1,4 @@
-# Grounding
+# Debug: Grounding
 
 The search works on what is actually there: the messages, the code that runs, the data and the environment were read or run, in full and now, and what was seen, inferred and assumed stay apart.
 

@@ -1,4 +1,4 @@
-# Containment
+# Debug: Containment
 
 The search harms nothing and leaves things as it found them: what shows the failure is saved before it is disturbed, probes run where a mistake costs little, and what was added or changed in order to look is taken out again.
 

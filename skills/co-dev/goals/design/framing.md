@@ -1,4 +1,4 @@
-# Framing
+# Design: Framing
 
 The problem is settled before the solution: both of you can say who the design is for, how success will be checked and what it leaves out.
 

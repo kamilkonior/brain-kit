@@ -1,4 +1,4 @@
-# Agency
+# Design: Agency
 
 The design has both of you in it: you contribute ideas and objections, the user decides what is theirs to decide and can steer the session at any point, and the record shows who decided what.
 

@@ -1,4 +1,4 @@
-# Proof
+# Debug: Proof
 
 The cause is shown, not supposed: the failure stops when the cause alone is removed and returns when it is put back, the way from cause to symptom can be told without a gap, and the diagnosis says how sure it is.
 

@@ -1,4 +1,4 @@
-# Resilience
+# Plan: Resilience
 
 The plan holds when the build meets something unforeseen: what it assumes and where it is unsure are marked, the steps hard to undo are known, and it says when the builder adapts and when the work stops and comes back.
 

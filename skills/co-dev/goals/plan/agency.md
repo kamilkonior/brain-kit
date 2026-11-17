@@ -1,4 +1,4 @@
-# Agency
+# Plan: Agency
 
 The plan has both of you in it: you propose the route and say what worries you, the user decides what is theirs to decide (what comes first, what is cut, what risk is taken, where the build waits for them), and the plan shows who decided what.
 

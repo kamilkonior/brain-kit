@@ -1,4 +1,4 @@
-# Shared understanding
+# Plan: Shared understanding
 
 You and the user mean the same thing by the plan: they can say what will be built in what order, what they will have at each stage and what will be asked of them, and that has been checked, not assumed.
 

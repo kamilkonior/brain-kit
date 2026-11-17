@@ -1,4 +1,4 @@
-# Completeness
+# Plan: Completeness
 
 The plan covers the whole way from what exists to the agreed end state, including the work the design does not mention, and names what it leaves out.
 

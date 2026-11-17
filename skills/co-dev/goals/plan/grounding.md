@@ -1,4 +1,4 @@
-# Grounding
+# Plan: Grounding
 
 The plan starts from what is actually there: the code, tools and conditions it relies on were looked at, and what was seen, inferred and assumed stay apart.
 

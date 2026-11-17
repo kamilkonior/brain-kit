@@ -1,4 +1,4 @@
-# Convergence
+# Design: Convergence
 
 The open questions close: each choice is made against stated criteria and says what it gives up, how sure it is and what would change it, and the session ends in a design, not a list of options.
 

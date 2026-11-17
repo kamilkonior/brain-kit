@@ -1,4 +1,4 @@
-# Narrowing
+# Debug: Narrowing
 
 Each probe rules something out: it is chosen for what its result would tell, its outcome is predicted before it runs, it changes one thing, and after each result the room in which the cause can lie is smaller.
 

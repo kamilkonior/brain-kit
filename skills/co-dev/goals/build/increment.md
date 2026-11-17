@@ -1,4 +1,4 @@
-# Increment
+# Build: Increment
 
 The build advances one finished step at a time: each step is built, checked and recorded before the next begins, and the code works after each.
 

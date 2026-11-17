@@ -1,4 +1,4 @@
-# Adaptation
+# Build: Adaptation
 
 What turns out differently than the plan expected is understood before it is answered, and answered at its level: the builder settles what is the builder's, a matter for the plan or the design is raised with the user, and the work stops where the plan says it stops.
 

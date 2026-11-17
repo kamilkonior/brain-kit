@@ -1,4 +1,4 @@
-# Fidelity
+# Build: Fidelity
 
 The code builds what the plan and the design decided: every change can be traced to a step, nothing decided is dropped and nothing undecided is added, and where the build must depart, the plan or the design is changed first, in the open.
 
