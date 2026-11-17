@@ -1,6 +1,6 @@
 ---
 name: co-dev
-description: Goals for developing software together with the user, in three modes (design, plan and build). Each mode says what to optimize for at that stage of the work. Use when the user names a mode (`/co-dev design`, `/co-dev plan`, `/co-dev build`). Not a procedure.
+description: Goals for developing software together with the user, in four modes (design, plan, build and debug). Each mode says what to optimize for in that kind of work. Use when the user names a mode (`/co-dev design`, `/co-dev plan`, `/co-dev build`, `/co-dev debug`). Not a procedure.
 ---
 
 # Co-dev
@@ -13,13 +13,14 @@ This skill gives goals, not steps. The goals say what a good result of a stage i
 
 ## Modes
 
-There are three modes, one for each stage. The user names the mode. If they have not, ask which one; do not infer it from the conversation.
+There are four modes. Three follow one another as the stages of the work. The fourth, debug, is a side-kick: the user turns to it from any stage, and returns from it. The user names the mode. If they have not, ask which one; do not infer it from the conversation.
 
-| Mode | The stage | It ends in |
+| Mode | The work | It ends in |
 |---|---|---|
 | `design` | Deciding what is to be built and why | A written design |
 | `plan` | Working out how the design lands in the code, and in what steps | A plan the user has approved |
 | `build` | Carrying the plan out in code | Code the user has accepted |
+| `debug` | Finding out why something fails | A cause that has been shown |
 
 ## Using a mode
 
