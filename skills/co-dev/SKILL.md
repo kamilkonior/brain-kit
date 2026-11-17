@@ -1,6 +1,6 @@
 ---
 name: co-dev
-description: Goals for developing software together with the user, in four modes (design, plan, build and debug). Each mode says what to optimize for in that kind of work. Use when the user names a mode (`/co-dev design`, `/co-dev plan`, `/co-dev build`, `/co-dev debug`). Not a procedure.
+description: Goals for developing software together with the user, in five modes (design, plan, build, debug and review). Each mode says what to optimize for in that kind of work. Use when the user names a mode (`/co-dev design`, `/co-dev plan`, `/co-dev build`, `/co-dev debug`, `/co-dev review`). Not a procedure.
 ---
 
 # Co-dev
@@ -13,7 +13,7 @@ This skill gives goals, not steps. The goals say what a good result of the work 
 
 ## Modes
 
-There are four modes. Three follow one another as the stages of the work. The fourth, debug, is a side-kick: the user turns to it from any stage, and returns from it. The user names the mode. If they have not, ask which one; do not infer it from the conversation.
+There are five modes. Three follow one another as the stages of the work. The other two, debug and review, are side-kicks: the user turns to them from any stage, and returns from them. The user names the mode. If they have not, ask which one; do not infer it from the conversation.
 
 | Mode | The work | It ends in |
 |---|---|---|
@@ -21,6 +21,7 @@ There are four modes. Three follow one another as the stages of the work. The fo
 | `plan` | Working out how the design lands in the code, and in what steps | A plan the user has approved |
 | `build` | Carrying the plan out in code | Code the user has accepted |
 | `debug` | Finding out why something fails | A cause that has been shown |
+| `review` | Reading finished work to find what is wrong with it | Findings, each shown and weighed |
 
 ## Using a mode
 
