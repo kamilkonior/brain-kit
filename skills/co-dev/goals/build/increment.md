@@ -1,54 +1,53 @@
 # Increment
 
-The work advances one step at a time: each step is built, checked and recorded before the next begins, and the code works in between.
+The build advances one finished step at a time: each step is built, checked and recorded before the next begins, and the code works after each.
 
-*Falls short:* many steps under way and none of them done. *Overshoots:* more ceremony per change than the change is worth.
+*Falls short:* everything open at once, and nothing that works until all of it does. *Overshoots:* ceremony around every small change.
 
-*Borders:* what the check is and whether it passed belongs to verification; what is done when a step does not go as planned belongs to adaptation; when the user looks in belongs to iteration.
+*Borders:* how a step is shown to be done belongs to verification; whether a change is what the step called for belongs to fidelity; what the record and the history must say belongs to handover; taking back what a revert does not undo belongs to containment; when the user looks at the work belongs to iteration.
 
 ## Desirable
 
-- **Ready before started:** what the plan lists as needed before the first step (access, an environment, a branch) is in place, and each step is started when what it needs is there.
-- **Plan's order:** steps are taken in the plan's order; steps marked independent may be taken in another, and you say when you do.
-- **One step in hand:** one step is in progress at a time, and it is finished or put back on purpose before the next is started.
-- **Small moves:** within a step the change is made in small pieces, each run or checked soon after it is written, so that a failure points at the last few lines.
-- **Thin first:** within a step, the simplest version that meets the outcome runs before it is filled in.
-- **Working in between:** after each step the code builds and what passed before still passes.
-- **Closed in one go:** a step is closed by its check, its commit and its state and notes in the plan, all before the next step starts.
-- **One step, one commit:** each step is a commit, or a short run of commits, of its own, which names the step and could be reverted alone.
-- **One kind of change:** restructuring that changes no behavior is committed apart from the change in behavior it prepares.
-- **Faults fixed where made:** a failure caused by this step is fixed in this step, before anything is built on it.
-- **Work around a block:** when a step waits (on an answer, on someone else), work moves to a step that does not depend on it, as the plan provides, and the block is noted.
-- **Side by side with care:** steps the plan marks independent are built in parallel only where they touch separate ground, and each result is checked and joined one at a time.
-- **Rhythm follows risk:** moves are smaller and checks closer together where the work is uncertain or hard to undo, and larger where it is routine.
-- **Visible place:** at any moment it can be said which step is in hand, what is done and what is next.
+- **One step in hand:** one step is in progress at a time, unless the plan marks steps as independent, and it is the next one in the plan's order.
+- **Finished before the next:** a step's check has passed, its change is committed (or recorded as the rules of the build say) and its status is updated before the next step is started.
+- **Working state:** after every step the code builds, the checks that passed still pass and what worked still works; where the plan lets a step break something for a while, that is noted, and ended at the step the plan names.
+- **One step, one change:** the change made for a step holds that step's work and nothing else: no unrelated fix, no reformatting of lines it did not need to touch.
+- **Unit that can be undone:** each step's change can be reviewed and reverted on its own, without taking other steps with it.
+- **Small moves inside a step:** within a step the work goes in small edits, each run soon after it is made, so that a failure points at the last edit.
+- **Thin first:** within a step the narrowest version that passes the check is made to work before it is widened or tidied.
+- **Joined as built:** each part is connected to the running system when it is built, as the plan orders, and is not left loose for a joining at the end.
+- **Step split in the open:** a step that proves too large to finish as one piece is split, and the plan shows the split.
+- **Order changed in the open:** when the build shows that two steps must swap, the order is changed in the plan, with the reason, before the work follows it.
+- **Stage closed:** at the end of a stage everything in it is done and the code is in the state the plan says the stage ends in, before the next stage starts.
+- **Parallel without collision:** steps the plan marks as independent may be built side by side, each keeping to its own files, and they are joined and checked together before either counts as done.
+- **Clean stop:** when the build pauses or is interrupted, at most one step is open, and what is open is said.
+- **Proportion:** the size of a move follows the risk: fine where a mistake would be costly or hard to see, larger where the work is routine.
 
 ## Undesirable
 
 ### Falls short
 
-- **Big bang:** several steps are written in one stretch and checked together at the end.
-- **Many open:** steps are started and left half done, and none can be checked.
-- **Long dark stretch:** hundreds of lines are written before anything is run.
-- **Broken in between:** a step is closed with the build or the checks failing, for a later step to repair.
-- **Building on red:** the next step starts on top of a failure of the last.
-- **Lumped commit:** several steps, or a step and unrelated edits, share one commit, and none can be reverted alone.
-- **Jumping ahead:** a later step's work is done early because the file was open, or a step is started on a guess at what an earlier one will produce.
-- **Easy first:** comfortable steps are taken ahead while the hard one the plan put first waits.
-- **Bookkeeping in arrears:** states, notes and commits are caught up at the end, from memory.
+- **Big bang:** several steps are written in one go and first run together.
+- **Open on all fronts:** many steps are started and none is finished.
+- **Running ahead:** the next step is begun while the last one's check has not passed.
+- **Broken in between:** a step leaves the code not building or the checks failing, and the build goes on.
+- **Mixed change:** one commit holds two steps, or a step and an unrelated cleanup, so that neither can be reviewed or undone alone.
+- **Uncommitted pile:** hours of work sit in the working tree with no point to return to.
+- **Joined at the end:** parts are built side by side and first meet in the last step.
+- **Long edit, no run:** hundreds of lines are written before anything is run.
 
 ### Overshoots
 
-- **Ceremony per edit:** every small change gets its own full check run, commit and report.
-- **Crumb commits:** commits the size of a line, none of which means anything alone.
-- **Rigid sequence:** independent steps wait in line, or one blocked step holds up everything.
-- **Halting gait:** the work pauses after each step for a word from the user that nobody asked for.
-- **Forced halves:** work that is one change by nature is split to keep the moves small, and extra code is written only to make the halves work.
+- **Crumb commits:** every edit is committed, recorded and announced.
+- **Step ritual:** each small step gets the full round of suite, review and report, whatever its risk.
+- **Slicing for its own sake:** a step that is one coherent change is cut into pieces that have no result of their own.
+- **Serial by habit:** steps marked independent are queued behind each other, though nothing connects them and time matters.
+- **Order as law:** the plan's order is held to where the build has shown that it forces rework.
 
 ### Counterfeits (looks met, is not)
 
-- **Cut up afterward:** the work was done in one lump and divided into step-shaped commits afterward, none of which was ever checked alone.
-- **Working by switching off:** the code works after the step only because the new part is stubbed or never reached, and nothing says when that ends.
-- **Marked done early:** the step's state says done, and its check has not run or its commit is not made.
-- **One at a time in name:** steps are reported one by one, and the code for all of them was written together.
-- **Parallel in name:** work handed out side by side changes the same files, and joining it is a step nobody planned.
+- **Split after the fact:** one big change is cut afterward into step-shaped commits that never worked on their own.
+- **Green by stub:** the code "works after each step" because the part not yet working is stubbed, skipped or switched off.
+- **Step in name:** a commit carries one step's number and holds parts of three.
+- **Done but open:** a step is marked done, and its remaining work is carried silently into the next.
+- **Checkpoint that isn't:** a "working state" is recorded that was never built or run.

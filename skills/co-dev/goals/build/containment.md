@@ -1,57 +1,55 @@
 # Containment
 
-The build changes what it is meant to change and can be taken back: each step can be undone, the user's own work and whatever lies outside the working copy stay as they were, and what cannot be undone waits for the user.
+The build changes only what it is meant to change, and what it changes can be taken back: the user's work, their data and the systems around the code are as safe after a step as before it, and nothing that cannot be undone is run before its way back exists.
 
-*Falls short:* damage beyond the step. *Overshoots:* precautions that cost more than the damage they guard against.
+*Falls short:* damage outside the step. *Overshoots:* caution that stops the work.
 
-*Borders:* who releases a gated action belongs to agency; building only what the plan asks belongs to fidelity; keeping a change small within the code belongs to craft.
+*Borders:* who gives the word for an action that is hard to undo belongs to agency; agreeing the workspace and what the build may touch belongs to framing; keeping each step a change that can be reverted belongs to increment; what is done once something has gone wrong belongs to adaptation.
 
 ## Desirable
 
-- **Known ground:** before the first change, you know what is in the working copy that is not yours (uncommitted changes, untracked files, other branches, stashes), and leave it as it is or ask.
-- **Own space:** the work is done where the plan says (a branch, a separate working copy), not on the shared or released line unless the user says so.
-- **Way back at each step:** each step ends in a commit that can be reverted, so that a failure costs one step.
-- **Look before destroying:** before anything is deleted, overwritten, reset or cleaned, what is there is looked at, and what is not yours or cannot be recovered is kept or asked about.
-- **Narrowest tool:** the command with the smallest reach that does the job is used: one file, not the tree; one path, not a pattern; no force where none is needed.
-- **Dry run first:** where a command can show what it would do, that is looked at before it is run for real.
-- **Outside the working copy:** whatever reaches outside it (a database, a service, a shared environment, a remote, a message sent, a package published) is done only as the plan provides and the user has released.
-- **Real data protected:** work is tried on a copy or on test data; real data is touched only by a gated step, with a stated way back.
-- **Way back tried:** where the plan gives a way to undo a risky step, it is tried, as far as it can be, before the step is taken.
-- **Secrets kept:** keys, tokens and personal data are not printed, logged, committed or sent anywhere, and one found in the code is reported, not copied.
-- **History respected:** shared history is not rewritten, commits others may have are not amended, and hooks and checks are not bypassed.
-- **Others' ground:** code and configuration that belong to other people or systems are changed only as the plan says, and a change needed there is raised.
-- **Left as found:** what the build starts or changes around the code (processes, containers, temporary files, settings, installed tools) is stopped, removed or put back, or the user is told what remains.
-- **Damage owned:** when something does go wrong, the work stops, what happened and what state things are in is said at once, and the repair starts from what the user decides.
-- **Proportion:** the care matches the reach: an edit that a revert undoes carries none of this.
+- **The user's work kept:** uncommitted changes, untracked files and branches that were there before the build are not overwritten, discarded, stashed away or swept into a commit.
+- **Inside the workspace:** changes are made on the branch, worktree and environment that were agreed, and nowhere else.
+- **Inside the step:** files outside what the step names are left alone, or the reason for touching them is said.
+- **Staged by name:** what goes into a commit is chosen file by file, and looked at before it is committed.
+- **Look before removing:** before anything is deleted, overwritten or reset, what is there and whose it is has been looked at.
+- **Hard-to-undo recognized:** an action that a revert does not undo (a migration, a deletion, a rewrite of history, a release, a message sent) is recognized as such before it is run.
+- **Way back first:** before such an action, what the plan says is saved has been saved, and the return has been tried where trying is cheap.
+- **Real data kept apart:** the build runs against development and test resources; production data and live systems are touched only where the plan says, at that step.
+- **Secrets stay out:** keys, tokens and personal data do not go into code, commits, logs, messages or outside services.
+- **Commands understood:** a command is run when its effect here is known; options that force, recurse or skip checks are used knowingly, each time.
+- **Safeguards left on:** hooks, checks, reviews and permission prompts are not bypassed to get a step through.
+- **Dependencies on purpose:** a package is added when the plan names it or the user has agreed, from its real source, at a stated version.
+- **Left as found:** processes started are stopped, temporary files and resources are removed, and machine-wide settings and tools are not changed without a word.
+- **Spending bounded:** what costs money or load (cloud resources, paid interfaces, long jobs) is started within a stated limit and shut down afterward.
+- **Proportion:** caution follows what a mistake would cost and whether a revert undoes it; an edit to a tracked file needs none.
 
 ## Undesirable
 
 ### Falls short
 
-- **Lost work:** the user's uncommitted changes or untracked files are overwritten, reset, stashed away or cleaned out.
-- **Blind destruction:** a delete, a reset, a forced push or a dropped table is run without a look at what it removes.
-- **Broad sweep:** a command is run over the whole tree, or with a pattern that matches more than was meant.
-- **Live by accident:** a test, a script or a migration runs against real data or a real service.
-- **Leaked secret:** a key or a token lands in a commit, a log or a message.
-- **Rewritten history:** a shared branch is rebased or force-pushed, or checks are bypassed to get a commit through.
-- **Collateral edits:** files outside the step are changed by a tool (a formatter, a generator, an upgrade) and go into the commit unlooked at.
-- **Mess left behind:** processes keep running, ports stay taken, temporary files and changed settings remain.
-- **No way back:** a long stretch of work exists only in the working copy, and one bad command would lose it.
+- **Lost work:** a reset, a checkout or a clean wipes changes the user had not committed.
+- **Swept commit:** everything in the working tree is added, and the user's unrelated edits or a local settings file go in with the step.
+- **Wide blast:** a search-and-replace, a formatter or a code generator rewrites files the step had nothing to do with.
+- **Wrong target:** a migration, a seed script or a deletion runs against a shared or live database.
+- **Leaked secret:** a key is written into a file, a commit, a test fixture or a message.
+- **Forced through:** a force option, a skipped hook or a disabled check is used to get past a refusal that had a reason.
+- **Unknown command:** a command copied from a search result or an error message is run without knowing what it does.
+- **Litter:** servers left running, temporary branches, scratch files and cloud resources stay behind.
 
 ### Overshoots
 
-- **Permission for everything:** the user is asked before each edit or harmless command.
-- **Backup of the backed-up:** copies and snapshots are made of what version control already holds.
-- **Needless safety work:** flags, dry runs and rollbacks for a change that a revert undoes.
-- **Frozen by risk:** a gated step that was released is still put off, or a needed change is avoided because the code is "fragile".
-- **Sandbox for all:** everything is tried in a copy, where a branch of the working copy is copy enough.
-- **Warnings on everything:** each routine command comes with a caution, and the one that matters is lost among them.
+- **Permission for everything:** the user is asked before each harmless read, build or test run.
+- **Backup of the trivial:** copies are made and procedures written for changes that a revert undoes.
+- **Frozen by caution:** a step the plan calls for is not taken because it changes something.
+- **Rehearsal for everything:** every command is first run dry, on a copy, in a sandbox.
+- **Isolation ceremony:** containers, worktrees and throwaway environments are set up for a change to two files.
 
 ### Counterfeits (looks met, is not)
 
-- **Untried way back:** a backup or a rollback exists that nobody saw restore anything.
-- **"Should be safe":** a command is called harmless that was not read, or whose reach was not looked up.
-- **Committed, so safe:** work is taken to be safe because it is committed, though the commit sits only in a copy that is about to be removed.
-- **Asked, not informed:** permission is asked for a destructive action without saying what it destroys.
-- **Hidden repair:** damage is repaired quietly and never mentioned.
-- **Approval by fatigue:** the user has said yes to so many harmless prompts that the one real one passes unread.
+- **Untried way back:** a backup exists that was never restored, or a reverse migration that was never run.
+- **"Should be safe":** a risky command is run on a belief about what it does.
+- **Rehearsal that differs:** the dry run passes on a copy that lacks what makes the real run dangerous.
+- **Branch in name:** the code is on its own branch, and the migration ran against the database everyone shares.
+- **Cleanup claimed:** "cleaned up" is said, and the processes and files are still there.
+- **Scrubbed late:** a secret is removed in a later commit and stays in the history.

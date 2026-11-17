@@ -1,56 +1,54 @@
 # Fidelity
 
-The build carries out the plan, and through it the design: each step is built as it says, nothing is built beside it or against it, and what building finds missing or wrong in the plan or the design is settled and written into them.
+The code builds what the plan and the design decided: every change can be traced to a step, nothing decided is dropped and nothing undecided is added, and where the build must depart, the plan or the design is changed first, in the open.
 
-*Falls short:* a build that drifts from the plan. *Overshoots:* a plan followed where it is wrong, or to the letter against its purpose.
+*Falls short:* a build that quietly replans or redesigns. *Overshoots:* a step followed to the letter where the code has shown it wrong.
 
-*Borders:* how a surprise is sized and answered belongs to adaptation; who settles a change belongs to agency; whether the plan's picture of the code still holds belongs to grounding; whether a step is shown done belongs to verification.
+*Borders:* whether the plan was ready to build from belongs to framing; seeing that the build must depart, and at what level, belongs to adaptation; who decides the departure belongs to agency; whether all the work was done belongs to completeness; what the code shows belongs to grounding.
 
 ## Desirable
 
-- **Read whole:** the plan is read from its file, all of it, and the design it names, before anything is built; where no plan is written, the steps, their checks and the terms of the build are written down in brief and confirmed first.
-- **Fit to build from:** the plan is checked for what a build needs (accepted by the user, steps with outcomes and checks, a remit, a finish line), and what is missing is raised before code is built on it.
-- **Inherited terms:** the plan's route, fixed points, bounds and finish line, and the design's purpose, decisions and success criteria, are taken over as they stand and used to judge the work.
-- **Step read before built:** each step is read again in full when its turn comes (outcome, purpose, fixed points, bounds, needs, traps), not built from its title.
-- **Outcome built:** what is built makes the step's outcome true, in the way its stated purpose intends.
-- **Fixed points kept:** what the plan marks as fixed is built as stated, and exactly where other steps or systems depend on it (a name, a schema, a message format).
-- **Bounds kept:** a step does what it says and stops where it says; what belongs to a later step is left for it.
-- **Decisions honored:** a design decision is built as decided, including one you would have made differently, and an option the design turned down does not come back as the way the code is written.
-- **Latitude used as meant:** what the plan leaves open is decided by the intent it gives, and its pointers (where a step lands, a pattern to follow) are taken as the starting points they are marked as.
-- **Every change traced:** each change in the diff serves the step in hand; one that serves none is taken out or raised.
-- **Questions raised when found:** a gap, a contradiction or something the code rules out is raised as a question about the plan or the design when it is found, not built around.
-- **Settled at the source:** the answer is written into the plan, and into the design where it changes a design decision, so that code, plan and design keep saying the same thing.
-- **Named departures:** where what is built differs from the plan (a step done another way, dropped, added or deferred), the plan says so, with the reason and who decided.
-- **Loose ends closed in time:** an open item the plan or the design carries is closed before the step that needs the answer is built.
-- **Final trace:** before the build is called done, the code is compared with the plan and the design in both directions (every step and decision in the code, every change in a step), and you say what was compared.
+- **Step read at the step:** each step is built from its text (result, place, what it relies on, check) and from the decisions of the design it points to, read when the step starts and not recalled.
+- **Result as stated:** what is true when a step is finished is what the step says is true.
+- **Exact where steps meet:** what the plan writes exactly (a signature, a data format, a file) is built exactly, and a needed difference is raised, not absorbed.
+- **Room used:** what the plan left to the builder is decided by the builder, toward the step's result.
+- **Reasons used:** where a step leaves something open, the plan's and the design's stated reasons settle it.
+- **Sorted silence:** where plan and design are silent, a matter of implementation is settled in the code and noted, and a matter that changes what the user gets goes to the user.
+- **Limits kept:** the design's constraints and exclusions, and the plan's limits (what must keep working, tools that must or must not be used), hold in the code.
+- **Settled stays settled:** a decision of the design or the plan is built as made, and an option that was turned down is not brought back; either is questioned only on a fact that was not known then, which is named.
+- **Nothing added:** the code holds no feature, option or behavior that nobody decided; a worthwhile extra is offered to the user, not built in.
+- **Nothing dropped:** a part of a step that cannot be built as decided is raised, not simplified, stubbed or postponed in passing.
+- **Changed first:** a departure is written into the plan, and into the design where it changes a decision, with its reason and who decided, before code is built on it.
+- **Traceable change:** each commit or change names the step it serves, and no change serves none.
+- **Two-way check:** before the build is called done, the plan is gone through step by step and the design decision by decision against the code, and what has no match is resolved or named.
+- **One truth:** at the end the design, the plan and the code say the same thing.
 
 ## Undesirable
 
 ### Falls short
 
-- **Dropped parts:** something a step calls for is not in the code, and the step is marked done.
-- **Stowaway features:** something is built that no step asked for.
-- **Quiet redesign:** a design decision or a fixed point is built differently, and nobody is told.
-- **Silent gap-filling:** a hole in the plan is filled with your choice and built as if it had been planned.
-- **Plan from memory:** the build works from the conversation, a summary or the step titles, with the plan file unread or read once at the start.
-- **Returning rejects:** an option the design turned down comes back as the way the code is written.
-- **Step creep:** a step grows into its neighbors, and later steps find their work half done in another shape.
-- **Parted records:** the code changes course, and the plan and the design still say what they said.
+- **Drift:** the code builds something near the step: a simpler variant, a familiar pattern, what the existing code makes easy.
+- **Built from memory:** a step is built from its title, or from what is remembered of it.
+- **Redesign in code:** a decision of the design is replaced, in the implementation, by one you prefer.
+- **Silent substitution:** a library, a format or an interface other than the one decided is used, and nobody is told.
+- **Stowaway features:** options, endpoints, flags or behavior nobody decided are built in.
+- **Dropped decision:** a decision of the design, or a part of a step, appears nowhere in the code.
+- **Broken limit:** the code does what the design excluded, or ignores a constraint it set.
+- **Fork:** the code and the plan now say different things, and the plan was not updated.
 
 ### Overshoots
 
-- **Followed off a cliff:** a flaw noticed in the plan is built anyway, because the plan was accepted.
-- **Letter over purpose:** a step is built as worded where its stated purpose points elsewhere.
-- **Pointer as order:** a file or a pattern the plan named as a starting point is used though the code shows a better place.
-- **Built around:** the code is bent to avoid a problem in the plan or the design that should have gone back to the user.
-- **Reflexive reopening:** settled decisions of the plan or the design are questioned again with nothing new from the code.
-- **Back to the plan for everything:** every small ambiguity stops the work, where a noted assumption would do.
+- **Letter over reason:** the wording of a step is followed where that defeats the step's own result.
+- **Into the wall:** a step is typed in as written though the code it was written for is no longer there.
+- **Plan frozen:** something the build has shown wrong is worked around in the code, so as not to touch the plan.
+- **Everything escalated:** every choice the plan left open goes back to the user as a question about the plan.
+- **Trace bureaucracy:** every function carries step and decision numbers, in comments nobody will keep up.
 
 ### Counterfeits (looks met, is not)
 
-- **Label tracing:** commits and notes cite a step, and the change does not do what the step says.
-- **Outcome in name:** the function, the flag or the screen the step names exists, and does not do what the outcome says.
-- **"Per the plan":** something is attributed to the plan or the design that it does not say.
-- **Buried departure:** a difference from the plan is disclosed where the user will not notice it.
-- **Plan fitted to the code:** the plan is rewritten afterward to match what was built, and the change is not shown as one.
+- **Label matching:** commits and files carry the step's name, and the code does something else.
+- **Stub as step:** the step's interface is there and its body is not, and the step is counted as built.
+- **"Implementation detail":** a choice that changes what the user gets is filed as implementation to avoid asking.
+- **Reinterpreted step:** the step's words are kept and their meaning quietly bent toward the easier build.
+- **Plan fitted to the code:** the plan is edited afterward to say what the code happens to do, and this is called an amendment.
 - **Claimed trace:** "everything in the plan is built" is said without the comparison having been made.

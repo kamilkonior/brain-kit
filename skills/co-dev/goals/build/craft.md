@@ -1,59 +1,59 @@
 # Craft
 
-The code is written for whoever reads and changes it next: it follows the ways of this codebase, is as simple as its outcome allows, and deals with what can really go wrong.
+The code is well made: it is the simplest that does what the step needs, a reader of the project can follow it, it deals with the failures that will really occur, and it leaves nothing behind that the work did not need.
 
-*Falls short:* code that passes its check and that nobody would want to keep. *Overshoots:* polish, abstraction and tidying that no step asked for.
+*Falls short:* code that passes its check and that nobody would want to maintain. *Overshoots:* polish, generality and safeguards nobody needs.
 
-*Borders:* whether the code does what the step says belongs to fidelity; whether it is shown to work belongs to verification; finding what the codebase already has belongs to grounding.
+*Borders:* following the project's conventions and using what it already has belongs to grounding; whether a behavior was decided belongs to fidelity; whether the code works belongs to verification; removing the scaffolding and the obsolete code that the plan names belongs to completeness; secrets and what a command may harm belong to containment.
 
 ## Desirable
 
-- **Local conventions:** naming, structure, error handling, tests and formatting follow what this codebase does, including where you would do it differently, so that the new code reads like the code around it.
-- **Fits the structure:** new code goes where this codebase puts such things, and responsibilities stay where they were.
-- **Simplest that serves:** the code is the simplest that makes the outcome true: no layer, option or generality the step does not need.
-- **Reuse over rewrite:** what the codebase and its libraries already provide is used; a new dependency is added only where the plan says so or the user agrees.
-- **Says what it does:** names say what things are and do, and the code can be followed without its author.
+- **Simplest that does it:** the code is the plainest that produces the step's result and passes its check, with no layer, option or parameter that has only one use.
+- **Says what it does:** names say what things are and do, in the design's and the project's terms, and a function does what its name says and no more.
 - **Known word first:** a new thing is named with a word the reader already knows, from the codebase, the plan or plain language, and a word is coined only where none fits.
-- **Comments that earn their place:** a comment says why (a constraint, a trap, a reason the code is not the obvious one), in the measure this codebase comments; it does not narrate the code or the build.
-- **Small diff:** the change touches what the step needs and leaves the rest as it was: no reformatting, renaming or reordering in passing.
-- **Real failures handled:** the errors, empty cases and limits that can really occur at this point are handled the way this codebase handles such things, and a failure is loud enough to be found.
-- **One place:** each piece of knowledge (a rule, a constant, a format) is written once.
-- **Tests as code:** tests are written with the same care: readable, named for what they show, independent of one another.
-- **Tools obeyed:** the project's formatter, linter and type checker are run, and their findings are fixed in the code, not silenced.
-- **Safe by default:** input from outside is treated as such, and secrets and personal data stay out of the code and its logs.
-- **Cost in view:** where the code will run often or on much data, plain waste is avoided; elsewhere clarity wins.
-- **Read before commit:** the diff is read as a reviewer would read it before each commit, and what they would stumble on is fixed.
+- **Followable cold:** someone who knows the project and was not in the session can follow the change without help.
+- **Failures surfaced:** an error is handled where the design says it is handled, and otherwise passed on with enough to find its cause; none is swallowed, and no silent fallback hides one.
+- **Real edges covered:** the inputs and states that will occur here (empty, absent, repeated, large, at the same time) are dealt with.
+- **Boundaries guarded:** what comes from outside (a user, a file, the network) is checked where it enters, and trusted inside.
+- **Duplication judged:** the same thing is written once; things that only look alike stay apart.
+- **Small surface:** nothing is public, exported or configurable that nothing outside needs.
+- **Comments say why:** a comment says what the code cannot (a reason, a constraint, a trap), and none tells the story of the session.
+- **Nothing left behind:** debug output, commented-out code, unused imports and files, and notes to self are gone before the step is called done.
+- **Old replaced, not shadowed:** where new code takes over from old within a step, the old path goes in that step; two ways of doing one thing do not stay side by side unless the plan says so.
+- **Tests are code:** each test checks one behavior, is named for it, and can be read without the implementation open.
+- **Clean by the project's tools:** the formatter, linter and type checker the project uses pass without new exceptions.
+- **Care follows stakes:** the closest attention goes where a mistake would be costly or hard to see (data, money, access, concurrency), and routine code is not agonized over.
+- **Own review:** the full change is read as a reviewer would read it before the step is called done, and what that reading finds is fixed.
 
 ## Undesirable
 
 ### Falls short
 
-- **Against the grain:** the new code brings its own style, structure or tooling into a codebase that has another.
-- **Copy and adjust:** a block is duplicated with small changes where the existing one could have been used or extended.
-- **Happy path only:** the code works for the case that was tried, and an empty input, a failure or a second call breaks it.
-- **Swallowed errors:** a failure is caught and dropped, or replaced by a default, so that nothing shows it happened.
-- **Clever code:** a dense or surprising construction where a plain one would do.
-- **Misleading names:** names are left over from an earlier attempt, or say something other than what the code does.
+- **Works by accident:** the code passes, and its author could not say why a line is needed.
+- **Swallowed error:** an exception is caught and dropped, or a default is returned where the caller needed to know.
+- **Copy and adjust:** a block is pasted several times with small changes.
+- **Names that hide:** `data2`, `handleStuff`, `tmp`, or a name left over from an earlier idea of the code.
 - **Coined term:** a new thing is named with a word or a figure of speech made up in the session, where a word the reader already knows would do.
-- **Silenced tools:** warnings are switched off, types cast away or rules disabled in order to get through.
-- **Hard-wired values:** paths, addresses or sizes that belong in configuration are written into the code.
-- **Sprawl:** the change is spread over more files and lines than the outcome needs.
+- **Leftovers:** print statements, dead branches, unused parameters and files from abandoned attempts stay in.
+- **Hack with no end:** a "temporary" shortcut goes in with no step that removes it.
+- **Warnings waved through:** new compiler, linter or deprecation warnings are left for someone else.
+- **Sprawl:** one function or file takes on everything the step needed.
 
 ### Overshoots
 
-- **Speculative generality:** options, parameters, interfaces and layers for needs nobody has.
-- **Defensive clutter:** checks and fallbacks for cases that cannot occur here.
-- **Tidying in passing:** neighboring code is reformatted, renamed or restructured because it was open.
-- **Rewrite for taste:** working code within reach is rewritten because you would have written it differently.
-- **Gold-plating:** polishing goes on after the step's outcome is met and the code reads well enough.
-- **Comment clutter:** comments restate the code, tell the story of the change or speak to the user.
-- **Premature tuning:** code is made faster and harder to read where nothing showed it was slow.
+- **Speculative generality:** an interface, a base class, a plug-in point or a setting is built for a second use that nobody asked for.
+- **Defensive everything:** checks and fallbacks are written for states that cannot occur.
+- **Refactoring the neighborhood:** nearby code is restructured or renamed because the builder was passing.
+- **Premature optimization:** code is made faster and harder to read where the design asks for no speed.
+- **Comment on every line:** comments repeat the code, and documentation is written for the obvious.
+- **Cleverness:** a compact trick is used where three plain lines would do.
+- **Polishing past fit:** names and structure are reworked again after the code is clear and its check passes.
 
 ### Counterfeits (looks met, is not)
 
-- **Convention on the surface:** the formatting matches, and the structure, error handling or tests work differently from the code around them.
-- **Simple by omission:** the code is short because the hard case is not handled.
-- **Abstraction as quality:** layers and patterns give a small change the look of design.
-- **Comment over fix:** a comment or a TODO explains a problem that should have been solved.
-- **Handled in name:** an error is "handled" by logging it and going on as if nothing had happened.
-- **Clean by the tools:** the formatter and the linter pass, and that is taken for readable.
+- **Tidy surface:** the code is formatted, typed and documented, and its logic is wrong or tangled.
+- **Silenced tool:** a lint rule is disabled, a type cast away or a warning suppressed, to come out clean.
+- **Handling for show:** an error is caught, logged and ignored, and this counts as error handling.
+- **Comment as fix:** "TODO: handle the empty case" stands where the handling should be.
+- **Name that promises:** "validate", "safe" or "atomic" is in the name, and the code does not do it.
+- **Session narration:** comments like "new improved version" or "fixed as requested" describe the conversation, not the code.

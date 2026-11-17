@@ -1,54 +1,53 @@
 # Fidelity
 
-The plan builds the design: all of it, nothing beside it and nothing against it, and what planning finds missing or wrong in the design is settled with the user and written into the design.
+The plan builds the design that was decided: every step can be traced to it, nothing in the plan contradicts it or adds to it, and where planning finds the design silent or wrong, the design is changed in the open, not in a step.
 
-*Falls short:* a plan that drifts from the design. *Overshoots:* a design followed where it is wrong, or copied where it should be pointed to.
+*Falls short:* a plan that quietly redesigns. *Overshoots:* a design followed to the letter where planning has shown it wrong.
 
-*Borders:* work the design does not mention (setup, migration, cleanup) belongs to completeness; whether the code is as the design assumes belongs to grounding; who settles a question about the design belongs to agency.
+*Borders:* whether the design was ready to plan from belongs to framing; whether all the work is in the plan belongs to completeness; who decides a change to the design belongs to agency; what the code shows belongs to grounding.
 
 ## Desirable
 
-- **Read whole:** the design is read from its file, all of it, before anything is planned; where none is written, what is to be built is written down and confirmed first.
-- **Fit to plan from:** the design is checked for what a plan needs (decisions made, success that can be checked, scope stated), and what is missing is raised before steps are built on it.
-- **Inherited frame:** the design's purpose, success criteria, scope and constraints are taken over as they stand and used to judge the plan.
-- **Every decision placed:** each decision and requirement of the design can be pointed to in the step or steps that carry it out.
-- **Every step traced:** each step names the part of the design it serves; a step that serves none is removed or raised.
-- **Decisions honored:** a settled decision is planned as decided, including one you would have made differently, and an option the design turned down does not come back as the way a step is done.
-- **Firmness respected:** what the design marks firm is built on; what it marks provisional is planned so that changing it stays cheap.
-- **Loose ends placed:** each open item and untested assumption of the design is closed before planning or tied to the step that settles it, ahead of the steps that need the answer.
-- **Design questions raised:** a gap, a contradiction or something the code rules out is raised as a question about the design when it is found.
-- **Settled at the source:** the answer is written into the design, so that design and plan keep saying the same thing.
-- **Smallest reopening:** a question reopens only the decision it concerns, and you say what stands.
-- **Pointers, not copies:** the plan refers to the design's decisions by their names or numbers and does not restate them.
-- **Named departures:** where the plan builds less than the design (a first version, a deferred part), it says so, with who decided and where the rest goes.
-- **Final trace:** before the plan is called ready, design and plan are compared in both directions, and you say what was compared.
+- **Decisions carried:** each decision of the design can be pointed to in the step or steps that build it, by its name or number where the design gives one.
+- **Steps traced:** each step points to the decision it serves, or says that it is work the route needs (set-up, a migration, a test harness).
+- **Reasons used:** where the letter of the design leaves a step open, the design's stated reasons and success criteria settle it, and the step says so.
+- **Sorted silence:** where the design is silent, a matter of implementation is settled in the plan, and a matter that changes what the user gets goes to the user as a design question.
+- **Limits kept:** the design's constraints and its exclusions (what it deliberately does not do) hold in every step.
+- **Settled stays settled:** a decision of the design is built as made, and an option it turned down is not brought back; either is questioned only on a fact the design did not have, which is named.
+- **Raised at once:** a gap, a contradiction or a decision that cannot be built as written is raised when it is found, with what was found and what the options are.
+- **Amended at the source:** a change agreed during planning is written into the design, with its reason and who decided, and the plan follows the amended text.
+- **Settled on the spot:** a gap in the design is settled with the user when it is found, and the steps that depend on it wait until it is.
+- **Nothing added:** the plan builds no feature or behavior that the design did not decide; a worthwhile extra is offered to the user, not planned in.
+- **Two-way check:** before the plan is called done, the design is gone through decision by decision and the plan step by step, and what has no match on the other side is resolved or named.
+- **One truth:** at the end the design and the plan say the same thing, and no decision lives only in the plan.
 
 ## Undesirable
 
 ### Falls short
 
-- **Dropped parts:** something the design calls for appears in no step.
-- **Stowaway features:** a step builds something the design never asked for.
-- **Quiet redesign:** a design decision is changed by a step that does it differently, and nobody is told.
-- **Silent gap-filling:** a hole in the design is filled with your choice and planned as if it had been designed.
-- **Design from memory:** the plan is made from the conversation, a summary or the design's headings, with the document unread.
-- **Returning rejects:** an option the design turned down comes back as the way a step is done.
-- **Lost constraints:** a constraint or success criterion of the design reaches no step and no check.
-- **Parted documents:** a decision changed during planning is recorded in the plan only, and the design still says otherwise.
+- **Drift:** steps build something near the design: a simpler variant, a familiar pattern, what the existing code makes easy.
+- **Silent gap-filling:** where the design is silent on something that matters, the plan picks an answer and does not say so.
+- **Redesign in passing:** a decision of the design is replaced, in a step, by one you prefer.
+- **Relitigating:** a settled decision is put back on the table with no new fact, because you would have chosen otherwise.
+- **Revived option:** an alternative the design rejected returns as "the practical way".
+- **Dropped decision:** a decision of the design appears in no step.
+- **Broken limit:** a step does what the design excluded, or ignores a constraint it set.
+- **Stowaway features:** behavior nobody decided is planned in.
+- **Fork:** the plan and the design now say different things, and the design was not updated.
 
 ### Overshoots
 
-- **Followed off a cliff:** a flaw noticed in the design is planned anyway, because the design is settled.
-- **Planned around:** steps are bent to avoid a design problem that should have gone back to the user.
-- **Letter over purpose:** the design's wording is followed where its stated purpose points elsewhere.
-- **Copied design:** the plan restates the design at length, and the two begin to differ.
-- **Reflexive reopening:** settled decisions are questioned again with nothing new, or the design is argued over again under the name of planning.
-- **Back to design for everything:** every small ambiguity is sent back, where a stated assumption in the plan would do.
+- **Letter over reason:** the wording of the design is followed where that defeats the design's own goal.
+- **Into the wall:** a decision that the code shows cannot work as written is planned anyway, because it is in the design.
+- **Design frozen:** a gap found while planning is worked around in the steps, so as not to touch the design.
+- **Everything escalated:** every implementation choice goes back to the user as a design question.
+- **Trace bureaucracy:** every line of the plan carries references, or a matrix is kept for a plan of five steps.
 
 ### Counterfeits (looks met, is not)
 
-- **Label tracing:** each step cites a design section, and the step does not do what the section says.
-- **Heading coverage:** every heading of the design has a step, and the decisions under the headings are in none.
-- **"Per the design":** something is attributed to the design that it does not say.
-- **Buried departure:** a difference from the design is disclosed where the user will not notice it.
-- **Claimed trace:** "the plan covers the design" is said without the comparison having been made.
+- **Label matching:** steps carry the design's headings and decision numbers and build something else.
+- **Cited, not consulted:** the design is linked at the top and not read for the steps.
+- **"Implementation detail":** a choice that changes what the user gets is filed as implementation to avoid asking.
+- **Reinterpreted decision:** the design's words are kept and their meaning quietly bent toward the easier build.
+- **Amendment in a footnote:** a change to the design is recorded only in the plan, or where nobody will read it, and called agreed.
+- **Claimed trace:** "covers every decision" is said without the comparison having been made.
