@@ -2362,9 +2362,13 @@ const Graph = (() => {
   function rejectHidden(node: TreeNode): void {
     if (isActive(node)) return;
 
-    const hider = node.hiddenBy === undefined ? "" : `, hidden by ${node.hiddenBy.by}`;
+    const state = assignedState(node);
+    const hider = node.hiddenBy;
+    if (hider === undefined) throw new DecisionTreeError(`${node.id} is ${state}`);
 
-    throw new DecisionTreeError(`${node.id} is ${assignedState(node)}${hider}`);
+    const how = hider.state === state ? "" : ` (${hider.state})`;
+
+    throw new DecisionTreeError(`${node.id} is ${state}, hidden by ${hider.by}${how}`);
   }
 
   function hiddenOptions(graph: Graph, question: QuestionNode): HiddenOption[] {
@@ -7570,6 +7574,30 @@ const SelectOption = (() => {
   }
 
   function tests() {
+    test("selecting an option of a question excluded under an unselected option says how the option hides it", () => {
+      // given
+      const events: Event[] = [
+        { type: "add-question", id: "Q1", text: "q1" },
+        { type: "add-option", id: "Q1a", text: "a", origin: "Q1" },
+        { type: "add-option", id: "Q1b", text: "b", origin: "Q1" },
+        { type: "select-option", targets: ["Q1a"] },
+        { type: "add-question", id: "Q2", text: "q2", origin: "Q1b" },
+        { type: "add-option", id: "Q2a", text: "x", origin: "Q2" },
+        { type: "exclude", target: "Q2", reason: "deferred" },
+      ];
+      const log = Log.memoryLog([...events]);
+
+      // when
+      const act = () => select(log, ["Q2a"]);
+
+      // then
+      assert.throws(
+        act,
+        (error) => error instanceof DecisionTreeError && error.message === "Q2 is deferred, hidden by Q1b (off-path)",
+      );
+      assert.deepEqual(log.read(), events);
+    });
+
     test("selecting an option of a question under an excluded item names what hides the question", () => {
       // given
       const events: Event[] = [
@@ -9165,6 +9193,31 @@ const Focus = (() => {
 
       // then
       assert.throws(act, (error) => error instanceof DecisionTreeError && error.message === "nothing open under S1");
+      assert.deepEqual(log.read(), events);
+    });
+
+    test("focusing a statement excluded under an unselected option says how the option hides it", () => {
+      // given
+      const events: Event[] = [
+        { type: "add-question", id: "Q1", text: "q1" },
+        { type: "add-option", id: "Q1a", text: "a", origin: "Q1" },
+        { type: "add-option", id: "Q1b", text: "b", origin: "Q1" },
+        { type: "select-option", targets: ["Q1a"] },
+        { type: "add-statement", id: "S1", text: "s", origin: "Q1b" },
+        { type: "add-question", id: "Q2", text: "q2", origin: "S1" },
+        { type: "exclude", target: "S1", reason: "not-applicable" },
+      ];
+      const log = Log.memoryLog([...events]);
+
+      // when
+      const act = () => run(log, { target: "S1" });
+
+      // then
+      assert.throws(
+        act,
+        (error) =>
+          error instanceof DecisionTreeError && error.message === "S1 is not-applicable, hidden by Q1b (off-path)",
+      );
       assert.deepEqual(log.read(), events);
     });
 
