@@ -14,7 +14,9 @@ node <this skill's directory>/scripts/decision-tree.js --log <path> --op <op> [f
 node <this skill's directory>/scripts/decision-tree.js --log <path> --query <query> [flags]
 ```
 
-Requires Node 20+. `--help` lists every operation and query with its flags. `DECISION_TREE_LOG` can stand in for `--log`, which wins if both are set. In zsh, a command kept in a variable isn't split into words, so `$CLI --op …` fails; a shell function works. The argument after a flag is its value, even if it starts with a dash, unless it is one of the CLI's own flags; a value that is exactly such a flag needs the `--flag=value` form.
+Requires Node 20+. `--help` lists every operation and query with its flags. `DECISION_TREE_LOG` can stand in for `--log`, which wins if both are set. In zsh, a command kept in a variable isn't split into words, so `$CLI --op …` fails; a shell function works.
+
+The argument after a flag is its value, even if it starts with a dash. If that argument is itself one of the CLI’s flags, such as `--log` or `--log=foo`, use `=` to pass it as a value. For example, `--text=--log=foo` stores the text `--log=foo`.
 
 A log is a `.jsonl` file holding one tree with any number of roots. The same path resumes it, several agents can share it, and the tree is rebuilt from it on every call. Change it only through the CLI: a log that was edited and no longer fits is refused, naming the line, as in `log line 4: option Q9a does not exist`.
 
