@@ -18,7 +18,7 @@ Requires Node 20+. `--help` lists every operation and query with its flags. `DEC
 
 A log is a `.jsonl` file holding one tree with any number of roots. The same path resumes it, several agents can share it, and the tree is rebuilt from it on every call. Change it only through the CLI: a log that was edited and no longer fits is refused, naming the line, as in `log line 4: option Q9a does not exist`.
 
-Results are XML on stdout. A failed call prints one line on stderr, exits 1 and writes nothing. The item it names is the one to act on: `Q2 is off-path, hidden by Q1b` means select `Q1b` first.
+Results are XML on stdout. A failed call prints one line on stderr, exits 1 and writes nothing. The item it names is the one to act on: `Q2 is off-path, hidden by Q1b` means select `Q1b` first. A refusal can name two things to act on: `Q2 is deferred, hidden by Q1b (off-path)` means restore `Q2` and select `Q1b`.
 
 ## The tree
 
@@ -54,7 +54,18 @@ Ids are never reused: an excluded or superseded option keeps its letter. `--targ
 | `not-applicable` | excluded as dropped, or under something that was | `restore` on the excluded item |
 | `frozen` | a superseded question, option or statement, and everything under it | never |
 
-An item that two things hide shows the state of the higher one, except that a superseded item always shows `frozen`; its own exclusion shows once nothing above hides it.
+What an item shows when it is out of the walk:
+
+| The item | `state` shows | `<hidden-by>` names |
+|---|---|---|
+| was excluded itself | its own exclusion | the highest thing above it that hides it, if there is one |
+| was not excluded, but something above hides it | how that thing hides it | the highest such thing |
+
+`<hidden-by state="off-path"><id>Q1b</id></hidden-by>` says what hides the item and how. An item with `state="deferred"` and that `<hidden-by>` was excluded for later, in a branch that is not selected.
+
+Only the highest thing is named: once it is lifted, the item shows what still hides it. An item that was excluded itself carries `<context by="exclude">`; one that is only under an excluded item does not.
+
+A superseded item, and everything under it, always shows `frozen`.
 
 ### Walk order
 
@@ -121,7 +132,7 @@ A write prints how the tree differs after the call: ids and states, never a text
     <after><id>Q1b</id></after>
   </selection>
   <displaced>
-    <item state="off-path"><id>Q2</id><hidden-by><id>Q1a</id></hidden-by></item>
+    <item state="off-path"><id>Q2</id><hidden-by state="off-path"><id>Q1a</id></hidden-by></item>
   </displaced>
   <placed>
     <item state="open"><id>Q3</id></item>
@@ -131,7 +142,7 @@ A write prints how the tree differs after the call: ids and states, never a text
 
 | Element | Meaning |
 |---|---|
-| `<created>` | An id the CLI assigned, with its name if it was given one. A question, statement or follow-up carries its state; an option carries one only when something hides it. A new item that is not active names what hides it in `<hidden-by>`, unless the same call excluded or superseded it. |
+| `<created>` | An id the CLI assigned, with its name if it was given one. A question, statement or follow-up carries its state; an option carries one only when something hides it. A new item that something above it hides also carries `<hidden-by>`, as in `items`. |
 | `<selection question="…">` | A question whose selection changed, before and after. An empty `<after>` means the question is open again. |
 | `<displaced>` | Items that were active before the call and that something above them now hides. |
 | `<placed>` | Items that something above them hid and that are active after the call. |
@@ -156,6 +167,10 @@ Every query prints the contexts of the items it returns.
 | `items [--tag T] [--target ID [--trail]] [--state S]… [--limit N]` | a flat list: active items in walk order, then the hidden ones. `--target` finds one item in any state unless `--state` is given. `--limit` doesn't say whether more exist. |
 
 `S` is `open`, `settled`, `off-path`, `deferred`, `not-applicable`, `frozen` or `all`. It never filters options. Without `--state`, only open items are shown, so `tree --target ID` prints `<tree></tree>` for a decision with nothing open under it; read a decision with `--state all`. A statement is never open, so `items --tag T` finds none without a `--state`.
+
+`--state S` also finds an item whose `<hidden-by>` has the state `S`. So `--state off-path` returns the items excluded inside an unselected branch too.
+
+`items` and `tree` look at the whole tree; `status` shows only the current path. An item excluded inside an unselected branch is in `items --state deferred` and not in `status`.
 
 ## Judgement calls
 
