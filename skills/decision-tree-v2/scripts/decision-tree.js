@@ -271,6 +271,9 @@ const {
 
 class DecisionTreeError extends Error {}
 
+// Bump the format version when either reader would reject or reinterpret the other's events.
+const logHeader = { format: "decision-tree", formatVersion: 1 }         ;
+
 const Log = (() => {
                                                                        
 
@@ -326,19 +329,22 @@ const Log = (() => {
       .find((fault) => fault !== undefined);
   }
 
-  function parseLine(line        , number        , path        )        {
-    const parsed          = (() => {
-      try {
-        return JSON.parse(line);
-      } catch {
-        throw new DecisionTreeError(`log line ${number} is not valid JSON: ${path}`);
-      }
-    })();
+  function parseLine(line        , number        , path        )          {
+    try {
+      return JSON.parse(line);
+    } catch {
+      throw new DecisionTreeError(`log line ${number} is not valid JSON: ${path}`);
+    }
+  }
 
-    const fault = faultOf(parsed);
-    if (fault !== undefined) throw new DecisionTreeError(`log line ${number}: ${fault}`);
+  function checkHeader(value         , number        )       {
+    if (typeof value === "object" && value !== null &&
+      "format" in value && value.format === logHeader.format &&
+      "formatVersion" in value && value.formatVersion === logHeader.formatVersion) return;
 
-    return parsed         ;
+    throw new DecisionTreeError(
+      `log line ${number}: unsupported log format (expected ${logHeader.format} format ${logHeader.formatVersion})`,
+    );
   }
 
   const lines = new WeakMap               ();
@@ -358,23 +364,39 @@ const Log = (() => {
       read() {
         if (!existsSync(path)) return [];
 
-        return readFileSync(path, "utf8")
-          .split("\n")
-          .flatMap((line, index) => (line === "" ? [] : [numbered(parseLine(line, index + 1, path), index + 1)]));
+        const contents = readFileSync(path, "utf8");
+        if (contents === "") return [];
+
+        const records = contents.split("\n");
+        const isBlank = (line        ) => /^[ \t\r]*$/.test(line);
+        const first = records.findIndex((line) => !isBlank(line));
+        if (first === -1) throw new DecisionTreeError("missing log format header");
+        checkHeader(parseLine(records[first], first + 1, path), first + 1);
+
+        const events          = [];
+        for (let index = first + 1; index < records.length; index++) {
+          if (isBlank(records[index])) continue;
+          const number = index + 1;
+          const parsed = parseLine(records[index], number, path);
+          const fault = faultOf(parsed);
+          if (fault !== undefined) throw new DecisionTreeError(`log line ${number}: ${fault}`);
+          events.push(numbered(parsed         , number));
+        }
+        return events;
       },
 
       append(...events) {
         const lines = events.map((event) => JSON.stringify(event) + "\n").join("");
 
         mkdirSync(dirname(path), { recursive: true });
-        appendFileSync(path, endsMidLine(path) ? `\n${lines}` : lines);
+        appendFileSync(path, appendPrefix(path) + lines);
       },
     };
   }
 
-  function endsMidLine(path        )          {
+  function appendPrefix(path        )         {
     const size = existsSync(path) ? statSync(path).size : 0;
-    if (size === 0) return false;
+    if (size === 0) return JSON.stringify(logHeader) + "\n";
 
     const file = openSync(path, "r");
     const last = Buffer.alloc(1);
@@ -384,7 +406,7 @@ const Log = (() => {
       closeSync(file);
     }
 
-    return last.toString() !== "\n";
+    return last.toString() === "\n" ? "" : "\n";
   }
 
   function memoryLog(events          = [])      {
@@ -963,7 +985,7 @@ const Log = (() => {
       const dir = mkdtempSync(join(tmpdir(), "decision-tree-"));
       t.after(() => rmSync(dir, { recursive: true }));
       const path = join(dir, "decision-tree.jsonl");
-      appendFileSync(path, '{"type":"add-question","id":"Q1","text":"q"}\n\n{"type":"select-option","targets":[]}\n');
+      appendFileSync(path, JSON.stringify(logHeader) + "\n" + '{"type":"add-question","id":"Q1","text":"q"}\n\n{"type":"select-option","targets":[]}\n');
 
       // when
       const act = () => fileLog(path).read();
@@ -973,7 +995,7 @@ const Log = (() => {
         act,
         (error) =>
           error instanceof DecisionTreeError &&
-          error.message === "log line 3: select-option needs at least one string in its targets",
+          error.message === "log line 4: select-option needs at least one string in its targets",
       );
     });
 
@@ -982,7 +1004,7 @@ const Log = (() => {
       const dir = mkdtempSync(join(tmpdir(), "decision-tree-"));
       t.after(() => rmSync(dir, { recursive: true }));
       const path = join(dir, "decision-tree.jsonl");
-      appendFileSync(path, '{"type":"add-question","id":"Q1","text":"q"}\n{"type":"add-opt\n');
+      appendFileSync(path, JSON.stringify(logHeader) + "\n" + '{"type":"add-question","id":"Q1","text":"q"}\n{"type":"add-opt\n');
 
       // when
       const act = () => fileLog(path).read();
@@ -990,7 +1012,7 @@ const Log = (() => {
       // then
       assert.throws(
         act,
-        (error) => error instanceof DecisionTreeError && error.message === `log line 2 is not valid JSON: ${path}`,
+        (error) => error instanceof DecisionTreeError && error.message === `log line 3 is not valid JSON: ${path}`,
       );
     });
 
@@ -1006,6 +1028,20 @@ const Log = (() => {
       // then
       assert.deepEqual(events, []);
       assert.equal(existsSync(path), false);
+    });
+
+    test("a header alone represents an empty tree and is kept on the first append", (t) => {
+      const dir = mkdtempSync(join(tmpdir(), "decision-tree-"));
+      t.after(() => rmSync(dir, { recursive: true }));
+      const path = join(dir, "decision-tree.jsonl");
+      const contents = ` \t\r\n${JSON.stringify(logHeader)}`;
+      writeFileSync(path, contents);
+
+      const log = fileLog(path);
+      assert.deepEqual(log.read(), []);
+      const question        = { type: "add-question", id: "Q1", text: "q" };
+      log.append(question);
+      assert.equal(readFileSync(path, "utf8"), `${contents}\n${JSON.stringify(question)}\n`);
     });
 
     test("reading a log that is a directory says so", (t) => {
@@ -1189,6 +1225,7 @@ const Log = (() => {
       t.after(() => rmSync(dir, { recursive: true }));
       const path = join(dir, "decision-tree.jsonl");
       const lines = [
+        JSON.stringify(logHeader),
         '{"type":"add-question","id":"Q1","text":"a"}',
         '{"type":"add-question","id":"Q2","text":"b"}',
       ];
@@ -1198,26 +1235,27 @@ const Log = (() => {
       const numbers = fileLog(path).read().map(lineOf);
 
       // then
-      assert.deepEqual(numbers, [1, 2]);
+      assert.deepEqual(numbers, [2, 3]);
     });
 
-    test("an event read after a blank line knows its line in the file", (t) => {
+    test("an event read after a blank CRLF line knows its line in the file", (t) => {
       // given
       const dir = mkdtempSync(join(tmpdir(), "decision-tree-"));
       t.after(() => rmSync(dir, { recursive: true }));
       const path = join(dir, "decision-tree.jsonl");
       const lines = [
+        JSON.stringify(logHeader),
         '{"type":"add-question","id":"Q1","text":"a"}',
         '',
         '{"type":"add-question","id":"Q2","text":"b"}',
       ];
-      writeFileSync(path, lines.map((line) => `${line}\n`).join(""));
+      writeFileSync(path, lines.join("\r\n"));
 
       // when
       const numbers = fileLog(path).read().map(lineOf);
 
       // then
-      assert.deepEqual(numbers, [1, 3]);
+      assert.deepEqual(numbers, [2, 4]);
     });
 
     test("an event that was not read from a file has no line", () => {
@@ -1246,7 +1284,7 @@ const Log = (() => {
 
       // then
       assert.deepEqual(fileLog(path).read(), [question, option]);
-      assert.equal(readFileSync(path, "utf8").split("\n").filter((line) => line !== "").length, 2);
+      assert.equal(readFileSync(path, "utf8"), [logHeader, question, option].map((line) => JSON.stringify(line) + "\n").join(""));
     });
 
     test("appending to a file log whose last line has no newline starts on a new line", (t) => {
@@ -1256,13 +1294,13 @@ const Log = (() => {
       const path = join(dir, "decision-tree.jsonl");
       const question        = { type: "add-question", id: "Q1", text: "q" };
       const option        = { type: "add-option", id: "Q1a", text: "a", origin: "Q1" };
-      appendFileSync(path, JSON.stringify(question));
+      appendFileSync(path, `${JSON.stringify(logHeader)}\n${JSON.stringify(question)}`);
 
       // when
       fileLog(path).append(option);
 
       // then
-      assert.equal(readFileSync(path, "utf8"), `${JSON.stringify(question)}\n${JSON.stringify(option)}\n`);
+      assert.equal(readFileSync(path, "utf8"), `${JSON.stringify(logHeader)}\n${JSON.stringify(question)}\n${JSON.stringify(option)}\n`);
     });
 
     test("appending to a file log that ends with a newline adds no empty line", (t) => {
@@ -1272,13 +1310,13 @@ const Log = (() => {
       const path = join(dir, "decision-tree.jsonl");
       const question        = { type: "add-question", id: "Q1", text: "q" };
       const option        = { type: "add-option", id: "Q1a", text: "a", origin: "Q1" };
-      appendFileSync(path, `${JSON.stringify(question)}\n`);
+      appendFileSync(path, `${JSON.stringify(logHeader)}\n${JSON.stringify(question)}\n`);
 
       // when
       fileLog(path).append(option);
 
       // then
-      assert.equal(readFileSync(path, "utf8"), `${JSON.stringify(question)}\n${JSON.stringify(option)}\n`);
+      assert.equal(readFileSync(path, "utf8"), `${JSON.stringify(logHeader)}\n${JSON.stringify(question)}\n${JSON.stringify(option)}\n`);
     });
 
     test("memory log read returns a copy", () => {
@@ -2798,6 +2836,7 @@ const Graph = (() => {
       t.after(() => rmSync(dir, { recursive: true }));
       const path = join(dir, "decision-tree.jsonl");
       const lines = [
+        JSON.stringify(logHeader),
         '{"type":"add-question","id":"Q1","text":"q"}',
         '',
         '{"type":"select-option","targets":["Q9a"]}',
@@ -2810,7 +2849,7 @@ const Graph = (() => {
       // then
       assert.throws(
         act,
-        (error) => error instanceof DecisionTreeError && error.message === "log line 3: option Q9a does not exist",
+        (error) => error instanceof DecisionTreeError && error.message === "log line 4: option Q9a does not exist",
       );
     });
 
@@ -2819,7 +2858,7 @@ const Graph = (() => {
       const dir = mkdtempSync(join(tmpdir(), "decision-tree-"));
       t.after(() => rmSync(dir, { recursive: true }));
       const path = join(dir, "decision-tree.jsonl");
-      writeFileSync(path, '{"type":"add-question","id":"Q1","text":"q"}\n');
+      writeFileSync(path, JSON.stringify(logHeader) + "\n" + '{"type":"add-question","id":"Q1","text":"q"}\n');
       const [event] = Log.fileLog(path).read();
       const failure = new Error("a fault in the code");
 
@@ -13906,12 +13945,61 @@ const Cli = (() => {
       assert.deepEqual([run.status, run.stderr, run.stdout], [1, "target not found: x\\ny\n", ""]);
     });
 
+    test("queries and writes refuse incompatible logs before replay and preserve their bytes", (t) => {
+      const dir = mkdtempSync(join(tmpdir(), "decision-tree-"));
+      t.after(() => rmSync(dir, { recursive: true }));
+      const path = join(dir, "decision-tree.jsonl");
+      const headers = [
+        '{"type":"add-question","id":"Q1","text":"q"}',
+        '{"type":"add-question","id":"Q1","text":"q","context":"why","meta":{"eid":1,"at":10}}',
+        JSON.stringify({ ...logHeader, formatVersion: logHeader.formatVersion + 1 }),
+        JSON.stringify({ ...logHeader, formatVersion: String(logHeader.formatVersion) }),
+        JSON.stringify({ ...logHeader, format: "another-format" }),
+        '{"format":"decision-tree"}',
+        '{"format":',
+      ];
+      const cases = headers.map((header) => `${header}\n`);
+      cases.push("\r\n \t\n");
+
+      for (const contents of cases) {
+        writeFileSync(path, contents);
+        for (const args of [["--query", "items"], ["--op", "add-question", "--text", "new"]]) {
+          const result = spawnSync(process.execPath, [process.argv[1], "--log", path, ...args], { encoding: "utf8" });
+          assert.equal(result.status, 1, contents);
+          assert.equal(result.stdout, "");
+          assert.match(result.stderr, /^[^\r\n]+\n$/);
+          assert.equal(readFileSync(path, "utf8"), contents);
+        }
+      }
+    });
+
+    test("the first successful batch initializes a missing or zero-byte log with one header", (t) => {
+      const dir = mkdtempSync(join(tmpdir(), "decision-tree-"));
+      t.after(() => rmSync(dir, { recursive: true }));
+      for (const initial of ["missing", "empty"]) {
+        const path = join(dir, initial);
+        if (initial === "empty") writeFileSync(path, "");
+        const run = (...args          ) =>
+          spawnSync(process.execPath, [process.argv[1], "--log", path, ...args], { encoding: "utf8" });
+        const add = ["--op", "add-question", "--text", "q"];
+
+        assert.equal(run(...add, "--op", "focus", "--target", "Q9").status, 1);
+        assert.equal(existsSync(path), initial === "empty");
+        if (initial === "empty") assert.equal(readFileSync(path, "utf8"), "");
+        assert.equal(run(...add, ...add).status, 0);
+        assert.equal(run(...add).status, 0);
+        const [header, ...events] = readFileSync(path, "utf8").trimEnd().split("\n").map((line) => JSON.parse(line));
+        assert.deepEqual(header, logHeader);
+        assert.deepEqual(events.map((event) => [event.id, event.meta.eid]), [["Q1", 1], ["Q2", 2], ["Q3", 3]]);
+      }
+    });
+
     test("a write on a log with a line that is not an event it knows names the line and exits 1", (t) => {
       // given
       const dir = mkdtempSync(join(tmpdir(), "decision-tree-"));
       t.after(() => rmSync(dir, { recursive: true }));
       const path = join(dir, "decision-tree.jsonl");
-      const damaged = '{"type":"add-question","id":"Q1","text":"q"}\n{"type":"select-option","targets":[]}\n';
+      const damaged = JSON.stringify(logHeader) + "\n" + '{"type":"add-question","id":"Q1","text":"q"}\n{"type":"select-option","targets":[]}\n';
       writeFileSync(path, damaged);
 
       // when
@@ -13924,7 +14012,7 @@ const Cli = (() => {
       // then
       assert.deepEqual(
         [run.status, run.stderr, run.stdout, readFileSync(path, "utf8")],
-        [1, "log line 2: select-option needs at least one string in its targets\n", "", damaged],
+        [1, "log line 3: select-option needs at least one string in its targets\n", "", damaged],
       );
     });
 
@@ -13933,7 +14021,7 @@ const Cli = (() => {
       const dir = mkdtempSync(join(tmpdir(), "decision-tree-"));
       t.after(() => rmSync(dir, { recursive: true }));
       const path = join(dir, "decision-tree.jsonl");
-      writeFileSync(path, '{"type":"add-question","id":"Q1","text":"q"}\n{"type":"select-option","targets":["Q9a"]}\n');
+      writeFileSync(path, JSON.stringify(logHeader) + "\n" + '{"type":"add-question","id":"Q1","text":"q"}\n{"type":"select-option","targets":["Q9a"]}\n');
 
       // when
       const run = spawnSync(
@@ -13943,7 +14031,7 @@ const Cli = (() => {
       );
 
       // then
-      assert.deepEqual([run.status, run.stderr, run.stdout], [1, "log line 2: option Q9a does not exist\n", ""]);
+      assert.deepEqual([run.status, run.stderr, run.stdout], [1, "log line 3: option Q9a does not exist\n", ""]);
     });
 
     test("a query on a log that is a directory prints one line and exits 1", (t) => {
