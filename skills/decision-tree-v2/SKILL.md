@@ -20,7 +20,7 @@ The argument after a flag is its value, even if it starts with a dash. If that a
 
 A log is a `.jsonl` file holding one tree with any number of roots. The same path resumes it, several agents can share it, and the tree is rebuilt from it on every call. Change it only through the CLI: a log that was edited and no longer fits is refused, naming the line, as in `log line 4: option Q9a does not exist`.
 
-The first successful write starts the log with `{"format":"decision-tree","formatVersion":1}`. This CLI reads and appends only log format 1. For a session created with another format or an older CLI that wrote no header, start a fresh log path.
+If the CLI reports `unsupported log format`, use the CLI version that created the log to resume that session. To start a new tree, choose a fresh log path.
 
 Results are XML on stdout. A failed call prints one line on stderr, exits 1 and writes nothing. The item it names is the one to act on: `Q2 is off-path, hidden by Q1b` means select `Q1b` first. A refusal can name two things to act on: `Q2 is deferred, hidden by Q1b (off-path)` means restore `Q2` and select `Q1b`.
 
