@@ -1,9 +1,1 @@
-do-not-read
 /node_modules/
-/package.json
-/package-lock.json
-/tsconfig.json
-/.idea/
-/CLAUDE.md
-/.claude/
-/.agents/
