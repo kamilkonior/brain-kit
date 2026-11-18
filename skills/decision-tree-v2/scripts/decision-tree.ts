@@ -169,7 +169,7 @@ type StatusItem =
 
 type Hiding = { state: ItemState; by: string };
 
-type Placement = { state: ItemState; hiddenBy?: string };
+type Placement = { state: ItemState; hiddenBy?: Hiding };
 
 type Listed = { id: string; text: string; tags: string[]; trail?: TrailStep[] } & Placement;
 
@@ -206,7 +206,7 @@ type QuestionNode = {
   context: QuestionContext;
   supersededBy?: QuestionNode;
   supersedes?: QuestionNode;
-  hiddenBy?: string;
+  hiddenBy?: Hiding;
 };
 
 type OptionNode = {
@@ -215,7 +215,7 @@ type OptionNode = {
   text: string;
   state: NodeState;
   active: boolean | "unset";
-  hiddenBy?: string;
+  hiddenBy?: Hiding;
   context: ItemContext;
   question: QuestionNode;
   supersededBy?: OptionNode;
@@ -232,7 +232,7 @@ type FollowUpNode = {
   active: boolean | "unset";
   parent?: TreeNode;
   status: "open" | "promoted";
-  hiddenBy?: string;
+  hiddenBy?: Hiding;
   context: ItemContext;
   children: (QuestionNode | StatementNode)[];
   followUps: FollowUpNode[];
@@ -244,7 +244,7 @@ type StatementNode = {
   text: string;
   state: NodeState;
   active: boolean | "unset";
-  hiddenBy?: string;
+  hiddenBy?: Hiding;
   context: ItemContext;
   parent?: TreeNode;
   children: (QuestionNode | StatementNode)[];
@@ -1400,7 +1400,7 @@ const Graph = (() => {
   function rejectFrozen(graph: Graph, node: TreeNode): void {
     if (node.state !== "frozen") return;
 
-    const superseded = requireSuperseded(graph.nodes, node.hiddenBy ?? node.id);
+    const superseded = requireSuperseded(graph.nodes, node.hiddenBy?.by ?? node.id);
     const replacement = superseded.supersededBy?.id;
     if (superseded === node) {
       throw new DecisionTreeError(`${node.id} is frozen, as it was superseded by ${replacement}`);
@@ -1776,8 +1776,8 @@ const Graph = (() => {
     return reason === undefined ? undefined : { state: reason, by: node.id };
   }
 
-  function hiddenBy(node: TreeNode, hiding: Hiding | undefined): string | undefined {
-    return hiding === undefined || hiding.by === node.id ? undefined : hiding.by;
+  function hiddenBy(node: TreeNode, hiding: Hiding | undefined): Hiding | undefined {
+    return hiding === undefined || hiding.by === node.id ? undefined : hiding;
   }
 
   function offPathBelow(hiding: Hiding | undefined, by: string): Hiding {
@@ -2305,7 +2305,7 @@ const Graph = (() => {
     return selectionOf(requireQuestion(graph.nodes, id));
   }
 
-  function hiderOf(node: TreeNode): string {
+  function hiderOf(node: TreeNode): Hiding {
     if (node.hiddenBy === undefined) throw new Error(`node ${node.id} has nothing hiding it`);
 
     return node.hiddenBy;
@@ -2348,7 +2348,7 @@ const Graph = (() => {
   function rejectHidden(node: TreeNode): void {
     if (isActive(node)) return;
 
-    const hider = node.hiddenBy === undefined ? "" : `, hidden by ${node.hiddenBy}`;
+    const hider = node.hiddenBy === undefined ? "" : `, hidden by ${node.hiddenBy.by}`;
 
     throw new DecisionTreeError(`${node.id} is ${assignedState(node)}${hider}`);
   }
@@ -2532,7 +2532,7 @@ const Graph = (() => {
 
       // then
       const question = requireQuestion(graph.nodes, "Q2");
-      assert.deepEqual([question.state, question.hiddenBy], ["off-path", "Q1b"]);
+      assert.deepEqual([question.state, question.hiddenBy], ["off-path", { state: "off-path", by: "Q1b" }]);
     });
 
     test("an off-path question is hidden by its outermost unchosen option", () => {
@@ -2551,7 +2551,7 @@ const Graph = (() => {
       const graph = build(log);
 
       // then
-      assert.equal(requireQuestion(graph.nodes, "Q3").hiddenBy, "Q1b");
+      assert.deepEqual(requireQuestion(graph.nodes, "Q3").hiddenBy, { state: "off-path", by: "Q1b" });
     });
 
     test("once the outer option is selected, the next unchosen option is the blocker", () => {
@@ -2570,7 +2570,7 @@ const Graph = (() => {
       const graph = build(log);
 
       // then
-      assert.equal(requireQuestion(graph.nodes, "Q3").hiddenBy, "Q2a");
+      assert.deepEqual(requireQuestion(graph.nodes, "Q3").hiddenBy, { state: "off-path", by: "Q2a" });
     });
 
     test("a question under an open follow-up in an off-path branch is hidden by the outer option", () => {
@@ -2588,7 +2588,7 @@ const Graph = (() => {
       const graph = build(log);
 
       // then
-      assert.equal(requireQuestion(graph.nodes, "Q2").hiddenBy, "Q1b");
+      assert.deepEqual(requireQuestion(graph.nodes, "Q2").hiddenBy, { state: "off-path", by: "Q1b" });
     });
 
     test("an excluded question has its reason as its state and hides what is under it", () => {
@@ -2607,7 +2607,7 @@ const Graph = (() => {
       const child = requireQuestion(graph.nodes, "Q2");
       assert.deepEqual(
         [excluded.state, excluded.hiddenBy, child.state, child.hiddenBy],
-        ["deferred", undefined, "deferred", "Q1"],
+        ["deferred", undefined, "deferred", { state: "deferred", by: "Q1" }],
       );
     });
 
@@ -2625,7 +2625,7 @@ const Graph = (() => {
 
       // then
       const question = requireQuestion(graph.nodes, "Q2");
-      assert.deepEqual([question.state, question.hiddenBy], ["deferred", "Q1"]);
+      assert.deepEqual([question.state, question.hiddenBy], ["deferred", { state: "deferred", by: "Q1" }]);
     });
 
     test("a superseded question and what is under it are frozen", () => {
@@ -2645,7 +2645,7 @@ const Graph = (() => {
       const child = requireQuestion(graph.nodes, "Q2");
       assert.deepEqual(
         [superseded.state, superseded.hiddenBy, child.state, child.hiddenBy],
-        ["frozen", undefined, "frozen", "Q1"],
+        ["frozen", undefined, "frozen", { state: "frozen", by: "Q1" }],
       );
     });
 
@@ -2668,7 +2668,7 @@ const Graph = (() => {
       const replacement = requireOption(graph.nodes, "Q1b");
       assert.deepEqual(
         [superseded.state, superseded.hiddenBy, child.state, child.hiddenBy, replacement.state],
-        ["frozen", undefined, "frozen", "Q1a", "open"],
+        ["frozen", undefined, "frozen", { state: "frozen", by: "Q1a" }, "open"],
       );
     });
 
@@ -2771,7 +2771,7 @@ const Graph = (() => {
 
       // then
       const question = requireQuestion(graph.nodes, "Q1");
-      assert.deepEqual([question.state, question.hiddenBy], ["off-path", "F1"]);
+      assert.deepEqual([question.state, question.hiddenBy], ["off-path", { state: "off-path", by: "F1" }]);
     });
 
     test("a refusal while replaying a line of a file names the line", (t) => {
@@ -3058,7 +3058,10 @@ const Graph = (() => {
 
       // then
       const child = requireQuestion(graph.nodes, "Q2");
-      assert.deepEqual([graph.nodes.get("Q1a")?.state, child.state, child.hiddenBy], ["deferred", "deferred", "Q1a"]);
+      assert.deepEqual(
+        [graph.nodes.get("Q1a")?.state, child.state, child.hiddenBy],
+        ["deferred", "deferred", { state: "deferred", by: "Q1a" }],
+      );
     });
 
     test("the walk order leaves out off-path and excluded questions", () => {
@@ -3162,7 +3165,7 @@ const Graph = (() => {
 
       // then
       const option = requireOption(graph.nodes, "Q1a");
-      assert.deepEqual([option.state, option.hiddenBy], ["deferred", "Q1"]);
+      assert.deepEqual([option.state, option.hiddenBy], ["deferred", { state: "deferred", by: "Q1" }]);
     });
 
     test("an item both excluded and frozen is refused as frozen", () => {
@@ -3550,7 +3553,7 @@ const Graph = (() => {
       const question = requireQuestion(graph.nodes, "Q2");
 
       // then
-      assert.deepEqual([question.state, question.hiddenBy], ["off-path", "Q1b"]);
+      assert.deepEqual([question.state, question.hiddenBy], ["off-path", { state: "off-path", by: "Q1b" }]);
     });
 
     test("an excluded statement takes the exclusion's state and passes it to what hangs under it", () => {
@@ -4602,8 +4605,8 @@ const Graph = (() => {
       // then
       assert.deepEqual(result, {
         created: [
-          { id: "Q3", state: "off-path", hiddenBy: "Q1b" },
-          { id: "S1", state: "off-path", hiddenBy: "Q1b" },
+          { id: "Q3", state: "off-path", hiddenBy: { state: "off-path", by: "Q1b" } },
+          { id: "S1", state: "off-path", hiddenBy: { state: "off-path", by: "Q1b" } },
         ],
         selections: [],
         displaced: [],
@@ -4629,7 +4632,7 @@ const Graph = (() => {
 
       // then
       assert.deepEqual(result, {
-        created: [{ id: "Q2", state: "off-path", hiddenBy: "Q1b" }],
+        created: [{ id: "Q2", state: "off-path", hiddenBy: { state: "off-path", by: "Q1b" } }],
         selections: [{ question: "Q1", before: ["Q1b"], after: ["Q1a"] }],
         displaced: [],
         placed: [],
@@ -4763,7 +4766,7 @@ const Graph = (() => {
       assert.deepEqual(result, {
         created: [{ id: "S2", state: "settled" }],
         selections: [],
-        displaced: [{ id: "Q1", state: "frozen", hiddenBy: "S1" }],
+        displaced: [{ id: "Q1", state: "frozen", hiddenBy: { state: "frozen", by: "S1" } }],
         placed: [],
       });
     });
@@ -4791,9 +4794,9 @@ const Graph = (() => {
 
       // then
       assert.deepEqual(displaced, [
-        { id: "Q2", state: "off-path", hiddenBy: "Q1b" },
-        { id: "S1", state: "off-path", hiddenBy: "Q1b" },
-        { id: "F1", state: "off-path", hiddenBy: "Q1b" },
+        { id: "Q2", state: "off-path", hiddenBy: { state: "off-path", by: "Q1b" } },
+        { id: "S1", state: "off-path", hiddenBy: { state: "off-path", by: "Q1b" } },
+        { id: "F1", state: "off-path", hiddenBy: { state: "off-path", by: "Q1b" } },
       ]);
     });
 
@@ -4815,7 +4818,7 @@ const Graph = (() => {
       );
 
       // then
-      assert.deepEqual(displaced, [{ id: "Q3", state: "off-path", hiddenBy: "Q1b" }]);
+      assert.deepEqual(displaced, [{ id: "Q3", state: "off-path", hiddenBy: { state: "off-path", by: "Q1b" } }]);
     });
 
     test("a cleared selection displaces what hung under the answer", () => {
@@ -4834,7 +4837,7 @@ const Graph = (() => {
       );
 
       // then
-      assert.deepEqual(displaced, [{ id: "Q2", state: "off-path", hiddenBy: "Q1a" }]);
+      assert.deepEqual(displaced, [{ id: "Q2", state: "off-path", hiddenBy: { state: "off-path", by: "Q1a" } }]);
     });
 
     test("excluding an item displaces what hangs directly under it, and not the item excluded", () => {
@@ -4853,7 +4856,7 @@ const Graph = (() => {
       );
 
       // then
-      assert.deepEqual(displaced, [{ id: "Q1", state: "deferred", hiddenBy: "S1" }]);
+      assert.deepEqual(displaced, [{ id: "Q1", state: "deferred", hiddenBy: { state: "deferred", by: "S1" } }]);
     });
 
     test("excluding the selected option displaces what hung under it, and not the question it reopens", () => {
@@ -4878,7 +4881,9 @@ const Graph = (() => {
       );
 
       // then
-      assert.deepEqual(displaced, [{ id: "Q2", state: "not-applicable", hiddenBy: "Q1a" }]);
+      assert.deepEqual(displaced, [
+        { id: "Q2", state: "not-applicable", hiddenBy: { state: "not-applicable", by: "Q1a" } },
+      ]);
     });
 
     test("superseding a statement displaces what hung directly under it", () => {
@@ -4902,7 +4907,7 @@ const Graph = (() => {
       );
 
       // then
-      assert.deepEqual(displaced, [{ id: "Q1", state: "frozen", hiddenBy: "S1" }]);
+      assert.deepEqual(displaced, [{ id: "Q1", state: "frozen", hiddenBy: { state: "frozen", by: "S1" } }]);
     });
 
     test("a displaced item names what hides it, which need not be what it hangs on", () => {
@@ -4921,7 +4926,7 @@ const Graph = (() => {
       );
 
       // then
-      assert.deepEqual(displaced, [{ id: "Q2", state: "deferred", hiddenBy: "Q1" }]);
+      assert.deepEqual(displaced, [{ id: "Q2", state: "deferred", hiddenBy: { state: "deferred", by: "Q1" } }]);
     });
 
     test("an item that was already out of play is not displaced when something else hides it too", () => {
@@ -5656,7 +5661,7 @@ const Graph = (() => {
       // then
       assert.deepEqual(
         items.map((each) => [each.hiddenBy, each.context?.exclusion]),
-        [["Q1", undefined]],
+        [[{ state: "deferred", by: "Q1" }, undefined]],
       );
     });
 
@@ -5676,7 +5681,7 @@ const Graph = (() => {
       // then
       assert.deepEqual(
         items.map((each) => each.hiddenBy),
-        ["Q1"],
+        [{ state: "frozen", by: "Q1" }],
       );
     });
 
@@ -5718,7 +5723,7 @@ const Graph = (() => {
       // then
       assert.deepEqual(
         items.map((each) => each.hiddenBy),
-        ["Q1b"],
+        [{ state: "off-path", by: "Q1b" }],
       );
     });
 
@@ -5736,7 +5741,7 @@ const Graph = (() => {
       // then
       assert.deepEqual(
         items.map((each) => each.hiddenBy),
-        ["F1"],
+        [{ state: "off-path", by: "F1" }],
       );
     });
 
@@ -5844,7 +5849,7 @@ const Graph = (() => {
           kind: "question", id: "Q2", text: "q2", options: [],
           tags: [],
           state: "off-path",
-          hiddenBy: "Q1b",
+          hiddenBy: { state: "off-path", by: "Q1b" },
         },
       ]);
     });
@@ -6153,7 +6158,7 @@ const Graph = (() => {
       assert.deepEqual(result, {
         created: [{ id: "Q3", state: "open" }],
         selections: [{ question: "Q1", before: ["Q1a"], after: ["Q1b"] }],
-        displaced: [{ id: "Q2", state: "off-path", hiddenBy: "Q1a" }],
+        displaced: [{ id: "Q2", state: "off-path", hiddenBy: { state: "off-path", by: "Q1a" } }],
         placed: [],
       });
     });
@@ -6236,7 +6241,7 @@ const Graph = (() => {
         items.map((each) => [each.id, each.state, each.hiddenBy]),
         [
           ["Q1", "not-applicable", undefined],
-          ["Q2", "not-applicable", "Q1"],
+          ["Q2", "not-applicable", { state: "not-applicable", by: "Q1" }],
         ],
       );
     });
@@ -6283,7 +6288,7 @@ const Graph = (() => {
         items.map((each) => [each.id, each.state, each.hiddenBy]),
         [
           ["Q1", "settled", undefined],
-          ["Q2", "off-path", "Q1b"],
+          ["Q2", "off-path", { state: "off-path", by: "Q1b" }],
         ],
       );
     });
@@ -6372,7 +6377,7 @@ const Graph = (() => {
       assert.deepEqual(result, {
         created: [],
         selections: [{ question: "Q1", before: ["Q1a"], after: ["Q1b"] }],
-        displaced: [{ id: "Q2", state: "off-path", hiddenBy: "Q1a" }],
+        displaced: [{ id: "Q2", state: "off-path", hiddenBy: { state: "off-path", by: "Q1a" } }],
         placed: [],
       });
     });
@@ -6397,7 +6402,7 @@ const Graph = (() => {
       assert.deepEqual(result, {
         created: [],
         selections: [{ question: "Q1", before: ["Q1a"], after: ["Q1b"] }],
-        displaced: [{ id: "Q2", state: "off-path", hiddenBy: "Q1a" }],
+        displaced: [{ id: "Q2", state: "off-path", hiddenBy: { state: "off-path", by: "Q1a" } }],
         placed: [],
       });
     });
@@ -6458,7 +6463,7 @@ const Graph = (() => {
 
       // then
       assert.deepEqual(result, {
-        created: [{ id: "Q2", state: "deferred", hiddenBy: "Q1" }],
+        created: [{ id: "Q2", state: "deferred", hiddenBy: { state: "deferred", by: "Q1" } }],
         selections: [],
         displaced: [],
         placed: [],
@@ -6481,7 +6486,7 @@ const Graph = (() => {
 
       // then
       assert.deepEqual(result, {
-        created: [{ id: "Q2", state: "not-applicable", hiddenBy: "Q1" }],
+        created: [{ id: "Q2", state: "not-applicable", hiddenBy: { state: "not-applicable", by: "Q1" } }],
         selections: [],
         displaced: [],
         placed: [],
@@ -6506,7 +6511,7 @@ const Graph = (() => {
       // then
       assert.deepEqual(result, {
         created: [
-          { id: "Q2", state: "frozen", hiddenBy: "Q1" },
+          { id: "Q2", state: "frozen", hiddenBy: { state: "frozen", by: "Q1" } },
           { id: "Q3", state: "open" },
         ],
         selections: [],
@@ -6532,7 +6537,7 @@ const Graph = (() => {
 
       // then
       assert.deepEqual(result, {
-        created: [{ id: "Q2", state: "off-path", hiddenBy: "Q1b" }],
+        created: [{ id: "Q2", state: "off-path", hiddenBy: { state: "off-path", by: "Q1b" } }],
         selections: [],
         displaced: [],
         placed: [],
@@ -6570,7 +6575,7 @@ const Graph = (() => {
 
       // then
       assert.deepEqual(result, {
-        created: [{ id: "Q1a", state: "deferred", hiddenBy: "Q1" }],
+        created: [{ id: "Q1a", state: "deferred", hiddenBy: { state: "deferred", by: "Q1" } }],
         selections: [],
         displaced: [],
         placed: [],
@@ -6607,7 +6612,7 @@ const Graph = (() => {
 
       // then
       assert.deepEqual(result, {
-        created: [{ id: "Q1", state: "off-path", hiddenBy: "F1" }],
+        created: [{ id: "Q1", state: "off-path", hiddenBy: { state: "off-path", by: "F1" } }],
         selections: [],
         displaced: [],
         placed: [],
@@ -6649,7 +6654,10 @@ const Graph = (() => {
       const option = requireOption(graph.nodes, "Q2a");
 
       // then
-      assert.deepEqual([option.state, isActive(option), option.hiddenBy], ["off-path", false, "Q1b"]);
+      assert.deepEqual(
+        [option.state, isActive(option), option.hiddenBy],
+        ["off-path", false, { state: "off-path", by: "Q1b" }],
+      );
     });
   }
 
@@ -10726,7 +10734,7 @@ const Xml = (() => {
 
   function listedLines(data: ListedItem): string[] {
     const state = ` state="${data.state}"`;
-    const hidden = data.hiddenBy === undefined ? [] : [`  ${ids("hidden-by", [data.hiddenBy])}`];
+    const hidden = data.hiddenBy === undefined ? [] : [`  ${hiddenByTag(data.hiddenBy)}`];
     const links = data.kind === "follow-up" ? [] : linkTags(data).map((tag) => `  ${tag}`);
 
     if (data.kind === "question") {
@@ -10778,6 +10786,10 @@ const Xml = (() => {
     ];
   }
 
+  function hiddenByTag(hiding: Hiding): string {
+    return `<hidden-by state="${hiding.state}"><id>${hiding.by}</id></hidden-by>`;
+  }
+
   function ids(tag: string, list: string[]): string {
     return `<${tag}>${list.map((id) => `<id>${id}</id>`).join("")}</${tag}>`;
   }
@@ -10792,7 +10804,7 @@ const Xml = (() => {
   }
 
   function itemLine(item: { id: string } & Placement): string {
-    const hidden = item.hiddenBy === undefined ? "" : ids("hidden-by", [item.hiddenBy]);
+    const hidden = item.hiddenBy === undefined ? "" : hiddenByTag(item.hiddenBy);
 
     return `    <item state="${item.state}"><id>${item.id}</id>${hidden}</item>`;
   }
@@ -10801,7 +10813,7 @@ const Xml = (() => {
     const created = result.created.map((each) => {
       const name = each.as === undefined ? "" : ` as="${each.as}"`;
       const state = each.state === undefined ? "" : ` state="${each.state}"`;
-      const hidden = each.hiddenBy === undefined ? "" : ids("hidden-by", [each.hiddenBy]);
+      const hidden = each.hiddenBy === undefined ? "" : hiddenByTag(each.hiddenBy);
 
       return `  <created${name}${state}><id>${each.id}</id>${hidden}</created>`;
     });
@@ -11915,7 +11927,10 @@ const Xml = (() => {
     test("a write that created items renders each id, and what hides it after the id", () => {
       // given
       const result: WriteResult = {
-        created: [{ id: "Q2", state: "open" }, { id: "S1", state: "off-path", hiddenBy: "Q1b" }],
+        created: [
+          { id: "Q2", state: "open" },
+          { id: "S1", state: "off-path", hiddenBy: { state: "off-path", by: "Q1b" } },
+        ],
         selections: [],
         displaced: [],
         placed: [],
@@ -11928,7 +11943,7 @@ const Xml = (() => {
       assert.deepEqual(xml.split("\n"), [
         "<batch>",
         '  <created state="open"><id>Q2</id></created>',
-        '  <created state="off-path"><id>S1</id><hidden-by><id>Q1b</id></hidden-by></created>',
+        '  <created state="off-path"><id>S1</id><hidden-by state="off-path"><id>Q1b</id></hidden-by></created>',
         "</batch>",
       ]);
     });
@@ -11969,8 +11984,8 @@ const Xml = (() => {
         created: [],
         selections: [],
         displaced: [
-          { id: "Q2", state: "off-path", hiddenBy: "Q1a" },
-          { id: "S1", state: "deferred", hiddenBy: "Q3" },
+          { id: "Q2", state: "off-path", hiddenBy: { state: "off-path", by: "Q1a" } },
+          { id: "S1", state: "deferred", hiddenBy: { state: "deferred", by: "Q3" } },
         ],
         placed: [],
       };
@@ -11982,8 +11997,8 @@ const Xml = (() => {
       assert.deepEqual(xml.split("\n"), [
         "<batch>",
         "  <displaced>",
-        '    <item state="off-path"><id>Q2</id><hidden-by><id>Q1a</id></hidden-by></item>',
-        '    <item state="deferred"><id>S1</id><hidden-by><id>Q3</id></hidden-by></item>',
+        '    <item state="off-path"><id>Q2</id><hidden-by state="off-path"><id>Q1a</id></hidden-by></item>',
+        '    <item state="deferred"><id>S1</id><hidden-by state="deferred"><id>Q3</id></hidden-by></item>',
         "  </displaced>",
         "</batch>",
       ]);
@@ -11994,7 +12009,7 @@ const Xml = (() => {
       const result: WriteResult = {
         created: [{ id: "Q1c" }],
         selections: [{ question: "Q1", before: ["Q1a"], after: [] }],
-        displaced: [{ id: "Q2", state: "off-path", hiddenBy: "Q1a" }],
+        displaced: [{ id: "Q2", state: "off-path", hiddenBy: { state: "off-path", by: "Q1a" } }],
         placed: [],
       };
 
@@ -12010,7 +12025,7 @@ const Xml = (() => {
         "    <after></after>",
         "  </selection>",
         "  <displaced>",
-        '    <item state="off-path"><id>Q2</id><hidden-by><id>Q1a</id></hidden-by></item>',
+        '    <item state="off-path"><id>Q2</id><hidden-by state="off-path"><id>Q1a</id></hidden-by></item>',
         "  </displaced>",
         "</batch>",
       ]);
@@ -12021,7 +12036,7 @@ const Xml = (() => {
       const result: WriteResult = {
         created: [],
         selections: [],
-        displaced: [{ id: "Q2", state: "off-path", hiddenBy: "Q1a" }],
+        displaced: [{ id: "Q2", state: "off-path", hiddenBy: { state: "off-path", by: "Q1a" } }],
         placed: [
           { id: "Q3", state: "open" },
           { id: "S1", state: "settled" },
@@ -12035,7 +12050,7 @@ const Xml = (() => {
       assert.deepEqual(xml.split("\n"), [
         "<batch>",
         "  <displaced>",
-        '    <item state="off-path"><id>Q2</id><hidden-by><id>Q1a</id></hidden-by></item>',
+        '    <item state="off-path"><id>Q2</id><hidden-by state="off-path"><id>Q1a</id></hidden-by></item>',
         "  </displaced>",
         "  <placed>",
         '    <item state="open"><id>Q3</id></item>',
@@ -12821,7 +12836,7 @@ const Xml = (() => {
           kind: "follow-up", id: "F1", text: "f",
           tags: ["t"],
           state: "frozen",
-          hiddenBy: "Q1",
+          hiddenBy: { state: "frozen", by: "Q1" },
         },
       ];
 
@@ -12835,7 +12850,7 @@ const Xml = (() => {
         "    <id>F1</id>",
         "    <text>f</text>",
         "    <tags><tag>t</tag></tags>",
-        "    <hidden-by><id>Q1</id></hidden-by>",
+        '    <hidden-by state="frozen"><id>Q1</id></hidden-by>',
         "  </follow-up>",
         "</items>",
       ]);
@@ -13459,8 +13474,8 @@ const Cli = (() => {
         created: [{ id: "Q1c" }],
         selections: [{ question: "Q1", before: ["Q1a", "Q1b"], after: [] }],
         displaced: [
-          { id: "Q2", state: "frozen", hiddenBy: "Q1a" },
-          { id: "Q3", state: "off-path", hiddenBy: "Q1b" },
+          { id: "Q2", state: "frozen", hiddenBy: { state: "frozen", by: "Q1a" } },
+          { id: "Q3", state: "off-path", hiddenBy: { state: "off-path", by: "Q1b" } },
         ],
         placed: [],
       });
@@ -13489,8 +13504,8 @@ const Cli = (() => {
         created: [],
         selections: [{ question: "Q1", before: ["Q1a", "Q1b"], after: [] }],
         displaced: [
-          { id: "Q2", state: "off-path", hiddenBy: "Q1a" },
-          { id: "Q3", state: "deferred", hiddenBy: "Q1b" },
+          { id: "Q2", state: "off-path", hiddenBy: { state: "off-path", by: "Q1a" } },
+          { id: "Q3", state: "deferred", hiddenBy: { state: "deferred", by: "Q1b" } },
         ],
         placed: [],
       });
@@ -13521,7 +13536,7 @@ const Cli = (() => {
       assert.deepEqual(result, {
         created: [],
         selections: [{ question: "Q1", before: ["Q1a", "Q1b"], after: ["Q1a"] }],
-        displaced: [{ id: "Q3", state: "deferred", hiddenBy: "Q1b" }],
+        displaced: [{ id: "Q3", state: "deferred", hiddenBy: { state: "deferred", by: "Q1b" } }],
         placed: [],
       });
     });
@@ -13571,7 +13586,7 @@ const Cli = (() => {
 
       // then
       assert.deepEqual(result, {
-        created: [{ id: "Q3", state: "deferred", hiddenBy: "Q1" }],
+        created: [{ id: "Q3", state: "deferred", hiddenBy: { state: "deferred", by: "Q1" } }],
         selections: [],
         displaced: [],
         placed: [],
@@ -13627,7 +13642,7 @@ const Cli = (() => {
 
       // then
       assert.deepEqual(result, {
-        created: [{ id: "Q2", state: "off-path", hiddenBy: "Q1a" }],
+        created: [{ id: "Q2", state: "off-path", hiddenBy: { state: "off-path", by: "Q1a" } }],
         selections: [],
         displaced: [],
         placed: [],
