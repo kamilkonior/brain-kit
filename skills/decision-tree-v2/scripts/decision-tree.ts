@@ -10592,7 +10592,7 @@ const Xml = (() => {
   function hiddenOption(data: HiddenOption): string {
     const { id, text, context } = data;
 
-    return renderOption({ id, text, marker: ` state="${data.state}"`, context, links: linkTags(data) })[0];
+    return renderOption({ id, text, marker: ` state="${data.state}"`, context, links: linkElements(data) })[0];
   }
 
   function optionsBlock(lines: string[]): string[] {
@@ -10701,7 +10701,7 @@ const Xml = (() => {
     const marker = state !== undefined ? ` state="${state}"` : selectedMarker(entry.selected === true);
     const children = entry.children.flatMap(treeLines);
 
-    return renderOption({ id, text, marker, context, links: linkTags(entry), children });
+    return renderOption({ id, text, marker, context, links: linkElements(entry), children });
   }
 
   function treeLines(entry: TreeEntry): string[] {
@@ -10709,7 +10709,7 @@ const Xml = (() => {
       return [
         `<${entry.kind} state="${entry.state}">`,
         ...headLines(entry),
-        ...linkTags(entry).map((line) => `  ${line}`),
+        ...linkElements(entry).map((line) => `  ${line}`),
         ...entry.children.flatMap(treeLines).map((line) => `  ${line}`),
         `</${entry.kind}>`,
       ];
@@ -10718,7 +10718,7 @@ const Xml = (() => {
     return [
       `<question state="${entry.state}">`,
       ...headLines(entry),
-      ...linkTags(entry).map((line) => `  ${line}`),
+      ...linkElements(entry).map((line) => `  ${line}`),
       ...optionsBlock(entry.options.flatMap(treeOptionLines)),
       ...selectionContextLines(entry.context),
       ...entry.children.flatMap(treeLines).map((line) => `  ${line}`),
@@ -10734,8 +10734,8 @@ const Xml = (() => {
 
   function listedLines(data: ListedItem): string[] {
     const state = ` state="${data.state}"`;
-    const hidden = data.hiddenBy === undefined ? [] : [`  ${hiddenByTag(data.hiddenBy)}`];
-    const links = data.kind === "follow-up" ? [] : linkTags(data).map((tag) => `  ${tag}`);
+    const hidden = data.hiddenBy === undefined ? [] : [`  ${hiddenByElement(data.hiddenBy)}`];
+    const links = data.kind === "follow-up" ? [] : linkElements(data).map((line) => `  ${line}`);
 
     if (data.kind === "question") {
       const selected = data.selected ?? [];
@@ -10786,7 +10786,7 @@ const Xml = (() => {
     ];
   }
 
-  function hiddenByTag(hiding: Hiding): string {
+  function hiddenByElement(hiding: Hiding): string {
     return `<hidden-by state="${hiding.state}"><id>${hiding.by}</id></hidden-by>`;
   }
 
@@ -10804,7 +10804,7 @@ const Xml = (() => {
   }
 
   function itemLine(item: { id: string } & Placement): string {
-    const hidden = item.hiddenBy === undefined ? "" : hiddenByTag(item.hiddenBy);
+    const hidden = item.hiddenBy === undefined ? "" : hiddenByElement(item.hiddenBy);
 
     return `    <item state="${item.state}"><id>${item.id}</id>${hidden}</item>`;
   }
@@ -10813,7 +10813,7 @@ const Xml = (() => {
     const created = result.created.map((each) => {
       const name = each.as === undefined ? "" : ` as="${each.as}"`;
       const state = each.state === undefined ? "" : ` state="${each.state}"`;
-      const hidden = each.hiddenBy === undefined ? "" : hiddenByTag(each.hiddenBy);
+      const hidden = each.hiddenBy === undefined ? "" : hiddenByElement(each.hiddenBy);
 
       return `  <created${name}${state}><id>${each.id}</id>${hidden}</created>`;
     });
@@ -10849,7 +10849,7 @@ const Xml = (() => {
     return headElements(item).map((element) => `  ${element}`);
   }
 
-  function linkTags(links: SupersedeLinks): string[] {
+  function linkElements(links: SupersedeLinks): string[] {
     return [
       ...(links.supersedes === undefined ? [] : [ids("supersedes", [links.supersedes])]),
       ...(links.supersededBy === undefined ? [] : [ids("superseded-by", [links.supersededBy])]),
