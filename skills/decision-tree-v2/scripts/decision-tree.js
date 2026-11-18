@@ -359,12 +359,16 @@ const Log = (() => {
     return lines.get(event);
   }
 
-  function fileLog(path        )      {
+  function fileLog(path        , { allowMissing = false } = {})      {
     return {
       read() {
-        if (!existsSync(path)) return [];
-
-        const contents = readFileSync(path, "utf8");
+        let contents        ;
+        try {
+          contents = readFileSync(path, "utf8");
+        } catch (error) {
+          if (allowMissing && (error                         ).code === "ENOENT") return [];
+          throw error;
+        }
         if (contents === "") return [];
 
         const records = contents.split("\n");
@@ -496,6 +500,7 @@ const Log = (() => {
   }
 
   const fileErrorReasons                         = {
+    ENOENT: "file does not exist",
     EACCES: "permission denied",
     EPERM: "permission denied",
     EISDIR: "it is a directory",
@@ -1016,14 +1021,14 @@ const Log = (() => {
       );
     });
 
-    test("file log without a file reads as empty", (t) => {
+    test("reading a missing file for the first write starts with an empty tree", (t) => {
       // given
       const dir = mkdtempSync(join(tmpdir(), "decision-tree-"));
       t.after(() => rmSync(dir, { recursive: true }));
       const path = join(dir, "decision-tree.jsonl");
 
       // when
-      const events = fileLog(path).read();
+      const events = fileLog(path, { allowMissing: true }).read();
 
       // then
       assert.deepEqual(events, []);
@@ -14034,6 +14039,63 @@ const Cli = (() => {
       assert.deepEqual([run.status, run.stderr, run.stdout], [1, "log line 3: option Q9a does not exist\n", ""]);
     });
 
+    function queryDirectory(t                                 )         {
+      const dir = mkdtempSync(join(tmpdir(), "decision-tree-"));
+      t.after(() => rmSync(dir, { recursive: true }));
+      return dir;
+    }
+
+    function runFileQuery(query        , path        ) {
+      return spawnSync(process.execPath, [process.argv[1], "--log", path, "--query", query], { encoding: "utf8" });
+    }
+
+    const missingPaths = [
+      ["a missing log file", "missing.jsonl", "file does not exist"],
+      ["a missing parent directory", "missing-parent/log.jsonl", "file does not exist"],
+      ["a regular file as the parent", "file/log.jsonl", "part of its path is not a directory"],
+    ];
+    const emptyLogs = [
+      ["a zero-byte log", ""],
+      ["a header-only log", JSON.stringify(logHeader) + "\n"],
+    ];
+
+    for (const query of ["next", "status", "tree", "items"]) {
+      for (const [description, relativePath, reason] of missingPaths) {
+        test(`${query} reports ${description}`, (t) => {
+          const dir = queryDirectory(t);
+          writeFileSync(join(dir, "file"), "existing file");
+          const path = join(dir, relativePath);
+          const run = runFileQuery(query, path);
+          assert.deepEqual([run.status, run.stdout, run.stderr], [1, "", `cannot use log ${path}: ${reason}\n`]);
+        });
+
+        test(`${query} preserves the filesystem with ${description}`, (t) => {
+          const dir = queryDirectory(t);
+          const file = join(dir, "file");
+          writeFileSync(file, "existing file");
+          runFileQuery(query, join(dir, relativePath));
+          assert.deepEqual(fs.readdirSync(dir), ["file"]);
+          assert.equal(readFileSync(file, "utf8"), "existing file");
+        });
+      }
+
+      for (const [description, contents] of emptyLogs) {
+        test(`${query} returns empty XML for ${description}`, (t) => {
+          const path = join(queryDirectory(t), "log.jsonl");
+          writeFileSync(path, contents);
+          const run = runFileQuery(query, path);
+          assert.deepEqual([run.status, run.stdout, run.stderr], [0, `<${query}></${query}>\n`, ""]);
+        });
+
+        test(`${query} preserves the contents of ${description}`, (t) => {
+          const path = join(queryDirectory(t), "log.jsonl");
+          writeFileSync(path, contents);
+          runFileQuery(query, path);
+          assert.equal(readFileSync(path, "utf8"), contents);
+        });
+      }
+    }
+
     test("a query on a log that is a directory prints one line and exits 1", (t) => {
       // given
       const dir = mkdtempSync(join(tmpdir(), "decision-tree-"));
@@ -15642,9 +15704,8 @@ const Cli = (() => {
       return;
     }
 
-    const log = Log.fileLog(mode.log);
-
     if (mode.kind === "query") {
+      const log = Log.fileLog(mode.log);
       console.log(Log.explainingFileErrors(mode.log, () => answer(log, mode.query, args)));
       return;
     }
@@ -15653,6 +15714,7 @@ const Cli = (() => {
 
     Log.explainingFileErrors(mode.log, () =>
       Log.locked(mode.log, () => {
+        const log = Log.fileLog(mode.log, { allowMissing: true });
         console.log(Xml.batch(write(log, operations, Date.now())));
       }),
     );
