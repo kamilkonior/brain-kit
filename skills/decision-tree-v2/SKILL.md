@@ -147,7 +147,7 @@ A write prints how the tree differs after the call: ids and states, never a text
 | `<displaced>` | Items that were active before the call and that something above them now hides. |
 | `<placed>` | Items that something above them hid and that are active after the call. |
 
-Only the top item of each branch is listed in `<displaced>` and `<placed>`. The item the call itself excluded, superseded or restored is not listed; the top items under it that were active, or are active after, are. `<batch></batch>` means nothing of this changed.
+Only the top item of each branch is listed in `<displaced>` and `<placed>`. When a call excludes, supersedes or restores an item, the top items under it that this hides or brings back are listed. `<batch></batch>` means nothing of this changed.
 
 ## Superseding
 
