@@ -6,3 +6,4 @@ do-not-read
 /.idea/
 /CLAUDE.md
 /.claude/
+/.agents/
