@@ -1784,8 +1784,14 @@ const Graph = (() => {
     return hiding ?? { state: "off-path", by };
   }
 
-  function place(node: TreeNode, hiding: Hiding | undefined, stateWhenActive: ItemState): void {
-    node.state = hiding?.state ?? stateWhenActive;
+  function stateWhenHidden(graph: Graph, node: TreeNode, hiding: Hiding): ItemState {
+    if (hiding.state === "frozen") return "frozen";
+
+    return graph.exclusions.get(node.id) ?? hiding.state;
+  }
+
+  function place(graph: Graph, node: TreeNode, hiding: Hiding | undefined, stateWhenActive: ItemState): void {
+    node.state = hiding === undefined ? stateWhenActive : stateWhenHidden(graph, node, hiding);
     node.hiddenBy = hiddenBy(node, hiding);
     node.active = hiding === undefined;
   }
@@ -1794,7 +1800,7 @@ const Graph = (() => {
     const hiding = hidingOf(graph, question, inherited);
     const selected = question.selected;
 
-    place(question, hiding, selected.length === 0 ? "open" : "settled");
+    place(graph, question, hiding, selected.length === 0 ? "open" : "settled");
     if (hiding === undefined) graph.walkOrder.push(question);
 
     question.options.forEach((option) => assignOption(graph, option, hiding, selected));
@@ -1817,7 +1823,7 @@ const Graph = (() => {
     const hiding = hidingOf(graph, option, inherited);
     const below = selected.includes(option) ? hiding : offPathBelow(hiding, option.id);
 
-    place(option, hiding, stateAmong(selected, option));
+    place(graph, option, hiding, stateAmong(selected, option));
 
     option.children.forEach((child) => assignChild(graph, child, below));
     option.followUps.forEach((followUp) => assignFollowUp(graph, followUp, below));
@@ -1827,7 +1833,7 @@ const Graph = (() => {
     const hiding = hidingOf(graph, followUp, inherited);
     const below = followUp.status === "open" ? offPathBelow(hiding, followUp.id) : hiding;
 
-    place(followUp, hiding, followUp.status === "open" ? "open" : "settled");
+    place(graph, followUp, hiding, followUp.status === "open" ? "open" : "settled");
     if (hiding === undefined) graph.walkOrder.push(followUp);
 
     followUp.children.forEach((child) => assignChild(graph, child, below));
@@ -1842,7 +1848,7 @@ const Graph = (() => {
   function assignStatement(graph: Graph, statement: StatementNode, inherited: Hiding | undefined): void {
     const hiding = hidingOf(graph, statement, inherited);
 
-    place(statement, hiding, "settled");
+    place(graph, statement, hiding, "settled");
     if (hiding === undefined) graph.walkOrder.push(statement);
 
     statement.children.forEach((child) => assignChild(graph, child, hiding));
@@ -6224,7 +6230,7 @@ const Graph = (() => {
       assert.deepEqual(entries, [{ kind: "question", state: "open", id: "Q1", text: "q", options: [], children: [] }]);
     });
 
-    test("an item excluded under an excluded ancestor takes the ancestor's state and is hidden by it", () => {
+    test("an item excluded for one reason under an item excluded for another shows its own exclusion", () => {
       // given
       const log = Log.memoryLog([
         { type: "add-question", id: "Q1", text: "q1" },
@@ -6241,12 +6247,12 @@ const Graph = (() => {
         items.map((each) => [each.id, each.state, each.hiddenBy]),
         [
           ["Q1", "not-applicable", undefined],
-          ["Q2", "not-applicable", { state: "not-applicable", by: "Q1" }],
+          ["Q2", "deferred", { state: "not-applicable", by: "Q1" }],
         ],
       );
     });
 
-    test("an item's own exclusion shows again once the ancestor above it is restored", () => {
+    test("an item excluded itself has no hider once the ancestor above it is restored", () => {
       // given
       const log = Log.memoryLog([
         { type: "add-question", id: "Q1", text: "q1" },
@@ -6269,7 +6275,7 @@ const Graph = (() => {
       );
     });
 
-    test("an item excluded while it is off the path stays off the path, hidden by what keeps it there", () => {
+    test("an item excluded itself under an unselected option shows its own exclusion, hidden by the option", () => {
       // given
       const log = Log.memoryLog([
         { type: "add-question", id: "Q1", text: "q1" },
@@ -6288,12 +6294,12 @@ const Graph = (() => {
         items.map((each) => [each.id, each.state, each.hiddenBy]),
         [
           ["Q1", "settled", undefined],
-          ["Q2", "off-path", { state: "off-path", by: "Q1b" }],
+          ["Q2", "deferred", { state: "off-path", by: "Q1b" }],
         ],
       );
     });
 
-    test("an item excluded while off the path shows its exclusion once it is on the path", () => {
+    test("an item excluded itself has no hider once the option above it is selected", () => {
       // given
       const log = Log.memoryLog([
         { type: "add-question", id: "Q1", text: "q1" },
@@ -6314,6 +6320,186 @@ const Graph = (() => {
         [
           ["Q1", "settled", undefined],
           ["Q2", "deferred", undefined],
+        ],
+      );
+    });
+
+    test("an item that is not excluded, with nothing above hiding it, shows open or settled and no hider", () => {
+      // given
+      const log = Log.memoryLog([
+        { type: "add-question", id: "Q1", text: "q" },
+        { type: "add-option", id: "Q1a", text: "o", origin: "Q1" },
+        { type: "select-option", targets: ["Q1a"] },
+        { type: "add-question", id: "Q2", text: "q" },
+      ]);
+
+      // when
+      const items = listed(log, undefined, ["open", "settled", "off-path", "deferred", "not-applicable", "frozen"]);
+
+      // then
+      assert.deepEqual(
+        items.map((each) => [each.id, each.state, each.hiddenBy]),
+        [
+          ["Q1", "settled", undefined],
+          ["Q2", "open", undefined],
+        ],
+      );
+    });
+
+    test("an item excluded itself, with nothing above hiding it, shows its exclusion and no hider", () => {
+      // given
+      const log = Log.memoryLog([
+        { type: "add-question", id: "Q1", text: "q" },
+        { type: "exclude", target: "Q1", reason: "deferred" },
+      ]);
+
+      // when
+      const items = listed(log, undefined, ["open", "settled", "off-path", "deferred", "not-applicable", "frozen"]);
+
+      // then
+      assert.deepEqual(
+        items.map((each) => [each.id, each.state, each.hiddenBy]),
+        [
+          ["Q1", "deferred", undefined],
+        ],
+      );
+    });
+
+    test("an item under an unselected option shows off-path, hidden by the option", () => {
+      // given
+      const log = Log.memoryLog([
+        { type: "add-question", id: "Q1", text: "q" },
+        { type: "add-option", id: "Q1a", text: "o", origin: "Q1" },
+        { type: "add-option", id: "Q1b", text: "o", origin: "Q1" },
+        { type: "select-option", targets: ["Q1a"] },
+        { type: "add-question", id: "Q2", text: "q", origin: "Q1b" },
+      ]);
+
+      // when
+      const items = listed(log, undefined, ["open", "settled", "off-path", "deferred", "not-applicable", "frozen"]);
+
+      // then
+      assert.deepEqual(
+        items.map((each) => [each.id, each.state, each.hiddenBy]),
+        [
+          ["Q1", "settled", undefined],
+          ["Q2", "off-path", { state: "off-path", by: "Q1b" }],
+        ],
+      );
+    });
+
+    test("an item under an excluded item shows that item's state, hidden by it", () => {
+      // given
+      const log = Log.memoryLog([
+        { type: "add-question", id: "Q1", text: "q" },
+        { type: "add-question", id: "Q2", text: "q", origin: "Q1" },
+        { type: "exclude", target: "Q1", reason: "deferred" },
+      ]);
+
+      // when
+      const items = listed(log, undefined, ["open", "settled", "off-path", "deferred", "not-applicable", "frozen"]);
+
+      // then
+      assert.deepEqual(
+        items.map((each) => [each.id, each.state, each.hiddenBy]),
+        [
+          ["Q1", "deferred", undefined],
+          ["Q2", "deferred", { state: "deferred", by: "Q1" }],
+        ],
+      );
+    });
+
+    test("an item under an excluded item in an unselected branch shows off-path, hidden by the option", () => {
+      // given
+      const log = Log.memoryLog([
+        { type: "add-question", id: "Q1", text: "q" },
+        { type: "add-option", id: "Q1a", text: "o", origin: "Q1" },
+        { type: "add-option", id: "Q1b", text: "o", origin: "Q1" },
+        { type: "select-option", targets: ["Q1a"] },
+        { type: "add-question", id: "Q2", text: "q", origin: "Q1b" },
+        { type: "add-question", id: "Q3", text: "q", origin: "Q2" },
+        { type: "exclude", target: "Q2", reason: "deferred" },
+      ]);
+
+      // when
+      const items = listed(log, undefined, ["open", "settled", "off-path", "deferred", "not-applicable", "frozen"]);
+
+      // then
+      assert.deepEqual(
+        items.map((each) => [each.id, each.state, each.hiddenBy]),
+        [
+          ["Q1", "settled", undefined],
+          ["Q2", "deferred", { state: "off-path", by: "Q1b" }],
+          ["Q3", "off-path", { state: "off-path", by: "Q1b" }],
+        ],
+      );
+    });
+
+    test("an item excluded for the same reason as the item above it is hidden by that item", () => {
+      // given
+      const log = Log.memoryLog([
+        { type: "add-question", id: "Q1", text: "q" },
+        { type: "add-question", id: "Q2", text: "q", origin: "Q1" },
+        { type: "exclude", target: "Q2", reason: "deferred" },
+        { type: "exclude", target: "Q1", reason: "deferred" },
+      ]);
+
+      // when
+      const items = listed(log, undefined, ["open", "settled", "off-path", "deferred", "not-applicable", "frozen"]);
+
+      // then
+      assert.deepEqual(
+        items.map((each) => [each.id, each.state, each.hiddenBy]),
+        [
+          ["Q1", "deferred", undefined],
+          ["Q2", "deferred", { state: "deferred", by: "Q1" }],
+        ],
+      );
+    });
+
+    test("an item under a superseded item shows frozen, hidden by the superseded item", () => {
+      // given
+      const log = Log.memoryLog([
+        { type: "add-question", id: "Q1", text: "q" },
+        { type: "add-question", id: "Q2", text: "q", origin: "Q1" },
+        { type: "add-question", id: "Q3", text: "q" },
+        { type: "supersede-question", target: "Q1", question: "Q3" },
+      ]);
+
+      // when
+      const items = listed(log, undefined, ["open", "settled", "off-path", "deferred", "not-applicable", "frozen"]);
+
+      // then
+      assert.deepEqual(
+        items.map((each) => [each.id, each.state, each.hiddenBy]),
+        [
+          ["Q3", "open", undefined],
+          ["Q1", "frozen", undefined],
+          ["Q2", "frozen", { state: "frozen", by: "Q1" }],
+        ],
+      );
+    });
+
+    test("an item excluded itself under a superseded item shows frozen, not its own exclusion", () => {
+      // given
+      const log = Log.memoryLog([
+        { type: "add-question", id: "Q1", text: "q" },
+        { type: "add-question", id: "Q2", text: "q", origin: "Q1" },
+        { type: "exclude", target: "Q2", reason: "deferred" },
+        { type: "add-question", id: "Q3", text: "q" },
+        { type: "supersede-question", target: "Q1", question: "Q3" },
+      ]);
+
+      // when
+      const items = listed(log, undefined, ["open", "settled", "off-path", "deferred", "not-applicable", "frozen"]);
+
+      // then
+      assert.deepEqual(
+        items.map((each) => [each.id, each.state, each.hiddenBy]),
+        [
+          ["Q3", "open", undefined],
+          ["Q1", "frozen", undefined],
+          ["Q2", "frozen", { state: "frozen", by: "Q1" }],
         ],
       );
     });
@@ -6382,7 +6568,7 @@ const Graph = (() => {
       });
     });
 
-    test("an item the write excluded is still listed when something else is what hides it", () => {
+    test("an item the write excluded and something else hides is still listed, with its own exclusion", () => {
       // given
       const log = Log.memoryLog([
         { type: "add-question", id: "Q1", text: "q1" },
@@ -6402,7 +6588,7 @@ const Graph = (() => {
       assert.deepEqual(result, {
         created: [],
         selections: [{ question: "Q1", before: ["Q1a"], after: ["Q1b"] }],
-        displaced: [{ id: "Q2", state: "off-path", hiddenBy: { state: "off-path", by: "Q1a" } }],
+        displaced: [{ id: "Q2", state: "deferred", hiddenBy: { state: "off-path", by: "Q1a" } }],
         placed: [],
       });
     });
@@ -6520,7 +6706,7 @@ const Graph = (() => {
       });
     });
 
-    test("an item created and excluded under an unselected option is reported as off the path", () => {
+    test("an item created and excluded under an unselected option is reported with its own exclusion", () => {
       // given
       const log = Log.memoryLog([
         { type: "add-question", id: "Q1", text: "q1" },
@@ -6537,7 +6723,7 @@ const Graph = (() => {
 
       // then
       assert.deepEqual(result, {
-        created: [{ id: "Q2", state: "off-path", hiddenBy: { state: "off-path", by: "Q1b" } }],
+        created: [{ id: "Q2", state: "deferred", hiddenBy: { state: "off-path", by: "Q1b" } }],
         selections: [],
         displaced: [],
         placed: [],
@@ -6597,6 +6783,28 @@ const Graph = (() => {
       // then
       assert.deepEqual(result, {
         created: [{ id: "Q1a", state: "not-applicable" }],
+        selections: [],
+        displaced: [],
+        placed: [],
+      });
+    });
+
+    test("an option created and excluded under an excluded question is reported with its own exclusion", () => {
+      // given
+      const log = Log.memoryLog([
+        { type: "add-question", id: "Q1", text: "q" },
+        { type: "exclude", target: "Q1", reason: "deferred" },
+      ]);
+
+      // when
+      const result = resultOfWrite(log, [
+        { type: "add-option", id: "Q1a", text: "o", origin: "Q1" },
+        { type: "exclude", target: "Q1a", reason: "not-applicable" },
+      ]);
+
+      // then
+      assert.deepEqual(result, {
+        created: [{ id: "Q1a", state: "not-applicable", hiddenBy: { state: "deferred", by: "Q1" } }],
         selections: [],
         displaced: [],
         placed: [],
@@ -9072,6 +9280,24 @@ const Items = (() => {
 
       // then
       assert.deepEqual(hidden, [{ id: "Q1b", text: "b", state: "deferred", context: { exclusion: "why" } }]);
+    });
+
+    test("an excluded question carries an option excluded for another reason with the option's own state", () => {
+      // given
+      const log = Log.memoryLog([
+        { type: "add-question", id: "Q1", text: "q" },
+        { type: "add-option", id: "Q1a", text: "a", origin: "Q1" },
+        { type: "exclude", target: "Q1a", reason: "not-applicable", context: "dropped" },
+        { type: "exclude", target: "Q1", reason: "deferred", context: "parked" },
+      ]);
+
+      // when
+      const hidden = run(log, { state: ["deferred"] }).flatMap((each) =>
+        each.kind === "question" ? (each.hiddenOptions ?? []) : [],
+      );
+
+      // then
+      assert.deepEqual(hidden, [{ id: "Q1a", text: "a", state: "not-applicable", context: { exclusion: "dropped" } }]);
     });
 
     test("a question carries its superseded option as frozen, linked to its replacement", () => {
