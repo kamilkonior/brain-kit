@@ -22,6 +22,8 @@ A log is a `.jsonl` file holding one tree with any number of roots. The same pat
 
 If the CLI reports `unsupported log format`, use the CLI version that created the log to resume that session. To start a new tree, choose a fresh log path.
 
+If the CLI reports `log is locked by another writer`, retry once the other writer finishes, or remove the lock file it names if no writer is running.
+
 Results are XML on stdout. A failed call prints one line on stderr, exits 1 and writes nothing. The item it names is the one to act on: `Q2 is off-path, hidden by Q1b` means select `Q1b` first. A refusal can name two things to act on: `Q2 is deferred, hidden by Q1b (off-path)` means restore `Q2` and select `Q1b`.
 
 ## The tree

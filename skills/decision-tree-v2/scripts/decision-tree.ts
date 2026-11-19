@@ -1,5 +1,6 @@
 const assert: typeof import("node:assert/strict") = require("node:assert/strict");
 const { spawnSync }: typeof import("node:child_process") = require("node:child_process");
+const { randomBytes }: typeof import("node:crypto") = require("node:crypto");
 const fs: typeof import("node:fs") = require("node:fs");
 const { tmpdir }: typeof import("node:os") = require("node:os");
 const { basename, dirname, join }: typeof import("node:path") = require("node:path");
@@ -20,7 +21,9 @@ const {
   rmSync,
   statSync,
   symlinkSync,
+  utimesSync,
   writeFileSync,
+  writeSync,
 } = fs;
 
 type ParseArgsOptionsConfig = import("node:util").ParseArgsOptionsConfig;
@@ -429,55 +432,69 @@ const Log = (() => {
     Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, milliseconds);
   }
 
-  const lockLimits = { waitMs: 5_000, abandonedMs: 30_000 };
+  const defaultLockWaitMs = 5_000;
 
-  function holderOf(lock: string): number | undefined {
+  function parseHolderPid(contents: string): number | undefined {
+    const match = /^([0-9]+)(?::|$)/.exec(contents);
+
+    return match === null ? undefined : Number(match[1]);
+  }
+
+  function lockTimeoutMessage(lock: string): string {
     try {
-      const written = readFileSync(lock, "utf8");
+      const pid = parseHolderPid(readFileSync(lock, "utf8"));
+      const stats = statSync(lock);
+      if (pid !== undefined) {
+        const ageSeconds = Math.max(0, Math.floor((Date.now() - stats.mtimeMs) / 1_000));
 
-      return /^[0-9]+$/.test(written) ? Number(written) : undefined;
+        return `log is locked by another writer: ${lock} (pid ${pid}, ${ageSeconds}s old; remove it only if no writer is running)`;
+      }
     } catch {
-      return undefined;
+      // Lock vanished or became unreadable at timeout; fall through to the generic message.
     }
+
+    return `log is locked by another writer: ${lock} (remove it only if no writer is running)`;
   }
 
-  function isRunning(pid: number): boolean {
-    try {
-      process.kill(pid, 0);
-
-      return true;
-    } catch (error) {
-      return (error as NodeJS.ErrnoException).code === "EPERM";
-    }
-  }
-
-  function isAbandoned(lock: string, abandonedMs: number): boolean {
-    const holder = holderOf(lock);
-    if (holder !== undefined && !isRunning(holder)) return true;
-
-    const stats = statSync(lock, { throwIfNoEntry: false });
-
-    return stats !== undefined && Date.now() - stats.mtimeMs > abandonedMs;
-  }
-
-  function acquire(lock: string, limits: typeof lockLimits): void {
-    const deadline = Date.now() + limits.waitMs;
+  function acquire(lock: string, waitMs: number): string {
+    const token = `${process.pid}:${randomBytes(8).toString("hex")}`;
+    const deadline = performance.now() + waitMs;
 
     while (true) {
       try {
-        writeFileSync(lock, String(process.pid), { flag: "wx" });
-        return;
+        const file = openSync(lock, "wx");
+        let closed = false;
+        try {
+          writeSync(file, token);
+          closeSync(file);
+          closed = true;
+        } catch (error) {
+          if (!closed) {
+            try {
+              closeSync(file);
+            } catch {
+              // Ignore secondary close error before removing the new empty lockfile.
+            }
+          }
+          rmSync(lock, { force: true });
+          throw error;
+        }
+        return token;
       } catch (error) {
         if ((error as NodeJS.ErrnoException).code !== "EEXIST") throw error;
       }
 
-      if (isAbandoned(lock, limits.abandonedMs)) {
-        rmSync(lock, { force: true });
-        continue;
-      }
-      if (Date.now() > deadline) throw new DecisionTreeError(`log is locked by another writer: ${lock}`);
+      if (performance.now() >= deadline) throw new DecisionTreeError(lockTimeoutMessage(lock));
 
       sleep(10);
+    }
+  }
+
+  function release(lock: string, token: string): void {
+    try {
+      if (readFileSync(lock, "utf8") === token) rmSync(lock, { force: true });
+    } catch (error) {
+      if ((error as NodeJS.ErrnoException).code !== "ENOENT") throw error;
     }
   }
 
@@ -485,17 +502,16 @@ const Log = (() => {
     return existsSync(path) ? realpathSync(path) : join(realpathSync(dirname(path)), basename(path));
   }
 
-  function locked<T>(path: string, work: () => T, limits = lockLimits): T {
+  function locked<T>(path: string, work: () => T, waitMs = defaultLockWaitMs): T {
     mkdirSync(dirname(path), { recursive: true });
 
     const lock = `${fileNamed(path)}.lock`;
-
-    acquire(lock, limits);
+    const token = acquire(lock, waitMs);
 
     try {
       return work();
     } finally {
-      rmSync(lock, { force: true });
+      release(lock, token);
     }
   }
 
@@ -568,31 +584,18 @@ const Log = (() => {
           () => {
             ran = true;
           },
-          { waitMs: 0, abandonedMs: 60_000 },
+          0,
         );
 
       // then
       assert.throws(
         act,
         (error) =>
-          error instanceof DecisionTreeError && error.message === `log is locked by another writer: ${path}.lock`,
+          error instanceof DecisionTreeError &&
+          error.message === `log is locked by another writer: ${path}.lock (remove it only if no writer is running)`,
       );
       assert.equal(ran, false);
-    });
-
-    test("an abandoned lock is taken over and removed afterwards", (t) => {
-      // given
-      const dir = mkdtempSync(join(tmpdir(), "decision-tree-"));
-      t.after(() => rmSync(dir, { recursive: true }));
-      const path = join(dir, "decision-tree.jsonl");
-      appendFileSync(`${path}.lock`, "");
-
-      // when
-      const result = locked(path, () => "done", { waitMs: 0, abandonedMs: -1 });
-
-      // then
-      assert.equal(result, "done");
-      assert.equal(existsSync(`${path}.lock`), false);
+      assert.equal(existsSync(`${path}.lock`), true);
     });
 
     test("a log reached through a link is locked as the file it points to", (t) => {
@@ -611,64 +614,105 @@ const Log = (() => {
       assert.deepEqual(locks, [true, false]);
     });
 
-    test("a lock names the process that holds it", (t) => {
+    test("a lock names the process that holds it with a unique token", (t) => {
       // given
       const dir = realpathSync(mkdtempSync(join(tmpdir(), "decision-tree-")));
       t.after(() => rmSync(dir, { recursive: true }));
       const path = join(dir, "decision-tree.jsonl");
 
       // when
-      const holder = locked(path, () => readFileSync(`${path}.lock`, "utf8"));
+      const token = locked(path, () => readFileSync(`${path}.lock`, "utf8"));
 
       // then
-      assert.equal(holder, String(process.pid));
+      assert.match(token, new RegExp(`^${process.pid}:[0-9a-f]{16}$`));
     });
 
-    test("a lock whose holder is still running is held while it is newer than the limit", (t) => {
-      // given
-      const dir = realpathSync(mkdtempSync(join(tmpdir(), "decision-tree-")));
-      t.after(() => rmSync(dir, { recursive: true }));
-      const path = join(dir, "decision-tree.jsonl");
-      appendFileSync(`${path}.lock`, String(process.pid));
-
-      // when
-      const act = () => locked(path, () => "done", { waitMs: 0, abandonedMs: 60_000 });
-
-      // then
-      assert.throws(
-        act,
-        (error) =>
-          error instanceof DecisionTreeError && error.message === `log is locked by another writer: ${path}.lock`,
-      );
-    });
-
-    test("a lock whose holder is still running is taken over once it is older than the limit", (t) => {
-      // given
-      const dir = realpathSync(mkdtempSync(join(tmpdir(), "decision-tree-")));
-      t.after(() => rmSync(dir, { recursive: true }));
-      const path = join(dir, "decision-tree.jsonl");
-      appendFileSync(`${path}.lock`, String(process.pid));
-
-      // when
-      const result = locked(path, () => "done", { waitMs: 0, abandonedMs: -1 });
-
-      // then
-      assert.equal(result, "done");
-    });
-
-    test("a lock whose holder is gone is taken over at once, however new it is", (t) => {
+    test("a lock naming a dead process is not taken over", (t) => {
       // given
       const dir = realpathSync(mkdtempSync(join(tmpdir(), "decision-tree-")));
       t.after(() => rmSync(dir, { recursive: true }));
       const path = join(dir, "decision-tree.jsonl");
       const gone = spawnSync(process.execPath, ["-e", ""]).pid;
-      appendFileSync(`${path}.lock`, String(gone));
+      const content = `${gone}:deadbeef01234567`;
+      writeFileSync(`${path}.lock`, content);
 
       // when
-      const result = locked(path, () => "done", { waitMs: 0, abandonedMs: 60_000 });
+      const act = () => locked(path, () => "done", 0);
+
+      // then
+      assert.throws(
+        act,
+        (error) =>
+          error instanceof DecisionTreeError &&
+          new RegExp(
+            `^log is locked by another writer: ${path.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\.lock \\(pid ${gone}, [0-9]+s old; remove it only if no writer is running\\)$`,
+          ).test(error.message),
+      );
+      assert.equal(readFileSync(`${path}.lock`, "utf8"), content);
+    });
+
+    test("an old lock is not taken over", (t) => {
+      // given
+      const dir = realpathSync(mkdtempSync(join(tmpdir(), "decision-tree-")));
+      t.after(() => rmSync(dir, { recursive: true }));
+      const path = join(dir, "decision-tree.jsonl");
+      const content = `${process.pid}:0123456789abcdef`;
+      writeFileSync(`${path}.lock`, content);
+      const past = new Date(Date.now() - 65_000);
+      utimesSync(`${path}.lock`, past, past);
+
+      // when
+      const act = () => locked(path, () => "done", 0);
+
+      // then
+      assert.throws(act, (error) => {
+        if (!(error instanceof DecisionTreeError)) return false;
+        const match = error.message.match(
+          new RegExp(
+            `^log is locked by another writer: ${path.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\.lock \\(pid ${process.pid}, ([0-9]+)s old; remove it only if no writer is running\\)$`,
+          ),
+        );
+        return match !== null && Number(match[1]) >= 60;
+      });
+      assert.equal(readFileSync(`${path}.lock`, "utf8"), content);
+    });
+
+    test("a lock replaced while work runs is not removed on exit", (t) => {
+      // given
+      const dir = realpathSync(mkdtempSync(join(tmpdir(), "decision-tree-")));
+      t.after(() => rmSync(dir, { recursive: true }));
+      const path = join(dir, "decision-tree.jsonl");
+      const replacement = "999999:fedcba9876543210";
+
+      // when
+      const result = locked(path, () => {
+        rmSync(`${path}.lock`, { force: true });
+        writeFileSync(`${path}.lock`, replacement);
+        return "done";
+      });
 
       // then
       assert.equal(result, "done");
+      assert.equal(readFileSync(`${path}.lock`, "utf8"), replacement);
+    });
+
+    test("a malformed lockfile falls back to the single-line timeout message", (t) => {
+      // given
+      const dir = realpathSync(mkdtempSync(join(tmpdir(), "decision-tree-")));
+      t.after(() => rmSync(dir, { recursive: true }));
+      const path = join(dir, "decision-tree.jsonl");
+      writeFileSync(`${path}.lock`, "not-a-pid\nsecond-line");
+
+      // when
+      const act = () => locked(path, () => "done", 0);
+
+      // then
+      assert.throws(
+        act,
+        (error) =>
+          error instanceof DecisionTreeError &&
+          error.message === `log is locked by another writer: ${path}.lock (remove it only if no writer is running)`,
+      );
     });
 
     test("the lock is released when the work throws", (t) => {
