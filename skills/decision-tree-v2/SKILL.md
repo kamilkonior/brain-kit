@@ -168,7 +168,7 @@ Every query prints the contexts of the items it returns.
 | `--query` | Returns |
 |---|---|
 | `next [--trail]` | the first open item, with the path to it if `--trail` is given. It is the only query a focus affects, and it names an active focus: `<next focus="Q2">`. |
-| `status [--target ID]` | open, settled and deferred items in one compact hierarchy. It stops at deferred items and leaves out off-path, not-applicable and frozen items. A statement that stands is left out too, and the items under it are shown in its place. An item inside a decided option goes if that answer changes, and one beside `<decided>` stays. `--target` limits it to that item and what's under it, and prints an empty `<status></status>` for an item it leaves out. |
+| `status [--target ID]` | open, settled and deferred items in one compact hierarchy. It stops at deferred items and leaves out off-path, not-applicable and frozen items. A standing statement or promoted follow-up is not shown itself; the items under it are shown in its place. An item inside a decided option goes if that answer changes, and one beside `<decided>` stays. `--target` limits it to that item and what's under it, and prints an empty `<status></status>` for an item it leaves out. |
 | `tree [--state S]… [--target ID]` | the nested structure, with every option. It keeps the ancestors of a match. `--target` limits it to that item and what's under it. |
 | `items [--tag T] [--target ID [--trail]] [--state S]… [--limit N]` | a flat list: active items in walk order, then the hidden ones. `--target` finds one item in any state unless `--state` is given. `--limit` doesn't say whether more exist. |
 
