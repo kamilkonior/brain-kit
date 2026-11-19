@@ -2585,9 +2585,12 @@ const Graph = (() => {
   function requireExcluded(log     , id        )           {
     const graph = build(log);
     const node = unfrozen(graph, id, "target");
-    if (!graph.exclusions.has(id)) throw new DecisionTreeError(`target is not excluded: ${id}`);
+    if (graph.exclusions.has(id)) return node;
 
-    return node;
+    const hider = node.hiddenBy;
+    const hidden = hider === undefined ? "" : `, hidden by ${hider.by} (${hider.state})`;
+
+    throw new DecisionTreeError(`target is not excluded: ${id}${hidden}`);
   }
 
   function tests() {
@@ -6294,7 +6297,7 @@ const Graph = (() => {
       );
     });
 
-    test("looking up an item that only an excluded ancestor hides to restore throws not excluded", () => {
+    test("looking up an item under a not-applicable ancestor to restore names that ancestor", () => {
       // given
       const log = Log.memoryLog([
         { type: "add-question", id: "Q1", text: "q1" },
@@ -6309,7 +6312,72 @@ const Graph = (() => {
       // then
       assert.throws(
         act,
-        (error) => error instanceof DecisionTreeError && error.message === "target is not excluded: Q2",
+        (error) =>
+          error instanceof DecisionTreeError &&
+          error.message === "target is not excluded: Q2, hidden by Q1a (not-applicable)",
+      );
+    });
+
+    test("looking up an item under a deferred ancestor to restore names that ancestor", () => {
+      // given
+      const log = Log.memoryLog([
+        { type: "add-question", id: "Q1", text: "q1" },
+        { type: "add-question", id: "Q2", text: "q2", origin: "Q1" },
+        { type: "exclude", target: "Q1", reason: "deferred" },
+      ]);
+
+      // when
+      const act = () => requireExcluded(log, "Q2");
+
+      // then
+      assert.throws(
+        act,
+        (error) =>
+          error instanceof DecisionTreeError && error.message === "target is not excluded: Q2, hidden by Q1 (deferred)",
+      );
+    });
+
+    test("looking up an item under an unselected option to restore names that option", () => {
+      // given
+      const log = Log.memoryLog([
+        { type: "add-question", id: "Q1", text: "q1" },
+        { type: "add-option", id: "Q1a", text: "a", origin: "Q1" },
+        { type: "add-option", id: "Q1b", text: "b", origin: "Q1" },
+        { type: "add-question", id: "Q2", text: "q2", origin: "Q1a" },
+        { type: "select-option", targets: ["Q1b"] },
+      ]);
+
+      // when
+      const act = () => requireExcluded(log, "Q2");
+
+      // then
+      assert.throws(
+        act,
+        (error) =>
+          error instanceof DecisionTreeError && error.message === "target is not excluded: Q2, hidden by Q1a (off-path)",
+      );
+    });
+
+    test("looking up an item to restore names the highest of the things that hide it", () => {
+      // given
+      const log = Log.memoryLog([
+        { type: "add-question", id: "Q1", text: "q1" },
+        { type: "add-option", id: "Q1a", text: "a", origin: "Q1" },
+        { type: "add-option", id: "Q1b", text: "b", origin: "Q1" },
+        { type: "add-statement", id: "S1", text: "s1", origin: "Q1a" },
+        { type: "add-question", id: "Q2", text: "q2", origin: "S1" },
+        { type: "exclude", target: "S1", reason: "deferred" },
+        { type: "select-option", targets: ["Q1b"] },
+      ]);
+
+      // when
+      const act = () => requireExcluded(log, "Q2");
+
+      // then
+      assert.throws(
+        act,
+        (error) =>
+          error instanceof DecisionTreeError && error.message === "target is not excluded: Q2, hidden by Q1a (off-path)",
       );
     });
 
