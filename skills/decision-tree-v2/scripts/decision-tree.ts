@@ -137,12 +137,20 @@ type OpenQuestion = {
   kind: "question";
   id: string;
   text: string;
+  origin?: string;
   tags?: string[];
   context?: QuestionContext;
   options: OptionData[];
 };
 
-type OpenFollowUp = { kind: "follow-up"; id: string; text: string; tags?: string[]; context?: ItemContext };
+type OpenFollowUp = {
+  kind: "follow-up";
+  id: string;
+  text: string;
+  origin?: string;
+  tags?: string[];
+  context?: ItemContext;
+};
 
 type OpenItem = OpenQuestion | OpenFollowUp;
 
@@ -176,7 +184,7 @@ type Hiding = { state: ItemState; by: string };
 
 type Placement = { state: ItemState; hiddenBy?: Hiding };
 
-type Listed = { id: string; text: string; tags: string[]; trail?: TrailStep[] } & Placement;
+type Listed = { id: string; text: string; origin?: string; tags: string[]; trail?: TrailStep[] } & Placement;
 
 type HiddenOption = OptionData & { state: ExclusionReason | "frozen"; supersededBy?: string };
 
@@ -193,7 +201,9 @@ type ListedItem =
   | (Listed & { kind: "follow-up"; context?: ItemContext })
   | (Listed & { kind: "statement"; context?: ItemContext } & SupersedeLinks);
 
-type TrailStep = { kind: "question" | "option" | "follow-up" | "statement"; id: string; text: string };
+type TrailStep =
+  | { kind: "question"; id: string; text: string; context?: QuestionContext }
+  | { kind: "option" | "follow-up" | "statement"; id: string; text: string; context?: ItemContext };
 
 type NextData = OpenItem & { trail?: TrailStep[]; focus?: string };
 
@@ -1974,16 +1984,18 @@ const Graph = (() => {
     return false;
   }
 
+  function originOf(node: TargetNode): { origin?: string } {
+    return node.parent === undefined ? {} : { origin: node.parent.id };
+  }
+
   function openItem(graph: Graph, node: QuestionNode | FollowUpNode): OpenItem {
-    if (node.kind === "follow-up") {
-      return { kind: "follow-up", id: node.id, text: node.text, ...tagsOf(graph, node), ...itemContextOf(node) };
-    }
+    const head = { id: node.id, text: node.text, ...originOf(node), ...tagsOf(graph, node) };
+
+    if (node.kind === "follow-up") return { kind: "follow-up", ...head, ...itemContextOf(node) };
 
     return {
       kind: "question",
-      id: node.id,
-      text: node.text,
-      ...tagsOf(graph, node),
+      ...head,
       ...questionContextOf(node),
       options: liveOptions(graph, node),
     };
@@ -2271,13 +2283,21 @@ const Graph = (() => {
     return item;
   }
 
+  function trailStep(node: TreeNode): TrailStep {
+    if (node.kind === "question") {
+      return { kind: "question", id: node.id, text: node.text, ...questionContextOf(node) };
+    }
+
+    return { kind: node.kind, id: node.id, text: node.text, ...itemContextOf(node) };
+  }
+
   function trail(log: Log, id: string): TrailStep[] {
     const steps: TrailStep[] = [];
 
     let current: TreeNode | undefined = requireNode(build(log).nodes, id);
     while (current !== undefined) {
       current = current.kind === "option" ? current.question : current.parent;
-      if (current !== undefined) steps.unshift({ kind: current.kind, id: current.id, text: current.text });
+      if (current !== undefined) steps.unshift(trailStep(current));
     }
 
     return steps;
@@ -2419,7 +2439,13 @@ const Graph = (() => {
   }
 
   function listedItem(graph: Graph, node: TargetNode): ListedItem {
-    const common = { id: node.id, text: node.text, tags: tagList(graph, node.id), ...placementOf(node) };
+    const common = {
+      id: node.id,
+      text: node.text,
+      ...originOf(node),
+      tags: tagList(graph, node.id),
+      ...placementOf(node),
+    };
 
     if (node.kind === "follow-up") return { kind: "follow-up", ...common, ...itemContextOf(node) };
     if (node.kind === "statement") {
@@ -5556,7 +5582,7 @@ const Graph = (() => {
 
       // then
       assert.deepEqual(items, [
-        { kind: "question", id: "Q2", text: "open", options: [], tags: ["t"], state: "open" },
+        { kind: "question", id: "Q2", text: "open", origin: "Q1a", options: [], tags: ["t"], state: "open" },
       ]);
     });
 
@@ -5990,6 +6016,98 @@ const Graph = (() => {
       assert.deepEqual(steps, []);
     });
 
+    test("a trail carries the creation context of each kind of step", () => {
+      // given
+      const log = Log.memoryLog([
+        { type: "add-statement", id: "S1", text: "s1", context: "why s1" },
+        { type: "add-question", id: "Q1", text: "q1", origin: "S1", context: "why q1" },
+        { type: "add-option", id: "Q1a", text: "a", origin: "Q1", context: "why a" },
+        { type: "add-follow-up", id: "F1", text: "f1", origin: "Q1a", context: "why f1" },
+        { type: "add-follow-up", id: "F2", text: "f2", origin: "F1" },
+      ]);
+
+      // when
+      const steps = trail(log, "F2");
+
+      // then
+      assert.deepEqual(steps, [
+        { kind: "statement", id: "S1", text: "s1", context: { creation: "why s1", createdBy: "add-statement" } },
+        { kind: "question", id: "Q1", text: "q1", context: { creation: "why q1", createdBy: "add-question" } },
+        { kind: "option", id: "Q1a", text: "a", context: { creation: "why a", createdBy: "add-option" } },
+        { kind: "follow-up", id: "F1", text: "f1", context: { creation: "why f1", createdBy: "add-follow-up" } },
+      ]);
+    });
+
+    test("a trail carries the selection context of a question on the way", () => {
+      // given
+      const log = Log.memoryLog([
+        { type: "add-question", id: "Q1", text: "q1" },
+        { type: "add-option", id: "Q1a", text: "a", origin: "Q1" },
+        { type: "select-option", targets: ["Q1a"], context: "why a wins" },
+        { type: "add-question", id: "Q2", text: "q2", origin: "Q1a" },
+      ]);
+
+      // when
+      const steps = trail(log, "Q2");
+
+      // then
+      assert.deepEqual(steps, [
+        { kind: "question", id: "Q1", text: "q1", context: { selection: "why a wins" } },
+        { kind: "option", id: "Q1a", text: "a" },
+      ]);
+    });
+
+    test("a trail carries the clearing context of a question on the way", () => {
+      // given
+      const log = Log.memoryLog([
+        { type: "add-question", id: "Q1", text: "q1" },
+        { type: "add-option", id: "Q1a", text: "a", origin: "Q1" },
+        { type: "select-option", targets: ["Q1a"], context: "why a wins" },
+        { type: "add-question", id: "Q2", text: "q2", origin: "Q1a" },
+        { type: "clear-selection", target: "Q1", context: "why reopened" },
+      ]);
+
+      // when
+      const steps = trail(log, "Q2");
+
+      // then
+      assert.deepEqual(steps[0], { kind: "question", id: "Q1", text: "q1", context: { clearing: "why reopened" } });
+    });
+
+    test("a trail carries the exclusion context of a step on the way", () => {
+      // given
+      const log = Log.memoryLog([
+        { type: "add-statement", id: "S1", text: "s1" },
+        { type: "add-question", id: "Q1", text: "q1", origin: "S1" },
+        { type: "exclude", target: "S1", reason: "deferred", context: "why later" },
+      ]);
+
+      // when
+      const steps = trail(log, "Q1");
+
+      // then
+      assert.deepEqual(steps, [{ kind: "statement", id: "S1", text: "s1", context: { exclusion: "why later" } }]);
+    });
+
+    test("a trail carries the promotion context of a promoted follow-up's question", () => {
+      // given
+      const log = Log.memoryLog([
+        { type: "add-follow-up", id: "F1", text: "f1", context: "why f1" },
+        { type: "add-question", id: "Q1", text: "q1", origin: "F1" },
+        { type: "promote-follow-up", target: "F1", question: "Q1", context: "why now" },
+        { type: "add-follow-up", id: "F2", text: "f2", origin: "Q1" },
+      ]);
+
+      // when
+      const steps = trail(log, "F2");
+
+      // then
+      assert.deepEqual(steps, [
+        { kind: "follow-up", id: "F1", text: "f1", context: { creation: "why f1", createdBy: "add-follow-up" } },
+        { kind: "question", id: "Q1", text: "q1", context: { creation: "why now", createdBy: "promote-follow-up" } },
+      ]);
+    });
+
     test("a supersede-question line alone does not tag the replacement", () => {
       // given
       const log = Log.memoryLog([
@@ -6022,7 +6140,7 @@ const Graph = (() => {
       // then
       assert.deepEqual(items, [
         {
-          kind: "question", id: "Q2", text: "q2", options: [],
+          kind: "question", id: "Q2", text: "q2", origin: "Q1b", options: [],
           tags: [],
           state: "off-path",
           hiddenBy: { state: "off-path", by: "Q1b" },
@@ -9769,6 +9887,66 @@ const Items = (() => {
       assert.equal("trail" in items[0], false);
     });
 
+    test("items name the parent of every nested item and none for a root", () => {
+      // given
+      const log = Log.memoryLog([
+        { type: "add-statement", id: "S1", text: "s1" },
+        { type: "add-question", id: "Q1", text: "q1", origin: "S1" },
+        { type: "add-option", id: "Q1a", text: "a", origin: "Q1" },
+        { type: "add-statement", id: "S2", text: "s2", origin: "Q1a" },
+        { type: "add-follow-up", id: "F1", text: "f1", origin: "Q1" },
+        { type: "add-follow-up", id: "F2", text: "f2" },
+      ]);
+
+      // when
+      const origins = Object.fromEntries(run(log, { state: ["all"] }).map((each) => [each.id, each.origin]));
+
+      // then
+      assert.deepEqual(origins, { S1: undefined, Q1: "S1", S2: "Q1a", F1: "Q1", F2: undefined });
+    });
+
+    test("a root item has no origin field", () => {
+      // given
+      const log = Log.memoryLog([{ type: "add-question", id: "Q1", text: "q1" }]);
+
+      // when
+      const items = run(log, {});
+
+      // then
+      assert.equal("origin" in items[0], false);
+    });
+
+    test("a nested target names its parent also when a trail is asked for", () => {
+      // given
+      const log = Log.memoryLog([
+        { type: "add-question", id: "Q1", text: "q1" },
+        { type: "add-option", id: "Q1a", text: "a", origin: "Q1" },
+        { type: "add-question", id: "Q2", text: "q2", origin: "Q1a" },
+      ]);
+
+      // when
+      const items = run(log, { target: "Q2", trail: true });
+
+      // then
+      assert.deepEqual([items[0].origin, items[0].trail?.length], ["Q1a", 2]);
+    });
+
+    test("an item under a superseded parent still names that parent", () => {
+      // given
+      const log = Log.memoryLog([
+        { type: "add-statement", id: "S1", text: "s1" },
+        { type: "add-question", id: "Q1", text: "q1", origin: "S1" },
+        { type: "add-statement", id: "S2", text: "s2" },
+        { type: "supersede-statement", target: "S1", statement: "S2" },
+      ]);
+
+      // when
+      const items = run(log, { target: "Q1" });
+
+      // then
+      assert.equal(items[0].origin, "S1");
+    });
+
     test("querying with state all returns items in every state", () => {
       // given
       const log = Log.memoryLog([
@@ -9978,7 +10156,7 @@ const Next = (() => {
       const data = run(log);
 
       // then
-      assert.deepEqual(data, { kind: "question", id: "Q3", text: "q3", options: [], focus: "Q2" });
+      assert.deepEqual(data, { kind: "question", id: "Q3", text: "q3", origin: "Q2a", options: [], focus: "Q2" });
     });
 
     test("next carries a trail only when asked", () => {
@@ -10108,7 +10286,49 @@ const Next = (() => {
       const item = run(log);
 
       // then
+      assert.deepEqual(item, { kind: "follow-up", id: "F1", text: "f1", origin: "Q1a" });
+    });
+
+    test("next names no parent for a root follow-up", () => {
+      // given
+      const log = Log.memoryLog([{ type: "add-follow-up", id: "F1", text: "f1" }]);
+
+      // when
+      const item = run(log);
+
+      // then
       assert.deepEqual(item, { kind: "follow-up", id: "F1", text: "f1" });
+    });
+
+    test("next names the parent of a nested question and none for a root question", () => {
+      // given
+      const root = Log.memoryLog([{ type: "add-question", id: "Q1", text: "q1" }]);
+      const nested = Log.memoryLog([
+        { type: "add-statement", id: "S1", text: "s1" },
+        { type: "add-question", id: "Q1", text: "q1", origin: "S1" },
+      ]);
+
+      // when
+      const origins = [run(root), run(nested)].map((item) => item?.origin);
+
+      // then
+      assert.deepEqual(origins, [undefined, "S1"]);
+    });
+
+    test("next names the parent of the item also when a trail is asked for", () => {
+      // given
+      const log = Log.memoryLog([
+        { type: "add-question", id: "Q1", text: "q1" },
+        { type: "add-option", id: "Q1a", text: "a", origin: "Q1" },
+        { type: "select-option", targets: ["Q1a"] },
+        { type: "add-question", id: "Q2", text: "q2", origin: "Q1a" },
+      ]);
+
+      // when
+      const item = run(log, { trail: true });
+
+      // then
+      assert.deepEqual([item?.origin, item?.trail?.length], ["Q1a", 2]);
     });
 
     test("next carries the tags of the follow-up it returns", () => {
@@ -11298,13 +11518,17 @@ const Xml = (() => {
     ];
   }
 
-  function selectionContextLines(context: QuestionContext | undefined): string[] {
+  function selectionContextElements(context: QuestionContext | undefined): string[] {
     if (context === undefined) return [];
 
     return [
       ...contextElement("select-option", context.selection),
       ...contextElement("clear-selection", context.clearing),
-    ].map((element) => `  ${element}`);
+    ];
+  }
+
+  function selectionContextLines(context: QuestionContext | undefined): string[] {
+    return selectionContextElements(context).map((element) => `  ${element}`);
   }
 
   function treeOptionLines(entry: TreeEntryOption): string[] {
@@ -11387,14 +11611,16 @@ const Xml = (() => {
     return selected ? ' selected="true"' : "";
   }
 
+  function trailStepLine(step: TrailStep): string {
+    const selection = step.kind === "question" ? selectionContextElements(step.context) : [];
+
+    return `<${step.kind}>${[...headElements(step), ...selection].join("")}</${step.kind}>`;
+  }
+
   function trailLines(steps: TrailStep[] | undefined): string[] {
     if (steps === undefined) return [];
 
-    return [
-      "  <trail>",
-      ...steps.map((step) => `    <${step.kind}>${headElements(step).join("")}</${step.kind}>`),
-      "  </trail>",
-    ];
+    return ["  <trail>", ...steps.map((step) => `    ${trailStepLine(step)}`), "  </trail>"];
   }
 
   function hiddenByElement(hiding: Hiding): string {
@@ -11447,16 +11673,19 @@ const Xml = (() => {
     return [`<tags>${tags.map((tag) => `<tag>${escapeXml(tag)}</tag>`).join("")}</tags>`];
   }
 
-  function headElements(item: { id: string; text: string; tags?: string[]; context?: ItemContext }): string[] {
+  type Head = { id: string; text: string; origin?: string; tags?: string[]; context?: ItemContext };
+
+  function headElements(item: Head): string[] {
     return [
       `<id>${item.id}</id>`,
       `<text>${escapeXml(item.text)}</text>`,
+      ...(item.origin === undefined ? [] : [ids("origin", [item.origin])]),
       ...tagsElement(item.tags),
       ...itemContextElements(item.context),
     ];
   }
 
-  function headLines(item: { id: string; text: string; tags?: string[]; context?: ItemContext }): string[] {
+  function headLines(item: Head): string[] {
     return headElements(item).map((element) => `  ${element}`);
   }
 
@@ -13515,6 +13744,277 @@ const Xml = (() => {
         "  <follow-up><id>F1</id><text>f</text></follow-up>",
         "</next>",
       ]);
+    });
+
+    test("next renders each trail step's creation context after its text", () => {
+      // given
+      const data: NextData = {
+        kind: "follow-up",
+        id: "F2",
+        text: "f",
+        trail: [
+          { kind: "statement", id: "S1", text: "s", context: { creation: "memo", createdBy: "add-statement" } },
+          { kind: "question", id: "Q1", text: "q", context: { creation: "asked", createdBy: "add-question" } },
+          { kind: "option", id: "Q1a", text: "a", context: { creation: "cheap", createdBy: "add-option" } },
+          { kind: "follow-up", id: "F1", text: "f1", context: { creation: "check", createdBy: "add-follow-up" } },
+          { kind: "question", id: "Q2", text: "q2", context: { creation: "now", createdBy: "promote-follow-up" } },
+        ],
+      };
+
+      // when
+      const xml = next(data);
+
+      // then
+      assert.deepEqual(xml.split("\n").slice(2, 7), [
+        '    <statement><id>S1</id><text>s</text><context by="add-statement">memo</context></statement>',
+        '    <question><id>Q1</id><text>q</text><context by="add-question">asked</context></question>',
+        '    <option><id>Q1a</id><text>a</text><context by="add-option">cheap</context></option>',
+        '    <follow-up><id>F1</id><text>f1</text><context by="add-follow-up">check</context></follow-up>',
+        '    <question><id>Q2</id><text>q2</text><context by="promote-follow-up">now</context></question>',
+      ]);
+    });
+
+    test("next renders a superseding trail step's context under the event that made it", () => {
+      // given
+      const data: NextData = {
+        kind: "follow-up",
+        id: "F1",
+        text: "f",
+        trail: [
+          { kind: "statement", id: "S2", text: "s", context: { creation: "s", createdBy: "supersede-statement" } },
+          { kind: "question", id: "Q2", text: "q", context: { creation: "q", createdBy: "supersede-question" } },
+          { kind: "option", id: "Q2a", text: "a", context: { creation: "o", createdBy: "supersede-option" } },
+        ],
+      };
+
+      // when
+      const xml = next(data);
+
+      // then
+      assert.deepEqual(xml.split("\n").slice(2, 5), [
+        '    <statement><id>S2</id><text>s</text><context by="supersede-statement">s</context></statement>',
+        '    <question><id>Q2</id><text>q</text><context by="supersede-question">q</context></question>',
+        '    <option><id>Q2a</id><text>a</text><context by="supersede-option">o</context></option>',
+      ]);
+    });
+
+    test("next renders a trail question's contexts as creation, exclusion, selection, then clearing", () => {
+      // given
+      const data: NextData = {
+        kind: "follow-up",
+        id: "F1",
+        text: "f",
+        trail: [
+          {
+            kind: "question",
+            id: "Q1",
+            text: "q",
+            context: { creation: "c", createdBy: "add-question", exclusion: "e", selection: "s", clearing: "x" },
+          },
+        ],
+      };
+
+      // when
+      const xml = next(data);
+
+      // then
+      assert.equal(
+        xml.split("\n")[2],
+        "    <question><id>Q1</id><text>q</text>" +
+          '<context by="add-question">c</context><context by="exclude">e</context>' +
+          '<context by="select-option">s</context><context by="clear-selection">x</context></question>',
+      );
+    });
+
+    test("next escapes the contexts of a trail step", () => {
+      // given
+      const data: NextData = {
+        kind: "follow-up",
+        id: "F1",
+        text: "f",
+        trail: [
+          { kind: "question", id: "Q1", text: "q", context: { selection: "a < b & c" } },
+          { kind: "option", id: "Q1a", text: "a", context: { exclusion: "x > y" } },
+        ],
+      };
+
+      // when
+      const xml = next(data);
+
+      // then
+      assert.deepEqual(xml.split("\n").slice(2, 4), [
+        '    <question><id>Q1</id><text>q</text><context by="select-option">a &lt; b &amp; c</context></question>',
+        '    <option><id>Q1a</id><text>a</text><context by="exclude">x &gt; y</context></option>',
+      ]);
+    });
+
+    test("next renders a question's origin right after its text", () => {
+      // given
+      const data: NextData = {
+        kind: "question",
+        id: "Q2",
+        text: "q2",
+        origin: "Q1a",
+        tags: ["t"],
+        context: { creation: "c", createdBy: "add-question" },
+        options: [{ id: "Q2a", text: "a" }],
+      };
+
+      // when
+      const xml = next(data);
+
+      // then
+      assert.deepEqual(xml.split("\n"), [
+        "<next>",
+        "  <question>",
+        "    <id>Q2</id>",
+        "    <text>q2</text>",
+        "    <origin><id>Q1a</id></origin>",
+        "    <tags><tag>t</tag></tags>",
+        '    <context by="add-question">c</context>',
+        "    <options>",
+        "      <option><id>Q2a</id><text>a</text></option>",
+        "    </options>",
+        "  </question>",
+        "</next>",
+      ]);
+    });
+
+    test("next renders a follow-up's origin on its one line, right after its text", () => {
+      // given
+      const data: NextData = { kind: "follow-up", id: "F1", text: "f", origin: "Q1a", tags: ["t"] };
+
+      // when
+      const xml = next(data);
+
+      // then
+      assert.deepEqual(xml.split("\n"), [
+        "<next>",
+        "  <follow-up><id>F1</id><text>f</text><origin><id>Q1a</id></origin><tags><tag>t</tag></tags></follow-up>",
+        "</next>",
+      ]);
+    });
+
+    test("next renders the origin of the item below its trail", () => {
+      // given
+      const data: NextData = {
+        kind: "follow-up",
+        id: "F1",
+        text: "f",
+        origin: "Q1",
+        trail: [{ kind: "question", id: "Q1", text: "q" }],
+      };
+
+      // when
+      const xml = next(data);
+
+      // then
+      assert.deepEqual(xml.split("\n"), [
+        "<next>",
+        "  <trail>",
+        "    <question><id>Q1</id><text>q</text></question>",
+        "  </trail>",
+        "  <follow-up><id>F1</id><text>f</text><origin><id>Q1</id></origin></follow-up>",
+        "</next>",
+      ]);
+    });
+
+    test("items renders the origin of each kind of item right after its text, and none for a root", () => {
+      // given
+      const list: ListedItem[] = [
+        { kind: "statement", id: "S1", text: "s", tags: [], state: "settled" },
+        {
+          kind: "question", id: "Q1", text: "q", origin: "S1", options: [],
+          tags: ["t"],
+          state: "open",
+          context: { creation: "c", createdBy: "add-question" },
+        },
+        { kind: "follow-up", id: "F1", text: "f", origin: "Q1", tags: ["t"], state: "open" },
+        {
+          kind: "statement", id: "S2", text: "s2", origin: "Q1", tags: [], state: "frozen",
+          hiddenBy: { state: "frozen", by: "Q1" },
+          supersededBy: "S3",
+        },
+      ];
+
+      // when
+      const xml = items(list);
+
+      // then
+      assert.deepEqual(xml.split("\n"), [
+        "<items>",
+        '  <statement state="settled">',
+        "    <id>S1</id>",
+        "    <text>s</text>",
+        "  </statement>",
+        '  <question state="open">',
+        "    <id>Q1</id>",
+        "    <text>q</text>",
+        "    <origin><id>S1</id></origin>",
+        "    <tags><tag>t</tag></tags>",
+        '    <context by="add-question">c</context>',
+        "    <options></options>",
+        "  </question>",
+        '  <follow-up state="open">',
+        "    <id>F1</id>",
+        "    <text>f</text>",
+        "    <origin><id>Q1</id></origin>",
+        "    <tags><tag>t</tag></tags>",
+        "  </follow-up>",
+        '  <statement state="frozen">',
+        "    <id>S2</id>",
+        "    <text>s2</text>",
+        "    <origin><id>Q1</id></origin>",
+        '    <hidden-by state="frozen"><id>Q1</id></hidden-by>',
+        "    <superseded-by><id>S3</id></superseded-by>",
+        "  </statement>",
+        "</items>",
+      ]);
+    });
+
+    test("status and tree render no origin for nested items", () => {
+      // given
+      const log = Log.memoryLog([
+        { type: "add-statement", id: "S1", text: "s1" },
+        { type: "add-question", id: "Q1", text: "q1", origin: "S1" },
+        { type: "add-option", id: "Q1a", text: "a", origin: "Q1" },
+        { type: "select-option", targets: ["Q1a"] },
+        { type: "add-question", id: "Q2", text: "q2", origin: "Q1a" },
+        { type: "add-follow-up", id: "F1", text: "f1", origin: "Q2" },
+      ]);
+
+      // when
+      const rendered = [status(Status.run(log)), tree(Tree.run(log, { state: ["all"] }))];
+
+      // then
+      assert.deepEqual(
+        rendered.map((xml) => [xml.includes("<id>F1</id>"), xml.includes("<origin>")]),
+        [
+          [true, false],
+          [true, false],
+        ],
+      );
+    });
+
+    test("items renders the contexts of a trail step", () => {
+      // given
+      const list: ListedItem[] = [
+        {
+          kind: "question", id: "Q2", text: "q2", options: [],
+          tags: [],
+          state: "open",
+          trail: [{ kind: "question", id: "Q1", text: "q", context: { clearing: "reopened" } }],
+        },
+      ];
+
+      // when
+      const xml = items(list);
+
+      // then
+      assert.equal(
+        xml.split("\n")[6],
+        '      <question><id>Q1</id><text>q</text><context by="clear-selection">reopened</context></question>',
+      );
     });
   }
 
