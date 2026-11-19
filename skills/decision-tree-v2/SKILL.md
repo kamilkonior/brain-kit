@@ -163,7 +163,7 @@ For the same reason, nothing under the superseded item moves to the replacement.
 
 ## Queries
 
-Every query prints the contexts of the items it returns.
+Every query prints the contexts of the items it returns. `--target` names a question, follow-up or statement, not an option.
 
 | `--query` | Returns |
 |---|---|
