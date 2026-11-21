@@ -1,6 +1,6 @@
 ---
 name: co-dev
-description: Goals for developing software together with the user, in twelve modes (explore, design, plan, build, gate, walkthrough, debug, review, spike, learn, refactor and hunt). Each mode says what to optimize for in that kind of work. Use when the user names a mode (`/co-dev explore`, `/co-dev design`, `/co-dev plan`, `/co-dev build`, `/co-dev gate`, `/co-dev walkthrough`, `/co-dev debug`, `/co-dev review`, `/co-dev spike`, `/co-dev learn`, `/co-dev refactor`, `/co-dev hunt`). Not a procedure.
+description: Goals for developing software together with the user, in twelve modes: six stages (explore, design, plan, build, gate, walkthrough) and six side-kicks (debug, review, spike, learn, refactor, hunt). Each mode says what to optimize for in that kind of work. Use when the user names a mode (`/co-dev <mode>`), or when a build is done and the gate follows. Not a procedure.
 ---
 
 # Co-dev
