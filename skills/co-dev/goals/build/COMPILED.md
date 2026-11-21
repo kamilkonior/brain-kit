@@ -649,7 +649,7 @@ The user sees the work running early and at each stage, tries it, and what they 
 - **Visible, contained changes:** a comment changes only what it concerns, and what changed in answer to it is said and shown.
 - **Accumulating acceptance:** what the user has accepted stays as it was; when a later step must change it, you say what is reopened and what stands.
 - **Exit condition:** rounds on a stage end when its checks pass and the user's points are handled; you say when further rounds are polish, and the user can end or extend them.
-- **Closing pass:** at the end the whole is put to the user once, with the main scenario for them to run, for the decision to accept.
+- **Closing pass:** at the end the whole is put to the user once, with the main scenario for them to run.
 
 ## Undesirable
 
