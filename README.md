@@ -9,7 +9,7 @@ npx skills add kamilkonior/brain-kit
 | Skill | What it does |
 |---|---|
 | `co-design` | Designs something with you: an architecture, a feature, a process, a strategy, a document. Both of you contribute ideas, you decide what is yours to decide, and the result is a written design that can be built from without the agent. |
-| `co-dev` | Gives the agent goals for developing software with you, in eleven modes: design, plan, build, walkthrough, debug, review, explain, spike, learn, refactor and hunt. Each mode says what to optimize for in that kind of work, and the two directions in which it goes wrong. |
+| `co-dev` | Gives the agent goals for developing software with you, in eleven modes: explore, design, plan, build, walkthrough, debug, review, spike, learn, refactor and hunt. Each mode says what to optimize for in that kind of work, and the two directions in which it goes wrong. |
 | `grill-me` | Interviews you about a design, one question at a time, until it's settled. You decide; the agent looks things up, recommends and keeps the order. |
 | `decision-tree` | A CLI memory for decisions: questions, options, selections and follow-ups in an append-only log. It answers what to decide next and what's already settled. |
 | `decision-tree-v2` | The next version of `decision-tree`: it adds statements, a reason on every judgement, several operations in one call, and a write result that says what each change displaced or brought back. Its log format is not compatible with `decision-tree`'s. |
@@ -27,6 +27,7 @@ To design something together:
 To develop software one stage at a time, name the mode:
 
 ```
+/co-dev explore how events are stored today
 /co-dev design how we should store events
 /co-dev plan
 /co-dev build
@@ -43,12 +44,6 @@ To have finished work read for what is wrong with it, at any stage:
 
 ```
 /co-dev review
-```
-
-To come to understand a piece of code, a change or a system, at any stage:
-
-```
-/co-dev explain
 ```
 
 To answer a question about something that does not exist yet, with code meant to be thrown away:
