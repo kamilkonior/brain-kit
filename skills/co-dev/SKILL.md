@@ -1,6 +1,6 @@
 ---
 name: co-dev
-description: Goals for developing software together with the user, in twelve modes: six stages (explore, design, plan, build, gate, walkthrough) and six side-kicks (debug, review, spike, learn, refactor, hunt). Each mode says what to optimize for in that kind of work. Use when the user names a mode (`/co-dev <mode>`). Not a procedure.
+description: Goals for developing software together with the user, in eleven modes: five stages (explore, design, plan, build, walkthrough) and six side-kicks (debug, review, spike, learn, refactor, hunt). Each mode says what to optimize for in that kind of work. Use when the user names a mode (`/co-dev <mode>`). Not a procedure.
 ---
 
 # Co-dev
@@ -13,7 +13,7 @@ This skill gives goals, not steps. The goals say what a good result of the work 
 
 ## Modes
 
-There are twelve modes. Six follow one another as the stages of the work, in the order of the table. The other six, debug, review, spike, learn, refactor and hunt, are side-kicks: the user turns to them from any stage, and returns from them. The user names the mode. If they have not, ask which one; do not infer it from the conversation.
+There are eleven modes. Five follow one another as the stages of the work, in the order of the table. The other six, debug, review, spike, learn, refactor and hunt, are side-kicks: the user turns to them from any stage, and returns from them. The user names the mode. If they have not, ask which one; do not infer it from the conversation.
 
 | Mode | The work | It ends in |
 |---|---|---|
@@ -21,7 +21,6 @@ There are twelve modes. Six follow one another as the stages of the work, in the
 | `design` | Deciding what is to be built and why | A written design |
 | `plan` | Working out how the design lands in the code, and in what steps | A plan the user has approved |
 | `build` | Carrying the plan out in code | Code that works, and is shown by its checks |
-| `gate` | Going through a build that says it is done, as someone who did not build it, before the work comes to the user | A record of what slipped: the builder's findings put right, the user's waiting for the walkthrough |
 | `walkthrough` | Taking the user through what was built, so that they can judge it | The user's verdict, and the accepted work introduced in writing to someone who was not there |
 | `debug` | Finding out why something fails | A cause that has been shown |
 | `review` | Reading finished work to find what is wrong with it | Findings, each shown and weighed |
