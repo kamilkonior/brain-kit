@@ -1,36 +1,85 @@
 ---
 name: co-dev
-description: Goals for developing software together with the user, in eleven modes: five stages (explore, design, plan, build, walkthrough) and six side-kicks (debug, review, spike, learn, refactor, hunt). Each mode says what to optimize for in that kind of work. Use when the user names a mode (`/co-dev <mode>`). Not a procedure.
+description: Develop software together with the user through five modes. Explore investigates a problem, codebase or idea. Design decides the shape of a change. Plan orders the work into verifiable steps. Build makes the change and proves it. Walkthrough shows the user what was built so they can judge it. Use for any software development request, for example looking into a bug, working out how something should be built, breaking work into steps, writing or changing code, or explaining a change, branch or pull request. Picks the mode that supplies what the user is missing, and moves between modes only with the user's agreement.
 ---
 
 # Co-dev
 
-## Intent
+Co-dev is one way of developing software with a user, in five modes. Each mode carries the work one stage further, and each stands on its own: the user can enter at any mode with whatever they have.
 
-Develop software together with the user, one stage at a time, knowing in each mode what you are optimizing for.
+This page only routes. The goals of each mode live in its own file, and that file is read before working in the mode.
 
-This skill gives goals, not steps. The goals say what a good result of the work is, and the two directions in which it goes wrong.
+## The modes
 
-## Modes
+| Mode | Supplies | Enter when | Changes the system | File |
+|---|---|---|---|---|
+| Explore | Understanding | The problem, the codebase or the idea is not yet understood. | No | `references/explore.md` |
+| Design | Decisions | What is needed is understood, and how to build it is not yet decided. | No | `references/design.md` |
+| Plan | An order of work | The approach is decided, and the work needs breaking into steps. | No | `references/plan.md` |
+| Build | The change | There is an agreed change to make, or a small, clear one. | Yes | `references/build.md` |
+| Walkthrough | A verdict | Something is built, and the user needs to understand and judge it. | No | `references/walkthrough.md` |
 
-There are eleven modes. Five follow one another as the stages of the work, in the order of the table. The other six, debug, review, spike, learn, refactor and hunt, are side-kicks: the user turns to them from any stage, and returns from them. The user names the mode. If they have not, ask which one; do not infer it from the conversation.
+Each mode's result is the next one's input: findings feed the design, decisions feed the plan, the plan feeds the build, and the change with its account feeds the walkthrough.
 
-| Mode | The work | It ends in |
-|---|---|---|
-| `explore` | Exploring what is already there, with the user steering where to look | A model of it in the user's head that holds |
-| `design` | Deciding what is to be built and why | A written design |
-| `plan` | Working out how the design lands in the code, and in what steps | A plan the user has approved |
-| `build` | Carrying the plan out in code | Code that works, and is shown by its checks |
-| `walkthrough` | Taking the user through what was built, so that they can judge it | The user's verdict, and the accepted work introduced in writing to someone who was not there |
-| `debug` | Finding out why something fails | A cause that has been shown |
-| `review` | Reading finished work to find what is wrong with it | Findings, each shown and weighed |
-| `spike` | Answering a question about something that does not exist yet, with code meant to be thrown away | An answer, and the code gone |
-| `learn` | Turning what a piece of work taught into a change in how you work | A change that is in place |
-| `refactor` | Changing the structure of existing code while what it does stays the same | The same behavior in a new shape, and that shown |
-| `hunt` | Looking for the ways in which something that was built breaks, against a stated reference for what is right | Breaks that were shown, and what held |
+Like the modes themselves, routing is held as goals and not as a procedure. There are two.
 
-## Using a mode
+## 1. The right mode
 
-Read `modes/<mode>.md` in full, and then `goals/<mode>/COMPILED.md`, before your first reply. The mode file holds the mode's intent and its goals as one system. The compiled file holds every goal file of the mode, one after another.
+The user is in the mode that supplies what they are missing.
 
-One mode is in use at a time, because a mode's goals are written for its kind of work. When the user names another mode, read that mode in full and work to its goals from then on.
+Why: the modes differ in what they are allowed to do. The wrong one either changes code before anything is decided, or holds back work that was ready to be done.
+
+**Desirable**
+- Routing by what is missing for the user's next step: understanding, a decision, an order of work, the change itself, or confidence in what was built.
+- Using the mode the user names.
+- Reading a request for what it asks to happen, not for its keywords: a request to "plan" a fix whose cause is unknown needs explore.
+- When a request spans several modes, starting at the earliest thing that is missing, and only as far as the gap requires. Each mode fills small gaps itself.
+- Sending small, clear work straight to build.
+- Reading the mode's file before acting in it, unless it has already been read in this session.
+- When two modes fit, taking one, saying which and why in a line, and proceeding.
+- Asking first only when the choice decides whether the system gets changed.
+- In doubt, the mode that changes nothing.
+
+**Undesirable**
+- Marching every request through all five modes.
+- Routing by keyword.
+- Working from the table above, or from memory of a mode, without reading its file.
+- Building while the approach is undecided, or changing code from any mode but build.
+- Asking the user which mode they want when the request makes it plain. The user need not know the modes exist.
+- Announcing modes with ceremony for a small request.
+- Blending modes: deciding while exploring, fixing while walking through.
+
+## 2. Clean transitions
+
+Work moves between modes deliberately, with the user's agreement, and nothing is lost on the way.
+
+Why: each mode ends at a point where the user decides. Rolling past it takes that decision away, and a careless handover loses what the last mode established.
+
+**Desirable**
+- Each mode finished by its own done-condition, with its closing state said plainly.
+- Moving forward when the user says so, either outright or by asking for what the next mode does.
+- Naming the natural next mode without taking it.
+- Going back when a mode meets what it cannot settle, and for that one thing: an unworkable decision goes to design, a gap in understanding to explore, a defect found in a walkthrough to build. Then returning to where the work stood.
+- Skipping modes the work does not need.
+- Carrying the previous mode's result forward as the input, re-checking only what the new mode rests on.
+- Keeping the place when the user interrupts with something that belongs to another mode: answering it, then saying where the work stands.
+- Saying when the mode changes in a way that alters what the user gets, above all when code is about to be changed.
+
+**Undesirable**
+- Rolling on into the next mode unasked.
+- Treating the pipeline as a gate: refusing to design without an exploration, or to build without a plan.
+- Refusing to go back, and patching around a decision or a gap instead.
+- Going back for one thing and redoing the whole earlier mode.
+- Redoing what the previous mode established, or dropping it.
+- Switching into build silently.
+- Losing the thread after a detour.
+
+## What holds in every mode
+
+Each mode's file states these in its own terms. They are listed here for the moments between modes.
+
+- Only build changes the system. Every other mode leaves it as found, apart from the mode's own record.
+- Nothing is claimed beyond its evidence. Observed, inferred, assumed and unknown stay distinguishable.
+- Choices, approvals, gates and verdicts are the user's. Silence is not agreement.
+- Effort is scaled to the stakes. Any mode can be two sentences long.
+- What a mode produces can be picked up cold by someone who was not there.

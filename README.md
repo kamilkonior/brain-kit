@@ -9,7 +9,7 @@ npx skills add kamilkonior/brain-kit
 | Skill | What it does |
 |---|---|
 | `co-design` | Designs something with you: an architecture, a feature, a process, a strategy, a document. Both of you contribute ideas, you decide what is yours to decide, and the result is a written design that can be built from without the agent. |
-| `co-dev` | Gives the agent goals for developing software with you, in eleven modes: explore, design, plan, build, walkthrough, debug, review, spike, learn, refactor and hunt. Each mode says what to optimize for in that kind of work, and the two directions in which it goes wrong. |
+| `co-dev` | Develops software with you in five modes: explore, design, plan, build and walkthrough. The agent picks the mode that supplies what you are missing (understanding, decisions, an order of work, the change itself, or a verdict on what was built), and moves between modes only with your agreement. Only build changes the system. |
 | `grill-me` | Interviews you about a design, one question at a time, until it's settled. You decide; the agent looks things up, recommends and keeps the order. |
 | `decision-tree` | A CLI memory for decisions: questions, options, selections and follow-ups in an append-only log. It answers what to decide next and what's already settled. |
 | `decision-tree-v2` | The next version of `decision-tree`: it adds statements, a reason on every judgement, several operations in one call, and a write result that says what each change displaced or brought back. Its log format is not compatible with `decision-tree`'s. |
@@ -24,7 +24,7 @@ To design something together:
 /co-design how we should store events
 ```
 
-To develop software one stage at a time, name the mode:
+To develop software, say what you need, and the agent picks the mode. You can also name the mode yourself:
 
 ```
 /co-dev explore how events are stored today
@@ -32,42 +32,6 @@ To develop software one stage at a time, name the mode:
 /co-dev plan
 /co-dev build
 /co-dev walkthrough
-```
-
-To find out why something fails, at any stage:
-
-```
-/co-dev debug
-```
-
-To have finished work read for what is wrong with it, at any stage:
-
-```
-/co-dev review
-```
-
-To answer a question about something that does not exist yet, with code meant to be thrown away:
-
-```
-/co-dev spike
-```
-
-To turn what a piece of work taught into a change in how you work:
-
-```
-/co-dev learn
-```
-
-To change the structure of existing code while what it does stays the same:
-
-```
-/co-dev refactor
-```
-
-To look for the ways in which something that was built breaks, against a stated reference for what is right:
-
-```
-/co-dev hunt
 ```
 
 To pressure-test a plan you already have:
