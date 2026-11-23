@@ -1,6 +1,6 @@
 # Walkthrough
 
-**Contents:** how to hold these goals · what walkthrough produces · invariants (1–3) · balanced goals (4–12) · when goals pull against each other · done
+**Contents:** how to hold these goals · what walkthrough produces · invariants (1–3) · balanced goals (4–12) · done
 
 Walkthrough exists so that the user understands and can rightly judge what was built: what changed, why, how it works, how it is known to work, where it departs from what was agreed, and what remains. They can then accept it, send it back or take it over on their own judgement, not on the builder's word. The product is the user's understanding and decision, not a document.
 
@@ -117,7 +117,7 @@ Why: the user is accountable for the change once it is accepted. A verdict that 
 
 ## Balanced goals
 
-These nine are weighed against each other. The section after them says how.
+Each of these nine is a matter of degree, not a rule: it can fall short or overshoot, and both fail. They work as one system. None outranks another, because a goal put first is pursued at the expense of the rest.
 
 ### 4. The true subject
 
@@ -236,6 +236,7 @@ Why: the user will maintain, defend and extend this change. Approval without und
 
 **Desirable**
 - Opening with the outcome and the state in a sentence or two: what is different now, and whether anything is wrong or unfinished.
+- "Did I get what I asked for" answered before "how does it work".
 - The mental model before the detail: the shape of the change, before and after, and where it sits.
 - One concrete scenario followed through the changed path end to end, then the variations and the failure paths.
 - The change sorted by kind so attention can be spent: the behaviour change itself, supporting restructuring, mechanical edits, tests, incidental changes.
@@ -359,24 +360,6 @@ Why: a verdict and its conditions matter after the conversation ends, to reviewe
 - A transcript in place of a record.
 - A record describing a version that has since changed.
 - Files written into the project unasked.
-
-## When goals pull against each other
-
-The invariants win over the balanced goals. Among the balanced goals, and where a balanced goal presses on an invariant:
-
-| Tension | Resolution |
-|---|---|
-| Understood against proportion | What the user needs in order to decide comes before completeness; depth goes where the risk and their unfamiliarity are. |
-| Fresh eyes against proportion | Scrutiny follows what the verdict rests on; the user's time outranks the presenter's thoroughness. |
-| Attention where it matters against understood | The outcome first, then the risky parts, then the rest in logical order. |
-| Measured against what was agreed, against understood | Answer "did I get what I asked for" before "how does it work". |
-| Shown, not told against understood | Evidence over fluency: a claim that cannot be shown is marked, however well it reads. |
-| Ready to own against proportion | Hand over what the user will need once the presenter is gone. |
-| Understood against honest account | The user steers depth and order, never disclosure. |
-| Honest account against understood | Honesty over polish: bad news in the opening lines, and weaknesses that would change the verdict before the tour. |
-| Shown, not told against changes nothing | Observe without mutating; what cannot be shown safely is stated, not risked. |
-| Fresh eyes against changes nothing | A finding is reported and routed, never fixed in passing; a fix is an explicit switch to building. |
-| The user's verdict against honest account | Recommend a next action, labelled; give a verdict on readiness only when asked; the decision stays the user's. |
 
 ## Done
 

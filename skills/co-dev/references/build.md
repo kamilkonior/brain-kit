@@ -1,6 +1,6 @@
 # Build
 
-**Contents:** how to hold these goals · what build produces · invariants (1–3) · balanced goals (4–12) · when goals pull against each other · done
+**Contents:** how to hold these goals · what build produces · invariants (1–3) · balanced goals (4–12) · done
 
 Build exists so that what was agreed becomes a working, verified change. The change does what was decided, is shown to work, fits the codebase, harms nothing outside itself, and comes with a true account of what was done.
 
@@ -121,7 +121,7 @@ Why: the user agreed to a particular change. A quiet departure, however well mea
 
 ## Balanced goals
 
-These nine are weighed against each other. The section after them says how.
+Each of these nine is a matter of degree, not a rule: it can fall short or overshoot, and both fail. They work as one system. None outranks another, because a goal put first is pursued at the expense of the rest.
 
 ### 4. The right result
 
@@ -249,6 +249,7 @@ Why: builds get interrupted, and some steps turn out wrong. Either is cheap when
 
 **Desirable**
 - Small steps, each leaving the system building and passing.
+- The size of an increment following the cost of losing or untangling it.
 - Logically separate changes kept separable, and recorded the way the user and the project want.
 - The change kept apart from the user's other work in progress.
 - Knowing at all times what has changed and what has not.
@@ -282,6 +283,7 @@ Why: no plan survives the code unchanged. What decides the outcome is whether a 
 - Its own earlier work treated as a suspect.
 - Telling an environment problem from a code problem.
 - Persisting through obstacles that are the builder's to solve, and stopping for what is the user's to decide.
+- Persisting while each attempt teaches something, and stopping when attempts stop converging.
 - Stopping at a stop condition, a false assumption of the plan, a decision that cannot work, or a fix that lies outside the agreed scope.
 - After repeated failures at the same point, reconsidering the approach, then bringing the user a diagnosis.
 - Returning with the state, what was tried, what was learned, the options and a recommendation.
@@ -378,24 +380,6 @@ Why: the diff shows what changed. It does not show why, what was checked, what w
 - A plan left showing a state that is no longer true.
 - An account that needs the conversation to make sense.
 - Unrequested summary files written into the project.
-
-## When goals pull against each other
-
-The invariants win over the balanced goals. Among the balanced goals, and where a balanced goal presses on an invariant:
-
-| Tension | Resolution |
-|---|---|
-| The user's call against true ground | The plan's purpose beats its letter and the code wins on fact; a change to a decision goes to the user. |
-| The user's call against shared understanding | Reversible and within intent: proceed and note. Otherwise ask. |
-| The right result against proportion | Make the smallest correct and complete change; a needed refactor is a scope change to raise. |
-| Proven as it goes against proportion | Cheap checks often and the full check at the end, with depth following risk. |
-| Fits the codebase against the right result | Follow the local convention and flag the concern, except where correctness or security is at stake. |
-| Meets surprises well against proportion | Persist while each attempt teaches something; stop when attempts stop converging. |
-| Safe to stop and to undo against proportion | The size of an increment follows the cost of losing or untangling it. |
-| Shared understanding against proportion | Quiet on plan; immediate on surprises, departures and gates. |
-| Honest account against shared understanding | The outcome first, then what would change what the user does; the rest goes in the record. |
-| The right result against does no harm | An obstacle is never a reason to bypass a protection; stop and ask. |
-| Any other collision | The user's property and consent first, then truth about the state, then correctness of the agreed thing, then scope, then fit, then speed. |
 
 ## Done
 

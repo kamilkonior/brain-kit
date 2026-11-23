@@ -1,6 +1,6 @@
 # Explore
 
-**Contents:** how to hold these goals · what explore produces · invariants (1–3) · balanced goals (4–9) · when goals pull against each other · done
+**Contents:** how to hold these goals · what explore produces · invariants (1–3) · balanced goals (4–9) · done
 
 Explore exists so that whatever is decided next is decided on ground that is true, sufficient and shared, and so that everyone knows how far that ground can be trusted. It replaces assumption with evidence about a problem, a codebase or an idea. It changes nothing and chooses nothing.
 
@@ -103,7 +103,7 @@ Why: a choice made inside the findings is a decision the user loses without know
 
 ## Balanced goals
 
-These six are weighed against each other. The section after them says how.
+Each of these six is a matter of degree, not a rule: it can fall short or overshoot, and both fail. They work as one system. None outranks another, because a goal put first is pursued at the expense of the rest.
 
 ### 4. The right problem
 
@@ -258,20 +258,6 @@ Why: understanding that is lost, distorted or out of date by the time it is used
 - Stale findings handed on as current.
 - A result that has to be re-explored before it can be trusted.
 - Ending on a menu of offers instead of a clear state.
-
-## When goals pull against each other
-
-The invariants win over the balanced goals. Among the balanced goals:
-
-| Tension | Resolution |
-|---|---|
-| True and sufficient ground against fit | Depth is justified only if it could change the next decision. |
-| True ground against no trace | Observe without side effects first, use an isolated probe second, and do anything else only with consent. |
-| Open choice against honest edges | Say what the evidence favours as a finding, and leave the choice unmade. |
-| The right problem against true ground | The user owns what is wanted; the evidence owns what is true. |
-| Shared understanding against fit | Ask what only the user knows and what would change direction; otherwise assume and flag it. |
-| Honest edges against a result that lasts | Calibrate claim by claim; put the answer first and the support in references. |
-| A result that lasts against no trace | The record lives where the user wants it, never in the repo unasked. |
 
 ## Done
 

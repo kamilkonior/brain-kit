@@ -1,6 +1,6 @@
 # Design
 
-**Contents:** how to hold these goals · what design produces · invariants (1–3) · balanced goals (4–12) · when goals pull against each other · done
+**Contents:** how to hold these goals · what design produces · invariants (1–3) · balanced goals (4–12) · done
 
 Design exists so that the decisions that are costly to get wrong are made on purpose, on the evidence and with the user, before work is planned. It records them with their reasons so that nothing later has to re-decide or guess. It changes no code.
 
@@ -109,7 +109,7 @@ Why: the user lives with the consequences, and holds priorities and knowledge th
 
 ## Balanced goals
 
-These nine are weighed against each other. The section after them says how.
+Each of these nine is a matter of degree, not a rule: it can fall short or overshoot, and both fail. They work as one system. None outranks another, because a goal put first is pursued at the expense of the rest.
 
 ### 4. The right target
 
@@ -363,21 +363,6 @@ Why: reasons that are lost get relitigated or quietly undone, and a design too v
 - Nothing to verify against.
 - A record left unchanged after the code moved or build diverged.
 - Files the user did not ask for.
-
-## When goals pull against each other
-
-The invariants win over the balanced goals. Among the balanced goals, and where a balanced goal presses on an invariant:
-
-| Tension | Resolution |
-|---|---|
-| Decisions found against proportion | Decide now what is costly to reverse; defer what is cheap to decide later, and say it is deferred. |
-| Decisions weighed against proportion | Care is proportional to irreversibility. |
-| Holds in reality against proportion | Design for the failures the stakes warrant; name and accept the rest. |
-| Fits what exists against decisions weighed | Follow convention unless the reason to depart is stated and worth its cost. |
-| The user's decision against shared understanding | The user decides what is consequential or theirs by nature; the agent decides the rest and lists it. |
-| The user's decision against honest edges | Always give a recommendation; say once when the evidence is against the user's choice; the user's call is final. |
-| True ground against builds nothing | Read first, calculate second, run an agreed experiment third. |
-| A record that carries against builds nothing | Be concrete where the consequences lie and free elsewhere: specify what must be true of the result, not how the work is ordered or typed. |
 
 ## Done
 

@@ -1,6 +1,6 @@
 # Plan
 
-**Contents:** how to hold these goals · what plan produces · invariants (1–3) · balanced goals (4–12) · when goals pull against each other · done
+**Contents:** how to hold these goals · what plan produces · invariants (1–3) · balanced goals (4–12) · done
 
 Plan exists so that agreed decisions become work that can be carried out, checked and stopped safely. The work is broken into steps a builder can do without re-deciding, ordered so the system keeps working and the risk is met early, with the user knowing what will happen and when they will be asked. It changes no code.
 
@@ -107,7 +107,7 @@ Why: the user approves a plan on the understanding that it carries out what was 
 
 ## Balanced goals
 
-These nine are weighed against each other. The section after them says how.
+Each of these nine is a matter of degree, not a rule: it can fall short or overshoot, and both fail. They work as one system. None outranks another, because a goal put first is pursued at the expense of the rest.
 
 ### 4. The right work
 
@@ -346,23 +346,6 @@ Why: the builder may have none of this conversation, and work that outlives a se
 - A plan that changes silently, or is silently abandoned.
 - Conflicting versions.
 - Files written into the repo unasked, or a narrative of the planning.
-
-## When goals pull against each other
-
-The invariants win over the balanced goals. Among the balanced goals, and where a balanced goal presses on an invariant:
-
-| Tension | Resolution |
-|---|---|
-| Steps that can be done against proportion | Specify what is costly to rediscover or risky to get wrong; leave the rest. |
-| Risk against value, within sound order | Risk first when a failure would invalidate the plan; otherwise the earliest visible value. |
-| Sound order against safe to stop and to undo | Meet risk early by testing it reversibly; place what cannot be undone late. |
-| Verified as it goes against proportion | Every step has a check; the cost of the check follows the step's risk. |
-| The right work against proportion | Include what "done" depends on; list the rest as optional. |
-| A plan that carries against proportion | Detail the near, outline the far, re-plan at marked points. |
-| The user's call against true ground | The code wins on fact; a divergence from the design goes back to the user. |
-| The user's call against safe to stop and to undo | Follow the user's call on order and scope after stating the cost once; irreversible steps keep their gate regardless. |
-| The user's call against shared understanding | The user approves the goal, the scope, the order of increments and the gates; plan settles the rest and lists it. |
-| True ground against builds nothing | Read first, run non-mutating commands second; anything else becomes a step. |
 
 ## Done
 
