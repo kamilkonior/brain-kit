@@ -24,7 +24,7 @@ If the CLI reports `unsupported log format`, use the CLI version that created th
 
 If the CLI reports `log is locked by another writer`, retry once the other writer finishes, or remove the lock file it names if no writer is running.
 
-Results are XML on stdout. A failed call prints one line on stderr, exits 1 and writes nothing. The item it names is the one to act on: `Q2 is off-path, hidden by Q1b` means select `Q1b` first. A refusal can name two things to act on: `Q2 is deferred, hidden by Q1b (off-path)` means restore `Q2` and select `Q1b`.
+Results are XML on stdout by default (`status` also supports `--format markdown` for human-readable output). A failed call prints one line on stderr, exits 1 and writes nothing. The item it names is the one to act on: `Q2 is off-path, hidden by Q1b` means select `Q1b` first. A refusal can name two things to act on: `Q2 is deferred, hidden by Q1b (off-path)` means restore `Q2` and select `Q1b`.
 
 ## The tree
 
@@ -168,7 +168,7 @@ Every query prints the contexts of the items it returns. `--target` names a ques
 | `--query` | Returns |
 |---|---|
 | `next [--trail]` | the first open item, with the path to it if `--trail` is given. It is the only query a focus affects, and it names an active focus: `<next focus="Q2">`. |
-| `status [--target ID]` | open, settled and deferred items in one compact hierarchy. It stops at deferred items and leaves out off-path, not-applicable and frozen items. A standing statement or promoted follow-up is not shown itself; the items under it are shown in its place. An item inside a decided option goes if that answer changes, and one beside `<decided>` stays. `--target` limits it to that item and what's under it, and prints an empty `<status></status>` for an item it leaves out. |
+| `status [--target ID] [--format xml\|markdown]` | open, settled and deferred items in one compact hierarchy. It stops at deferred items and leaves out off-path, not-applicable and frozen items. A standing statement or promoted follow-up is not shown itself; the items under it are shown in its place. An item inside a decided option goes if that answer changes, and one beside `<decided>` stays. `--target` limits it to that item and what's under it, and prints an empty `<status></status>` (or nothing with `--format markdown`) for an item it leaves out. `--format` defaults to `xml`; `markdown` prints a human-readable nested bullet list with ids, tags and contexts. |
 | `tree [--state S]… [--target ID]` | the nested structure, with every option. It keeps the ancestors of a match. `--target` limits it to that item and what's under it. |
 | `items [--tag T] [--target ID [--trail]] [--state S]… [--limit N]` | a flat list: active items in walk order, then the hidden ones. `--target` finds one item in any state unless `--state` is given. `--limit` doesn't say whether more exist. |
 
