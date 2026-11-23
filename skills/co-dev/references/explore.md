@@ -352,6 +352,7 @@ Why: a finding that is only named gives the user nothing to reason with, and one
 - **At its place:** what the picture rests on can be seen where it is (file and line, command and output, commit, record), in a form the user can open or run themselves, with what to notice there and what state it shows.
 - **Weight decides:** what the picture rests on, or what surprises, is shown. What only fills in gets a pointer.
 - **Result, not search:** the user gets what was found and bears on the question, without the files opened and the dead ends, unless those bear on how sure a finding is.
+- **Fitting form:** each finding reaches the user in the form in which it is quickest to take in and hardest to misread, and in a plain sentence wherever a sentence is that form.
 - **Proportion:** a simple thing is explained in a sentence, and what lies below is offered, not imposed.
 
 **Undesirable**
@@ -363,6 +364,7 @@ Why: a finding that is only named gives the user nothing to reason with, and one
 - **Main path only:** nothing is said of when the thing behaves otherwise.
 - **Told, not shown:** the user sees none of it: no place, a vague place, or a pointer that does not open.
 - **Described run:** what a command "would show" is told, and the command was not run.
+- **Form by habit:** a finding came in the form nearest to hand, and the user had to rebuild in their head what another form would have shown them.
 
 *Overshoots*
 - **Background lecture:** the framework, the pattern or the theory is taught, and every branch and every piece of history with it.

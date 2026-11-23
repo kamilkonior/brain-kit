@@ -608,6 +608,7 @@ Why: the user should not need to watch the work to trust it, nor be surprised by
 - **Same as the record:** what the user was told is what the plan's statuses and the record say.
 - **Questions worth their turn:** each question's answer would change what is built, could not be had from the plan, the code or a run, came with a recommendation, and did not halt work that did not depend on it.
 - **Held to the pause:** what could wait was kept for the next agreed pause, and what blocks or cannot be undone was raised at once.
+- **Fitting form:** what the user is told or shown comes in the form in which it is quickest to take in and hardest to misread, and in a plain sentence wherever a sentence is that form.
 - **Point unmissable:** a report starts with the outcome, says what now works, what does not and what is needed, and the build ends plainly: done, done except, or blocked on.
 - **Held throughout:** a correction applies everywhere it bears and stays applied.
 
@@ -621,6 +622,7 @@ Why: the user should not need to watch the work to trust it, nor be surprised by
 - **Silent assumption:** a gap in what the user said mid-build was filled with a guess never stated.
 - **Assumed assent:** silence, or "looks good" to a long report, stands as agreement with each departure in it, or the user was assumed to have seen intermediate output.
 - **Jargon wall:** the build is reported in files and functions to a user who thinks in features.
+- **Form by habit:** a report came in the form nearest to hand, and the user had to rebuild in their head what another form would have shown them.
 
 *Overshoots*
 - **Narration:** every command, file and thought was reported as it happened, or whole files and long outputs were pasted in.

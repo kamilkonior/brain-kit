@@ -593,6 +593,7 @@ Why: the user will maintain, defend and extend this change. Approval without und
 - **Mismatch taken up:** surprise, a term used differently, or a bare "ok" to a weighty disclosure was followed up.
 - **Nothing private:** what the agent learned while preparing that changes the picture is known to the user.
 - **Questions worth their turn:** each question to the user was one whose answer would change what is shown or how deep, could not be had from the code, its history or the records, and came with a default.
+- **Fitting form:** what the user is told or shown comes in the form in which it is quickest to take in and hardest to misread, and in a plain sentence wherever a sentence is that form.
 - **Point unmissable:** each portion starts with what it is about and what in it needs the user's decision. Code is pointed to by path and line, and shown only where the user must judge the lines themselves.
 - **Same as the text:** what the user was told is what the record and any text for others say.
 - **Held throughout:** a correction applies everywhere it bears and stays applied, and where something the agent told the user was wrong, that was said.
@@ -608,6 +609,7 @@ Why: the user will maintain, defend and extend this change. Approval without und
 - **Assumed memory:** something the user saw once, weeks ago, is treated as known.
 - **Surprise after acceptance:** the user first learned from using the work, or from a reviewer, of something the walkthrough covered in words they did not take in.
 - **Too much at once:** more arrived than the user could absorb in one sitting, or whole files and long outputs were pasted in.
+- **Form by habit:** the account came in the form nearest to hand, and the user had to rebuild in their head what another form would have shown them.
 
 *Overshoots*
 - **Teaching the code:** mechanics the user delegated, or the framework and the history of the codebase, were taught at length.

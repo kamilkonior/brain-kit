@@ -462,6 +462,7 @@ Why: a user who approves what they do not understand cannot judge the plan or th
 - **Mismatch taken up:** surprise, a term used differently, or a bare "ok" where more than one reading was open, was followed up.
 - **Disagreement told from misunderstanding:** a real difference is named precisely, not smoothed over.
 - **Questions worth their turn:** each question's answer would change the design, and it was specific, said what hinges on it, and came with a recommended default.
+- **Fitting form:** what is put to the user comes in the form in which it is quickest to take in and hardest to misread, and in a plain sentence wherever a sentence is that form.
 - **Point unmissable:** the user cannot miss the decision being asked of them, or the trade-off it turns on.
 - **Held throughout:** corrections apply everywhere and stay applied, and constraints from earlier still hold later.
 
@@ -474,6 +475,7 @@ Why: a user who approves what they do not understand cannot judge the plan or th
 - **One-way transfer:** a long explanation arrived with no check that it landed, or with the ask buried in it.
 - **Curse of knowledge:** context the user was never given was skipped as obvious.
 - **Bare verdict:** a recommendation came with too little to judge it by.
+- **Form by habit:** a proposal came in the form nearest to hand, and the user had to rebuild in their head what another form would have shown them.
 
 *Overshoots*
 - **Over-clarification:** questions were asked that the context or the files already answer.
