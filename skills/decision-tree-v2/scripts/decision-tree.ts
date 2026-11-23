@@ -180,6 +180,39 @@ type StatusItem =
       children: StatusItem[];
     };
 
+// `on` is the letter of the chosen option a node hangs on, given only when its question has several answers.
+type ReportNode =
+  | {
+      kind: "statement";
+      id: string;
+      text: string;
+      tags?: string[];
+      on?: string;
+      source?: string;
+      children: ReportNode[];
+    }
+  | {
+      kind: "question";
+      id: string;
+      text: string;
+      tags?: string[];
+      on?: string;
+      answers: { letter: string; text: string }[];
+      reason?: string;
+      underAnswers: ReportNode[];
+      children: ReportNode[];
+    };
+
+type ReportDeferred = {
+  id: string;
+  text: string;
+  tags?: string[];
+  hangsOn?: { as: "option-of" | "under"; id: string };
+  reason?: string;
+};
+
+type Report = { tree: ReportNode[]; deferred: ReportDeferred[] };
+
 type Hiding = { state: ItemState; by: string };
 
 type Placement = { state: ItemState; hiddenBy?: Hiding };
@@ -2144,6 +2177,125 @@ const Graph = (() => {
       ...graph.roots.flatMap((root) => childItem(graph, root)),
       ...graph.rootFollowUps.flatMap((followUp) => followUpItems(graph, followUp)),
     ];
+  }
+
+  function joined(parts: Report[]): Report {
+    return { tree: parts.flatMap((part) => part.tree), deferred: parts.flatMap((part) => part.deferred) };
+  }
+
+  function letterOf(option: OptionNode): string {
+    return option.id.slice(option.question.id.length);
+  }
+
+  function onOf(on: string | undefined): { on?: string } {
+    return on === undefined ? {} : { on };
+  }
+
+  function reasonOf(context: ItemContext): { reason?: string } {
+    return context.exclusion === undefined ? {} : { reason: context.exclusion };
+  }
+
+  // A report never shows a promoted follow-up, so an item under one hangs on whatever the follow-up hangs on.
+  function shownParent(node: TargetNode): TreeNode | undefined {
+    return node.parent?.kind === "follow-up" ? shownParent(node.parent) : node.parent;
+  }
+
+  function deferredInReport(graph: Graph, node: TargetNode): Report {
+    const parent = shownParent(node);
+    const entry: ReportDeferred = {
+      id: node.id,
+      text: node.text,
+      ...tagsOf(graph, node),
+      ...(parent === undefined ? {} : { hangsOn: { as: "under" as const, id: parent.id } }),
+      ...reasonOf(node.context),
+    };
+
+    return { tree: [], deferred: [entry] };
+  }
+
+  function reportUnder(graph: Graph, node: TreeNode, on?: string): Report {
+    return joined([
+      ...node.children.map((child) => reportChild(graph, child, on)),
+      ...node.followUps.map((followUp) => reportFollowUp(graph, followUp, on)),
+    ]);
+  }
+
+  function reportChild(graph: Graph, child: QuestionNode | StatementNode, on?: string): Report {
+    return child.kind === "question" ? reportQuestion(graph, child, on) : reportStatement(graph, child, on);
+  }
+
+  function reportStatement(graph: Graph, statement: StatementNode, on?: string): Report {
+    if (statement.state === "not-applicable") return joined([]);
+    if (statement.state === "deferred") return deferredInReport(graph, statement);
+    if (statement.state !== "settled") throw new Error(`report reached a ${statement.state} item: ${statement.id}`);
+
+    const under = reportUnder(graph, statement);
+    const node: ReportNode = {
+      kind: "statement",
+      id: statement.id,
+      text: statement.text,
+      ...tagsOf(graph, statement),
+      ...onOf(on),
+      ...(statement.context.creation === undefined ? {} : { source: statement.context.creation }),
+      children: under.tree,
+    };
+
+    return { tree: [node], deferred: under.deferred };
+  }
+
+  function reportQuestion(graph: Graph, question: QuestionNode, on?: string): Report {
+    if (question.state === "not-applicable") return joined([]);
+    if (question.state === "deferred") return deferredInReport(graph, question);
+    if (question.state !== "settled") throw new Error(`report reached a ${question.state} item: ${question.id}`);
+
+    const severalAnswers = question.selected.length > 1;
+    const underAnswers = joined(
+      question.selected.map((option) => reportUnder(graph, option, severalAnswers ? letterOf(option) : undefined)),
+    );
+    const own = reportUnder(graph, question);
+    const deferredOptions = question.options
+      .filter((option) => option.state === "deferred")
+      .map((option) => ({
+        id: option.id,
+        text: option.text,
+        hangsOn: { as: "option-of" as const, id: question.id },
+        ...reasonOf(option.context),
+      }));
+    const node: ReportNode = {
+      kind: "question",
+      id: question.id,
+      text: question.text,
+      ...tagsOf(graph, question),
+      ...onOf(on),
+      answers: question.selected.map((option) => ({ letter: letterOf(option), text: option.text })),
+      ...(question.context.selection === undefined ? {} : { reason: question.context.selection }),
+      underAnswers: underAnswers.tree,
+      children: own.tree,
+    };
+
+    return { tree: [node], deferred: [...underAnswers.deferred, ...own.deferred, ...deferredOptions] };
+  }
+
+  function reportFollowUp(graph: Graph, followUp: FollowUpNode, on?: string): Report {
+    if (followUp.state === "not-applicable") return joined([]);
+    if (followUp.state === "deferred") return deferredInReport(graph, followUp);
+    if (followUp.state !== "settled") throw new Error(`report reached a ${followUp.state} item: ${followUp.id}`);
+
+    return reportUnder(graph, followUp, on);
+  }
+
+  function report(log: Log): Report {
+    const graph = build(log);
+    const open = openWithin(graph).map((item) => item.id);
+
+    if (open.length > 0) {
+      throw new DecisionTreeError(`cannot report: ${open.join(", ")} ${open.length === 1 ? "is" : "are"} open`);
+    }
+
+    return joined([
+      ...graph.roots.map((root) => reportChild(graph, root)),
+      ...graph.rootFollowUps.map((followUp) => reportFollowUp(graph, followUp)),
+    ]);
   }
 
   function childEntry(graph: Graph, child: QuestionNode | StatementNode): TreeEntry[] {
@@ -7370,6 +7522,7 @@ const Graph = (() => {
     buildTree,
     filterTree,
     status,
+    report,
     frontier: (log: Log) => frontier(build(log)),
     activeFocus: (log: Log) => activeFocus(build(log)),
     hasOpen,
@@ -11464,6 +11617,643 @@ const Status = (() => {
   return { options, run, tests };
 })();
 
+const Report = (() => {
+  const options = {} as const;
+
+  function run(log: Log): Report {
+    return Graph.report(log);
+  }
+
+  // A closed tree with a statement, nested decisions, two answers to one question and every kind of deferred item.
+  // The tests of the report's data and of its rendering share it.
+  const closedSample: Event[] = [
+    {
+      type: "add-statement",
+      id: "S1",
+      text: "SOC 2 Type II audit window opens 2027-02-01; SSO must be live for contracted enterprise tenants before then",
+      context: "Compliance calendar, confirmed by Marta (security lead)",
+    },
+    { type: "tag", target: "S1", tags: ["compliance"] },
+    { type: "add-question", id: "Q1", text: "Build or buy the identity layer?", origin: "S1" },
+    { type: "add-option", id: "Q1a", text: "Keep homegrown auth, add SAML ourselves", origin: "Q1" },
+    { type: "add-option", id: "Q1b", text: "Managed identity provider", origin: "Q1" },
+    {
+      type: "add-option",
+      id: "Q1c",
+      text: "Self-hosted Keycloak",
+      origin: "Q1",
+      context: "Suggested by platform team; they already run it for internal tools",
+    },
+    {
+      type: "select-option",
+      targets: ["Q1b"],
+      context: "Two backend engineers can't build and pen-test SAML + SCIM before February",
+    },
+    { type: "exclude", target: "Q1c", reason: "deferred", context: "Revisit if vendor cost passes $40k/yr" },
+    { type: "add-question", id: "Q2", text: "Which vendor?", origin: "Q1b" },
+    { type: "tag", target: "Q2", tags: ["procurement"] },
+    { type: "add-option", id: "Q2a", text: "WorkOS", origin: "Q2" },
+    { type: "add-option", id: "Q2b", text: "Auth0", origin: "Q2" },
+    { type: "add-option", id: "Q2c", text: "Clerk", origin: "Q2" },
+    {
+      type: "select-option",
+      targets: ["Q2a"],
+      context: "Per-connection pricing fits our 14 enterprise tenants; Auth0 quote came in 3.1x higher",
+    },
+    {
+      type: "add-question",
+      id: "Q3",
+      text: "How are existing password users migrated?",
+      origin: "Q2a",
+      context: "~212k accounts with bcrypt hashes",
+    },
+    { type: "add-option", id: "Q3a", text: "Bulk import bcrypt hashes", origin: "Q3" },
+    {
+      type: "add-option",
+      id: "Q3b",
+      text: "Lazy migration on next login",
+      origin: "Q3",
+      context: "Needs the old login path kept alive for ~90 days",
+    },
+    { type: "add-option", id: "Q3c", text: "Force password reset for everyone", origin: "Q3" },
+    {
+      type: "add-follow-up",
+      id: "F1",
+      text: "Does directory sync cover Google Workspace groups, or only Okta and Entra?",
+      origin: "Q2a",
+    },
+    { type: "add-question", id: "Q4", text: "Where do sessions live after the switch?", origin: "Q1b" },
+    { type: "add-option", id: "Q4a", text: "Keep our Redis session store; the IdP only authenticates", origin: "Q4" },
+    { type: "add-option", id: "Q4b", text: "IdP-issued JWTs, stateless", origin: "Q4" },
+    {
+      type: "select-option",
+      targets: ["Q4a"],
+      context: "Instant revocation is a customer contract requirement; JWTs would need a denylist anyway",
+    },
+    { type: "add-question", id: "Q5", text: "Session lifetime for tenant admins?", origin: "Q4a" },
+    { type: "add-option", id: "Q5a", text: "8 hours, re-auth on sensitive actions", origin: "Q5" },
+    { type: "add-option", id: "Q5b", text: "24 hours", origin: "Q5" },
+    { type: "add-option", id: "Q5c", text: "Same as regular users (14 days sliding)", origin: "Q5" },
+    { type: "add-question", id: "Q6", text: "Which tenants get SSO in the first wave?", origin: "S1" },
+    { type: "add-option", id: "Q6a", text: "The 3 tenants with SSO written into their contract", origin: "Q6" },
+    { type: "add-option", id: "Q6b", text: "All enterprise-plan tenants", origin: "Q6" },
+    { type: "add-option", id: "Q6c", text: "Our internal staff tenant (dogfood)", origin: "Q6" },
+    {
+      type: "select-option",
+      targets: ["Q6a", "Q6c"],
+      context: "Contract deadlines first; staff tenant gives us two weeks of real usage before customers",
+    },
+    { type: "add-question", id: "Q7", text: "Do we enforce MFA for password logins?" },
+    { type: "tag", target: "Q7", tags: ["waiting-cs"] },
+    { type: "add-option", id: "Q7a", text: "Required for all users", origin: "Q7" },
+    { type: "add-option", id: "Q7b", text: "Required for admins, optional for others", origin: "Q7" },
+    { type: "add-option", id: "Q7c", text: "Optional, tenant decides", origin: "Q7" },
+    {
+      type: "exclude",
+      target: "Q7",
+      reason: "deferred",
+      context: "Waiting on the support-load estimate from Tomasz (CS), due 2026-12-04",
+    },
+    {
+      type: "add-question",
+      id: "Q8",
+      text: "What happens to API keys tied to user accounts?",
+      context: "1,340 active keys; 60% belong to people who have since left their company",
+    },
+    { type: "add-option", id: "Q8a", text: "Leave as is; keys bypass SSO", origin: "Q8" },
+    { type: "add-option", id: "Q8b", text: "Expire keys when the owning user is deprovisioned", origin: "Q8" },
+    { type: "add-option", id: "Q8c", text: "Move to tenant-level service accounts", origin: "Q8" },
+    { type: "exclude", target: "Q8c", reason: "deferred", context: "Needs the RBAC rework planned for Q2 2027" },
+    {
+      type: "add-follow-up",
+      id: "F2",
+      text: "Audit-log format for login events: what does the SOC 2 auditor expect to see?",
+    },
+    { type: "tag", target: "F2", tags: ["compliance"] },
+    {
+      type: "select-option",
+      targets: ["Q3b"],
+      context: "Nobody is forced to reset; the old login path stays for 90 days",
+    },
+    { type: "exclude", target: "F1", reason: "deferred", context: "Not needed for the first wave" },
+    {
+      type: "select-option",
+      targets: ["Q5a"],
+      context: "Admin sessions are the valuable target; 8 hours covers a working day",
+    },
+    { type: "add-question", id: "Q9", text: "Who trains the staff tenant's admins?", origin: "Q6c" },
+    { type: "add-option", id: "Q9a", text: "The security team", origin: "Q9" },
+    { type: "add-option", id: "Q9b", text: "Each team lead", origin: "Q9" },
+    { type: "select-option", targets: ["Q9a"], context: "They wrote the runbook" },
+    {
+      type: "select-option",
+      targets: ["Q8b"],
+      context: "Closes the leaver gap without waiting for service accounts",
+    },
+    { type: "exclude", target: "F2", reason: "deferred", context: "The auditor is not appointed until January" },
+  ];
+
+  function tests() {
+    const refuses = (act: () => unknown, message: string) =>
+      assert.throws(act, (error) => error instanceof DecisionTreeError && error.message === message);
+
+    test("a report of an empty log has no decisions and nothing deferred", () => {
+      // given
+      const log = Log.memoryLog();
+
+      // when
+      const report = run(log);
+
+      // then
+      assert.deepEqual(report, { tree: [], deferred: [] });
+    });
+
+    test("a report nests each decision under what it hangs on and lists what was deferred in tree order", () => {
+      // given
+      const log = Log.memoryLog(closedSample);
+
+      // when
+      const report = run(log);
+
+      // then
+      assert.deepEqual(report, {
+        tree: [
+          {
+            kind: "statement",
+            id: "S1",
+            text: "SOC 2 Type II audit window opens 2027-02-01; SSO must be live for contracted enterprise tenants before then",
+            tags: ["compliance"],
+            source: "Compliance calendar, confirmed by Marta (security lead)",
+            children: [
+              {
+                kind: "question",
+                id: "Q1",
+                text: "Build or buy the identity layer?",
+                answers: [{ letter: "b", text: "Managed identity provider" }],
+                reason: "Two backend engineers can't build and pen-test SAML + SCIM before February",
+                underAnswers: [
+                  {
+                    kind: "question",
+                    id: "Q2",
+                    text: "Which vendor?",
+                    tags: ["procurement"],
+                    answers: [{ letter: "a", text: "WorkOS" }],
+                    reason: "Per-connection pricing fits our 14 enterprise tenants; Auth0 quote came in 3.1x higher",
+                    underAnswers: [
+                      {
+                        kind: "question",
+                        id: "Q3",
+                        text: "How are existing password users migrated?",
+                        answers: [{ letter: "b", text: "Lazy migration on next login" }],
+                        reason: "Nobody is forced to reset; the old login path stays for 90 days",
+                        underAnswers: [],
+                        children: [],
+                      },
+                    ],
+                    children: [],
+                  },
+                  {
+                    kind: "question",
+                    id: "Q4",
+                    text: "Where do sessions live after the switch?",
+                    answers: [{ letter: "a", text: "Keep our Redis session store; the IdP only authenticates" }],
+                    reason: "Instant revocation is a customer contract requirement; JWTs would need a denylist anyway",
+                    underAnswers: [
+                      {
+                        kind: "question",
+                        id: "Q5",
+                        text: "Session lifetime for tenant admins?",
+                        answers: [{ letter: "a", text: "8 hours, re-auth on sensitive actions" }],
+                        reason: "Admin sessions are the valuable target; 8 hours covers a working day",
+                        underAnswers: [],
+                        children: [],
+                      },
+                    ],
+                    children: [],
+                  },
+                ],
+                children: [],
+              },
+              {
+                kind: "question",
+                id: "Q6",
+                text: "Which tenants get SSO in the first wave?",
+                answers: [
+                  { letter: "a", text: "The 3 tenants with SSO written into their contract" },
+                  { letter: "c", text: "Our internal staff tenant (dogfood)" },
+                ],
+                reason: "Contract deadlines first; staff tenant gives us two weeks of real usage before customers",
+                underAnswers: [
+                  {
+                    kind: "question",
+                    id: "Q9",
+                    text: "Who trains the staff tenant's admins?",
+                    on: "c",
+                    answers: [{ letter: "a", text: "The security team" }],
+                    reason: "They wrote the runbook",
+                    underAnswers: [],
+                    children: [],
+                  },
+                ],
+                children: [],
+              },
+            ],
+          },
+          {
+            kind: "question",
+            id: "Q8",
+            text: "What happens to API keys tied to user accounts?",
+            answers: [{ letter: "b", text: "Expire keys when the owning user is deprovisioned" }],
+            reason: "Closes the leaver gap without waiting for service accounts",
+            underAnswers: [],
+            children: [],
+          },
+        ],
+        deferred: [
+          {
+            id: "F1",
+            text: "Does directory sync cover Google Workspace groups, or only Okta and Entra?",
+            hangsOn: { as: "under", id: "Q2a" },
+            reason: "Not needed for the first wave",
+          },
+          {
+            id: "Q1c",
+            text: "Self-hosted Keycloak",
+            hangsOn: { as: "option-of", id: "Q1" },
+            reason: "Revisit if vendor cost passes $40k/yr",
+          },
+          {
+            id: "Q7",
+            text: "Do we enforce MFA for password logins?",
+            tags: ["waiting-cs"],
+            reason: "Waiting on the support-load estimate from Tomasz (CS), due 2026-12-04",
+          },
+          {
+            id: "Q8c",
+            text: "Move to tenant-level service accounts",
+            hangsOn: { as: "option-of", id: "Q8" },
+            reason: "Needs the RBAC rework planned for Q2 2027",
+          },
+          {
+            id: "F2",
+            text: "Audit-log format for login events: what does the SOC 2 auditor expect to see?",
+            tags: ["compliance"],
+            reason: "The auditor is not appointed until January",
+          },
+        ],
+      });
+    });
+
+    test("an open question refuses the report", () => {
+      // given
+      const log = Log.memoryLog([{ type: "add-question", id: "Q1", text: "q" }]);
+
+      // when
+      const act = () => run(log);
+
+      // then
+      refuses(act, "cannot report: Q1 is open");
+    });
+
+    test("an open follow-up refuses the report", () => {
+      // given
+      const log = Log.memoryLog([{ type: "add-follow-up", id: "F1", text: "f" }]);
+
+      // when
+      const act = () => run(log);
+
+      // then
+      refuses(act, "cannot report: F1 is open");
+    });
+
+    test("a question reopened by clear-selection refuses the report", () => {
+      // given
+      const log = Log.memoryLog([
+        { type: "add-question", id: "Q1", text: "q" },
+        { type: "add-option", id: "Q1a", text: "a", origin: "Q1" },
+        { type: "select-option", targets: ["Q1a"], context: "first thought" },
+        { type: "clear-selection", target: "Q1", context: "in doubt" },
+      ]);
+
+      // when
+      const act = () => run(log);
+
+      // then
+      refuses(act, "cannot report: Q1 is open");
+    });
+
+    test("a refusal names every open item in walk order", () => {
+      // given
+      const log = Log.memoryLog([
+        { type: "add-follow-up", id: "F1", text: "a root follow-up comes last" },
+        { type: "add-question", id: "Q1", text: "q1" },
+        { type: "add-option", id: "Q1a", text: "a", origin: "Q1" },
+        { type: "select-option", targets: ["Q1a"], context: "why" },
+        { type: "add-question", id: "Q2", text: "q2" },
+        { type: "add-question", id: "Q3", text: "under the answer", origin: "Q1a" },
+        { type: "add-follow-up", id: "F2", text: "under the answer", origin: "Q1a" },
+      ]);
+
+      // when
+      const act = () => run(log);
+
+      // then
+      refuses(act, "cannot report: Q3, F2, Q2, F1 are open");
+    });
+
+    test("an open item under an unselected option does not refuse the report", () => {
+      // given
+      const log = Log.memoryLog([
+        { type: "add-question", id: "Q1", text: "q1" },
+        { type: "add-option", id: "Q1a", text: "a", origin: "Q1" },
+        { type: "add-option", id: "Q1b", text: "b", origin: "Q1" },
+        { type: "add-question", id: "Q2", text: "only if b", origin: "Q1b" },
+        { type: "select-option", targets: ["Q1a"], context: "why" },
+      ]);
+
+      // when
+      const report = run(log);
+
+      // then
+      assert.deepEqual(report, {
+        tree: [
+          {
+            kind: "question",
+            id: "Q1",
+            text: "q1",
+            answers: [{ letter: "a", text: "a" }],
+            reason: "why",
+            underAnswers: [],
+            children: [],
+          },
+        ],
+        deferred: [],
+      });
+    });
+
+    test("a superseded question is reported only as its replacement, without the reason it was replaced", () => {
+      // given
+      const log = Log.memoryLog([
+        { type: "add-question", id: "Q1", text: "old", context: "asked first" },
+        { type: "add-question", id: "Q2", text: "new" },
+        { type: "supersede-question", target: "Q1", question: "Q2", context: "the premise changed" },
+        { type: "add-option", id: "Q2a", text: "a", origin: "Q2" },
+        { type: "select-option", targets: ["Q2a"], context: "why a" },
+      ]);
+
+      // when
+      const report = run(log);
+
+      // then
+      assert.deepEqual(report, {
+        tree: [
+          {
+            kind: "question",
+            id: "Q2",
+            text: "new",
+            answers: [{ letter: "a", text: "a" }],
+            reason: "why a",
+            underAnswers: [],
+            children: [],
+          },
+        ],
+        deferred: [],
+      });
+    });
+
+    test("a superseded statement is reported only as its replacement, with the supersede's context as its source", () => {
+      // given
+      const log = Log.memoryLog([
+        { type: "add-statement", id: "S1", text: "old fact", context: "from Anna" },
+        { type: "add-statement", id: "S2", text: "new fact" },
+        { type: "supersede-statement", target: "S1", statement: "S2", context: "Anna was wrong; Bob measured it" },
+      ]);
+
+      // when
+      const report = run(log);
+
+      // then
+      assert.deepEqual(report, {
+        tree: [{ kind: "statement", id: "S2", text: "new fact", source: "Anna was wrong; Bob measured it", children: [] }],
+        deferred: [],
+      });
+    });
+
+    test("a statement with no context is reported without a source", () => {
+      // given
+      const log = Log.memoryLog([{ type: "add-statement", id: "S1", text: "fact" }]);
+
+      // when
+      const report = run(log);
+
+      // then
+      assert.deepEqual(report, { tree: [{ kind: "statement", id: "S1", text: "fact", children: [] }], deferred: [] });
+    });
+
+    test("a promoted follow-up is replaced by its question", () => {
+      // given
+      const log = Log.memoryLog([
+        { type: "add-follow-up", id: "F1", text: "look at caching", context: "raised by Ola" },
+        { type: "add-question", id: "Q1", text: "which cache?", origin: "F1" },
+        { type: "promote-follow-up", target: "F1", question: "Q1", context: "now it matters" },
+        { type: "add-option", id: "Q1a", text: "redis", origin: "Q1" },
+        { type: "select-option", targets: ["Q1a"], context: "already run it" },
+      ]);
+
+      // when
+      const report = run(log);
+
+      // then
+      assert.deepEqual(report, {
+        tree: [
+          {
+            kind: "question",
+            id: "Q1",
+            text: "which cache?",
+            answers: [{ letter: "a", text: "redis" }],
+            reason: "already run it",
+            underAnswers: [],
+            children: [],
+          },
+        ],
+        deferred: [],
+      });
+    });
+
+    test("not-applicable questions and options are left out of the report", () => {
+      // given
+      const log = Log.memoryLog([
+        { type: "add-question", id: "Q1", text: "q1" },
+        { type: "add-option", id: "Q1a", text: "a", origin: "Q1" },
+        { type: "add-option", id: "Q1b", text: "b", origin: "Q1" },
+        { type: "exclude", target: "Q1b", reason: "not-applicable", context: "ruled out" },
+        { type: "select-option", targets: ["Q1a"], context: "why a" },
+        { type: "add-question", id: "Q2", text: "q2" },
+        { type: "exclude", target: "Q2", reason: "not-applicable", context: "no longer matters" },
+      ]);
+
+      // when
+      const report = run(log);
+
+      // then
+      assert.deepEqual(report, {
+        tree: [
+          {
+            kind: "question",
+            id: "Q1",
+            text: "q1",
+            answers: [{ letter: "a", text: "a" }],
+            reason: "why a",
+            underAnswers: [],
+            children: [],
+          },
+        ],
+        deferred: [],
+      });
+    });
+
+    test("a deferred question, follow-up, statement and option are each listed with what they hang on and why", () => {
+      // given
+      const log = Log.memoryLog([
+        { type: "add-statement", id: "S1", text: "fact" },
+        { type: "add-question", id: "Q1", text: "q1", origin: "S1" },
+        { type: "add-option", id: "Q1a", text: "a", origin: "Q1" },
+        { type: "add-option", id: "Q1b", text: "b", origin: "Q1" },
+        { type: "select-option", targets: ["Q1a"], context: "why a" },
+        { type: "exclude", target: "Q1b", reason: "deferred", context: "revisit b" },
+        { type: "add-question", id: "Q2", text: "q2", origin: "Q1" },
+        { type: "exclude", target: "Q2", reason: "deferred", context: "wait for q2" },
+        { type: "add-follow-up", id: "F1", text: "f1", origin: "Q1a" },
+        { type: "exclude", target: "F1", reason: "deferred", context: "later" },
+        { type: "add-statement", id: "S2", text: "unverified", origin: "S1" },
+        { type: "exclude", target: "S2", reason: "deferred", context: "not measured yet" },
+      ]);
+
+      // when
+      const report = run(log);
+
+      // then
+      assert.deepEqual(report.deferred, [
+        { id: "F1", text: "f1", hangsOn: { as: "under", id: "Q1a" }, reason: "later" },
+        { id: "Q2", text: "q2", hangsOn: { as: "under", id: "Q1" }, reason: "wait for q2" },
+        { id: "Q1b", text: "b", hangsOn: { as: "option-of", id: "Q1" }, reason: "revisit b" },
+        { id: "S2", text: "unverified", hangsOn: { as: "under", id: "S1" }, reason: "not measured yet" },
+      ]);
+    });
+
+    test("what hangs under a deferred item is not listed", () => {
+      // given
+      const log = Log.memoryLog([
+        { type: "add-question", id: "Q1", text: "q1" },
+        { type: "add-question", id: "Q2", text: "open, but under a deferred question", origin: "Q1" },
+        { type: "add-question", id: "Q3", text: "deferred under a deferred question", origin: "Q1" },
+        { type: "exclude", target: "Q3", reason: "deferred", context: "later" },
+        { type: "exclude", target: "Q1", reason: "deferred", context: "wait" },
+      ]);
+
+      // when
+      const report = run(log);
+
+      // then
+      assert.deepEqual(report, { tree: [], deferred: [{ id: "Q1", text: "q1", reason: "wait" }] });
+    });
+
+    test("an item deferred inside an unselected branch is left out of the report", () => {
+      // given
+      const log = Log.memoryLog([
+        { type: "add-question", id: "Q1", text: "q1" },
+        { type: "add-option", id: "Q1a", text: "a", origin: "Q1" },
+        { type: "add-option", id: "Q1b", text: "b", origin: "Q1" },
+        { type: "add-question", id: "Q2", text: "only if b", origin: "Q1b" },
+        { type: "exclude", target: "Q2", reason: "deferred", context: "later" },
+        { type: "select-option", targets: ["Q1a"], context: "why a" },
+      ]);
+
+      // when
+      const report = run(log);
+
+      // then
+      assert.deepEqual(report.deferred, []);
+    });
+
+    test("a deferred item under a promoted follow-up hangs on what the follow-up hangs on", () => {
+      // given
+      const log = Log.memoryLog([
+        { type: "add-question", id: "Q1", text: "q1" },
+        { type: "add-option", id: "Q1a", text: "a", origin: "Q1" },
+        { type: "select-option", targets: ["Q1a"], context: "why a" },
+        { type: "add-follow-up", id: "F1", text: "f1", origin: "Q1a" },
+        { type: "add-question", id: "Q2", text: "q2", origin: "F1" },
+        { type: "promote-follow-up", target: "F1", question: "Q2" },
+        { type: "exclude", target: "Q2", reason: "deferred", context: "later" },
+        { type: "add-follow-up", id: "F2", text: "f2" },
+        { type: "add-question", id: "Q3", text: "q3", origin: "F2" },
+        { type: "promote-follow-up", target: "F2", question: "Q3" },
+        { type: "exclude", target: "Q3", reason: "deferred", context: "much later" },
+      ]);
+
+      // when
+      const report = run(log);
+
+      // then
+      assert.deepEqual(report.deferred, [
+        { id: "Q2", text: "q2", hangsOn: { as: "under", id: "Q1a" }, reason: "later" },
+        { id: "Q3", text: "q3", reason: "much later" },
+      ]);
+    });
+
+    test("a decision under one of several answers names that answer, and one under a single answer does not", () => {
+      // given
+      const log = Log.memoryLog([
+        { type: "add-question", id: "Q1", text: "q1" },
+        { type: "add-option", id: "Q1a", text: "a", origin: "Q1" },
+        { type: "add-option", id: "Q1b", text: "b", origin: "Q1" },
+        { type: "add-option", id: "Q1c", text: "c", origin: "Q1" },
+        { type: "select-option", targets: ["Q1c", "Q1a"], context: "both" },
+        { type: "add-statement", id: "S1", text: "follows from c", origin: "Q1c" },
+        { type: "add-question", id: "Q2", text: "under a", origin: "Q1a" },
+        { type: "add-option", id: "Q2a", text: "x", origin: "Q2" },
+        { type: "select-option", targets: ["Q2a"], context: "only one" },
+        { type: "add-statement", id: "S2", text: "follows from x", origin: "Q2a" },
+        { type: "add-statement", id: "S3", text: "beside the answers", origin: "Q1" },
+      ]);
+
+      // when
+      const report = run(log);
+
+      // then
+      assert.deepEqual(report.tree, [
+        {
+          kind: "question",
+          id: "Q1",
+          text: "q1",
+          answers: [
+            { letter: "a", text: "a" },
+            { letter: "c", text: "c" },
+          ],
+          reason: "both",
+          underAnswers: [
+            {
+              kind: "question",
+              id: "Q2",
+              text: "under a",
+              on: "a",
+              answers: [{ letter: "a", text: "x" }],
+              reason: "only one",
+              underAnswers: [{ kind: "statement", id: "S2", text: "follows from x", children: [] }],
+              children: [],
+            },
+            { kind: "statement", id: "S1", text: "follows from c", on: "c", children: [] },
+          ],
+          children: [{ kind: "statement", id: "S3", text: "beside the answers", children: [] }],
+        },
+      ]);
+    });
+  }
+
+  return { options, run, tests, closedSample };
+})();
+
 const Xml = (() => {
   function escapeXml(text: string): string {
     return text.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll("\r", "&#13;");
@@ -14096,6 +14886,365 @@ const Xml = (() => {
   };
 })();
 
+const Markdown = (() => {
+  function normalize(text: string): string {
+    return text.replaceAll("\r\n", "\n").replaceAll("\r", "\n");
+  }
+
+  function indent(lines: string[]): string[] {
+    return lines.map((line) => (line === "" ? "" : `  ${line}`));
+  }
+
+  function formatTag(tag: string): string {
+    const content = `#${normalize(tag)}`;
+    const longest = Math.max(0, ...(content.match(/`+/g) ?? []).map((run) => run.length));
+    const fence = "`".repeat(longest + 1);
+    const padded = content.endsWith("`") ? ` ${content} ` : content;
+
+    return `${fence}${padded}${fence}`;
+  }
+
+  function bullet(text: string, suffix: string[] = []): string[] {
+    const body = normalize(text);
+    const tail = suffix.join(" ");
+    const combined = tail === "" ? body : body.endsWith("\n") ? `${body}${tail}` : `${body} ${tail}`;
+    const [first, ...rest] = combined.split("\n");
+
+    return [`- ${first}`, ...indent(rest)];
+  }
+
+  function optionalBullet(text: string | undefined): string[] {
+    return text === undefined ? [] : bullet(text);
+  }
+
+  // Bold cannot span lines, and several answers share one line.
+  function onOneLine(text: string): string {
+    return normalize(text)
+      .split("\n")
+      .map((line) => line.trim())
+      .filter((line) => line !== "")
+      .join(" ");
+  }
+
+  function suffixOf(pointer: string | undefined, tags: string[] = []): string[] {
+    return [...(pointer === undefined ? [] : [`(${pointer})`]), ...tags.map(formatTag)];
+  }
+
+  function nodeLines(node: ReportNode): string[] {
+    const suffix = suffixOf(node.on === undefined ? undefined : `on ${node.on}`, node.tags);
+
+    if (node.kind === "statement") {
+      return [
+        ...bullet(`*Given ${node.id} ·* ${node.text}`, suffix),
+        ...indent([...optionalBullet(node.source), ...node.children.flatMap(nodeLines)]),
+      ];
+    }
+
+    const answers = node.answers.map((answer) => `**${onOneLine(answer.text)}** (${answer.letter})`).join(", ");
+
+    return [
+      ...bullet(`**${node.id} · ${onOneLine(node.text)}**`, suffix),
+      ...indent([
+        `- ${answers}`,
+        ...indent([...optionalBullet(node.reason), ...node.underAnswers.flatMap(nodeLines)]),
+        ...node.children.flatMap(nodeLines),
+      ]),
+    ];
+  }
+
+  function pointerOf(hangsOn: ReportDeferred["hangsOn"]): string | undefined {
+    if (hangsOn === undefined) return undefined;
+
+    return hangsOn.as === "option-of" ? `option of ${hangsOn.id}` : `under ${hangsOn.id}`;
+  }
+
+  function deferredLines(item: ReportDeferred): string[] {
+    return [
+      ...bullet(`${item.id} · ${item.text}`, suffixOf(pointerOf(item.hangsOn), item.tags)),
+      ...indent(optionalBullet(item.reason)),
+    ];
+  }
+
+  function report(data: Report): string {
+    const tree = data.tree.flatMap(nodeLines);
+    const deferred = data.deferred.length === 0 ? [] : ["**Deferred**", ...data.deferred.flatMap(deferredLines)];
+    const gap = tree.length > 0 && deferred.length > 0 ? [""] : [];
+
+    return [...tree, ...gap, ...deferred].join("\n");
+  }
+
+  function tests() {
+    test("markdown report renders nothing to report as an empty string", () => {
+      // given
+      const data: Report = { tree: [], deferred: [] };
+
+      // when
+      const md = report(data);
+
+      // then
+      assert.equal(md, "");
+    });
+
+    test("markdown report renders a closed tree as question, answers, reason and nested decisions, then what was deferred", () => {
+      // given
+      const data = Report.run(Log.memoryLog(Report.closedSample));
+
+      // when
+      const md = report(data);
+
+      // then
+      assert.deepEqual(md.split("\n"), [
+        "- *Given S1 ·* SOC 2 Type II audit window opens 2027-02-01; SSO must be live for contracted enterprise tenants before then `#compliance`",
+        "  - Compliance calendar, confirmed by Marta (security lead)",
+        "  - **Q1 · Build or buy the identity layer?**",
+        "    - **Managed identity provider** (b)",
+        "      - Two backend engineers can't build and pen-test SAML + SCIM before February",
+        "      - **Q2 · Which vendor?** `#procurement`",
+        "        - **WorkOS** (a)",
+        "          - Per-connection pricing fits our 14 enterprise tenants; Auth0 quote came in 3.1x higher",
+        "          - **Q3 · How are existing password users migrated?**",
+        "            - **Lazy migration on next login** (b)",
+        "              - Nobody is forced to reset; the old login path stays for 90 days",
+        "      - **Q4 · Where do sessions live after the switch?**",
+        "        - **Keep our Redis session store; the IdP only authenticates** (a)",
+        "          - Instant revocation is a customer contract requirement; JWTs would need a denylist anyway",
+        "          - **Q5 · Session lifetime for tenant admins?**",
+        "            - **8 hours, re-auth on sensitive actions** (a)",
+        "              - Admin sessions are the valuable target; 8 hours covers a working day",
+        "  - **Q6 · Which tenants get SSO in the first wave?**",
+        "    - **The 3 tenants with SSO written into their contract** (a), **Our internal staff tenant (dogfood)** (c)",
+        "      - Contract deadlines first; staff tenant gives us two weeks of real usage before customers",
+        "      - **Q9 · Who trains the staff tenant's admins?** (on c)",
+        "        - **The security team** (a)",
+        "          - They wrote the runbook",
+        "- **Q8 · What happens to API keys tied to user accounts?**",
+        "  - **Expire keys when the owning user is deprovisioned** (b)",
+        "    - Closes the leaver gap without waiting for service accounts",
+        "",
+        "**Deferred**",
+        "- F1 · Does directory sync cover Google Workspace groups, or only Okta and Entra? (under Q2a)",
+        "  - Not needed for the first wave",
+        "- Q1c · Self-hosted Keycloak (option of Q1)",
+        "  - Revisit if vendor cost passes $40k/yr",
+        "- Q7 · Do we enforce MFA for password logins? `#waiting-cs`",
+        "  - Waiting on the support-load estimate from Tomasz (CS), due 2026-12-04",
+        "- Q8c · Move to tenant-level service accounts (option of Q8)",
+        "  - Needs the RBAC rework planned for Q2 2027",
+        "- F2 · Audit-log format for login events: what does the SOC 2 auditor expect to see? `#compliance`",
+        "  - The auditor is not appointed until January",
+      ]);
+    });
+
+    test("markdown report with nothing deferred has no Deferred heading", () => {
+      // given
+      const data: Report = {
+        tree: [
+          {
+            kind: "question",
+            id: "Q1",
+            text: "When is the digest sent?",
+            answers: [{ letter: "a", text: "08:00" }],
+            reason: "Before the working day starts",
+            underAnswers: [],
+            children: [{ kind: "statement", id: "S1", text: "The cron runs in UTC", children: [] }],
+          },
+        ],
+        deferred: [],
+      };
+
+      // when
+      const md = report(data);
+
+      // then
+      assert.deepEqual(md.split("\n"), [
+        "- **Q1 · When is the digest sent?**",
+        "  - **08:00** (a)",
+        "    - Before the working day starts",
+        "  - *Given S1 ·* The cron runs in UTC",
+      ]);
+    });
+
+    test("markdown report with only deferred items is the Deferred list alone", () => {
+      // given
+      const data: Report = { tree: [], deferred: [{ id: "Q1", text: "When is the digest sent?", reason: "Wait for v2" }] };
+
+      // when
+      const md = report(data);
+
+      // then
+      assert.deepEqual(md.split("\n"), ["**Deferred**", "- Q1 · When is the digest sent?", "  - Wait for v2"]);
+    });
+
+    test("markdown report leaves out a missing reason and a missing source", () => {
+      // given
+      const data: Report = {
+        tree: [
+          {
+            kind: "statement",
+            id: "S1",
+            text: "Max 100 emails/min",
+            children: [
+              {
+                kind: "question",
+                id: "Q1",
+                text: "Batch or stream?",
+                answers: [{ letter: "b", text: "Stream" }],
+                underAnswers: [],
+                children: [],
+              },
+            ],
+          },
+        ],
+        deferred: [{ id: "F1", text: "Check bounce handling" }],
+      };
+
+      // when
+      const md = report(data);
+
+      // then
+      assert.deepEqual(md.split("\n"), [
+        "- *Given S1 ·* Max 100 emails/min",
+        "  - **Q1 · Batch or stream?**",
+        "    - **Stream** (b)",
+        "",
+        "**Deferred**",
+        "- F1 · Check bounce handling",
+      ]);
+    });
+
+    test("markdown report puts what an item hangs on after its text and before its tags", () => {
+      // given
+      const data: Report = {
+        tree: [
+          {
+            kind: "question",
+            id: "Q1",
+            text: "Which channels?",
+            answers: [
+              { letter: "a", text: "Email" },
+              { letter: "b", text: "Push" },
+            ],
+            underAnswers: [
+              {
+                kind: "question",
+                id: "Q2",
+                text: "Which provider?",
+                tags: ["vendor", "cost"],
+                on: "a",
+                answers: [{ letter: "a", text: "SES" }],
+                underAnswers: [],
+                children: [],
+              },
+              { kind: "statement", id: "S1", text: "Push needs the app", tags: ["mobile"], on: "b", children: [] },
+            ],
+            children: [],
+          },
+        ],
+        deferred: [
+          { id: "Q1c", text: "SMS", hangsOn: { as: "option-of", id: "Q1" } },
+          { id: "F1", text: "Quiet hours", tags: ["later"], hangsOn: { as: "under", id: "Q1b" } },
+        ],
+      };
+
+      // when
+      const md = report(data);
+
+      // then
+      assert.deepEqual(md.split("\n"), [
+        "- **Q1 · Which channels?**",
+        "  - **Email** (a), **Push** (b)",
+        "    - **Q2 · Which provider?** (on a) `#vendor` `#cost`",
+        "      - **SES** (a)",
+        "    - *Given S1 ·* Push needs the app (on b) `#mobile`",
+        "",
+        "**Deferred**",
+        "- Q1c · SMS (option of Q1)",
+        "- F1 · Quiet hours (under Q1b) `#later`",
+      ]);
+    });
+
+    test("markdown report joins the lines of a question and of an answer, and indents the lines of other text", () => {
+      // given
+      const data: Report = {
+        tree: [
+          {
+            kind: "statement",
+            id: "S1",
+            text: "Fact 1\r\n\r\nFact 2\rFact 3",
+            tags: ["ops"],
+            source: "Source 1\r\nSource 2",
+            children: [
+              {
+                kind: "question",
+                id: "Q1",
+                text: " Line 1\r\n\r\nLine 2\rLine 3\n",
+                answers: [
+                  { letter: "a", text: "First\nanswer" },
+                  { letter: "b", text: "Second" },
+                ],
+                reason: "Reason 1\n\nReason 2",
+                underAnswers: [],
+                children: [],
+              },
+            ],
+          },
+        ],
+        deferred: [{ id: "Q2", text: "Later 1\nLater 2", tags: ["ops"], reason: "Why 1\nWhy 2" }],
+      };
+
+      // when
+      const md = report(data);
+
+      // then
+      assert.deepEqual(md.split("\n"), [
+        "- *Given S1 ·* Fact 1",
+        "",
+        "  Fact 2",
+        "  Fact 3 `#ops`",
+        "  - Source 1",
+        "    Source 2",
+        "  - **Q1 · Line 1 Line 2 Line 3**",
+        "    - **First answer** (a), **Second** (b)",
+        "      - Reason 1",
+        "",
+        "        Reason 2",
+        "",
+        "**Deferred**",
+        "- Q2 · Later 1",
+        "  Later 2 `#ops`",
+        "  - Why 1",
+        "    Why 2",
+      ]);
+    });
+
+    test("markdown report fences tags containing backticks and leaves prose unescaped", () => {
+      // given
+      const data: Report = {
+        tree: [],
+        deferred: [
+          {
+            id: "F1",
+            text: "Use `foo_bar` when x < 10 & *fast* is [on]",
+            tags: ["a`b", "end`", "two``ticks", "multi\nline"],
+          },
+        ],
+      };
+
+      // when
+      const md = report(data);
+
+      // then
+      assert.deepEqual(md.split("\n"), [
+        "**Deferred**",
+        "- F1 · Use `foo_bar` when x < 10 & *fast* is [on] ``#a`b`` `` #end` `` ```#two``ticks``` `#multi",
+        "  line`",
+      ]);
+    });
+  }
+
+  return { report, tests };
+})();
+
 const Cli = (() => {
   const cliOptions = {
     op: { type: "string" },
@@ -14289,7 +15438,7 @@ const Cli = (() => {
 
       // then
       for (const [name, { options }] of declared) {
-        const line = text.split("\n").find((each) => each.startsWith(`  ${name} `));
+        const line = text.split("\n").find((each) => `${each} `.startsWith(`  ${name} `));
         assert.ok(line !== undefined, name);
         for (const flag of Object.keys(options).filter((each) => !Object.hasOwn(operationOptions, each))) {
           assert.match(line, new RegExp(`--${flag}\\b`), `${name} --${flag}`);
@@ -14671,7 +15820,9 @@ const Cli = (() => {
       ["a header-only log", JSON.stringify(logHeader) + "\n"],
     ];
 
-    for (const query of ["next", "status", "tree", "items"]) {
+    const xmlQueries = ["next", "status", "tree", "items"];
+
+    for (const query of [...xmlQueries, "report"]) {
       for (const [description, relativePath, reason] of missingPaths) {
         test(`${query} reports ${description}`, (t) => {
           const dir = queryDirectory(t);
@@ -14690,7 +15841,9 @@ const Cli = (() => {
           assert.equal(readFileSync(file, "utf8"), "existing file");
         });
       }
+    }
 
+    for (const query of xmlQueries) {
       for (const [description, contents] of emptyLogs) {
         test(`${query} returns empty XML for ${description}`, (t) => {
           const path = join(queryDirectory(t), "log.jsonl");
@@ -14706,6 +15859,87 @@ const Cli = (() => {
           assert.equal(readFileSync(path, "utf8"), contents);
         });
       }
+    }
+
+    for (const [description, contents] of emptyLogs) {
+      test(`report prints 0 bytes for ${description} and preserves its contents`, (t) => {
+        const path = join(queryDirectory(t), "log.jsonl");
+        writeFileSync(path, contents);
+        const run = runFileQuery("report", path);
+        assert.deepEqual([run.status, run.stdout, run.stderr], [0, "", ""]);
+        assert.equal(readFileSync(path, "utf8"), contents);
+      });
+    }
+
+    function logFile(t: import("node:test").TestContext, events: Event[]): string {
+      const path = join(queryDirectory(t), "log.jsonl");
+      writeFileSync(path, [logHeader, ...events].map((each) => JSON.stringify(each)).join("\n") + "\n");
+      return path;
+    }
+
+    test("report prints a closed tree as markdown on stdout", (t) => {
+      // given
+      const path = logFile(t, [
+        { type: "add-question", id: "Q1", text: "When is the digest sent?" },
+        { type: "add-option", id: "Q1a", text: "08:00", origin: "Q1" },
+        { type: "add-option", id: "Q1b", text: "18:00", origin: "Q1" },
+        { type: "select-option", targets: ["Q1a"], context: "Before work" },
+        { type: "add-follow-up", id: "F1", text: "Check bounce handling", origin: "Q1a" },
+        { type: "exclude", target: "F1", reason: "deferred", context: "After launch" },
+      ]);
+
+      // when
+      const run = runFileQuery("report", path);
+
+      // then
+      assert.deepEqual(
+        [run.status, run.stderr, run.stdout],
+        [
+          0,
+          "",
+          [
+            "- **Q1 · When is the digest sent?**",
+            "  - **08:00** (a)",
+            "    - Before work",
+            "",
+            "**Deferred**",
+            "- F1 · Check bounce handling (under Q1a)",
+            "  - After launch",
+          ].join("\n") + "\n",
+        ],
+      );
+    });
+
+    test("report on a tree with open items prints one line naming them, exits 1 and leaves the log as it was", (t) => {
+      // given
+      const path = logFile(t, [
+        { type: "add-question", id: "Q1", text: "When is the digest sent?" },
+        { type: "add-follow-up", id: "F1", text: "Check bounce handling" },
+      ]);
+      const before = readFileSync(path, "utf8");
+
+      // when
+      const run = runFileQuery("report", path);
+
+      // then
+      assert.deepEqual([run.status, run.stderr, run.stdout], [1, "cannot report: Q1, F1 are open\n", ""]);
+      assert.equal(readFileSync(path, "utf8"), before);
+    });
+
+    for (const flag of ["--format=markdown", "--target=Q1"]) {
+      test(`report refuses ${flag} as an unknown flag`, () => {
+        // given
+        const log = Log.memoryLog([{ type: "add-question", id: "Q1", text: "q" }]);
+
+        // when
+        const act = () => answer(log, "report", [flag]);
+
+        // then
+        assert.throws(
+          act,
+          (error) => error instanceof DecisionTreeError && error.message === `unknown flag: ${flag.split("=")[0]}`,
+        );
+      });
     }
 
     test("a query on a log that is a directory prints one line and exits 1", (t) => {
@@ -16206,7 +17440,9 @@ const Cli = (() => {
     Next.tests();
     Tree.tests();
     Status.tests();
+    Report.tests();
     Xml.tests();
+    Markdown.tests();
   }
 
   function locatingErrors<T>(operation: { op: string; position: number; of: number }, work: () => T): T {
@@ -16318,7 +17554,8 @@ const Cli = (() => {
 
     if (mode.kind === "query") {
       const log = Log.fileLog(mode.log);
-      console.log(Log.explainingFileErrors(mode.log, () => answer(log, mode.query, args)));
+      const output = Log.explainingFileErrors(mode.log, () => answer(log, mode.query, args));
+      if (output !== "") console.log(output);
       return;
     }
 
@@ -16349,6 +17586,7 @@ const Cli = (() => {
     tree: query(Tree, Xml.tree, "The nested structure with every option, keeping the ancestors of a match."),
     status: query(Status, Xml.status, "Open, settled and deferred items in one compact hierarchy."),
     items: query(Items, Xml.items, "A flat list in walk order; --target finds one item, in any state unless --state is given, and --trail requires --target."),
+    report: query(Report, Markdown.report, "The settled decisions with their reasons, then what was deferred, as markdown for a person. Refused while anything is open."),
   };
 
   function answer(log: Log, name: string, args: string[]): string {
@@ -16479,7 +17717,7 @@ const Cli = (() => {
       `  node ${script} --help`,
       "",
       "DECISION_TREE_LOG can stand in for --log, which wins if both are set.",
-      "Results are XML on stdout. A refused call prints one line on stderr, exits 1 and writes nothing.",
+      "A write, and the queries next, status, tree and items, print XML on stdout. report prints markdown. A refused call prints one line on stderr, exits 1 and writes nothing.",
       "[--flag] is optional; a trailing … means it can be repeated.",
       "",
       "Operations:",

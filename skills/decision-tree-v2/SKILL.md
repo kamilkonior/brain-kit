@@ -24,7 +24,7 @@ If the CLI reports `unsupported log format`, use the CLI version that created th
 
 If the CLI reports `log is locked by another writer`, retry once the other writer finishes, or remove the lock file it names if no writer is running.
 
-Results are XML on stdout. A failed call prints one line on stderr, exits 1 and writes nothing. The item it names is the one to act on: `Q2 is off-path, hidden by Q1b` means select `Q1b` first. A refusal can name two things to act on: `Q2 is deferred, hidden by Q1b (off-path)` means restore `Q2` and select `Q1b`.
+A write, and the queries `next`, `status`, `tree` and `items`, print XML on stdout. `report` prints markdown. A failed call prints one line on stderr, exits 1 and writes nothing. The item it names is the one to act on: `Q2 is off-path, hidden by Q1b` means select `Q1b` first. A refusal can name two things to act on: `Q2 is deferred, hidden by Q1b (off-path)` means restore `Q2` and select `Q1b`.
 
 ## The tree
 
@@ -112,7 +112,7 @@ An item that is off the path, or under an excluded item, accepts every operation
 
 `--context C` says why an operation was done, or where a fact comes from. It is required on `select-option`, `clear-selection`, `exclude` and the three supersedes; optional on the four `add-…` operations and `promote-follow-up`; and refused on `restore`, `tag`, `untag` and `focus`.
 
-Queries show each context beside its item, marked with the operation it came from: `<context by="select-option">Before the working day starts</context>`. The context of a selection lasts until the selection changes, and the context of an exclusion until the restore.
+A query that prints XML shows each context beside its item, marked with the operation it came from: `<context by="select-option">Before the working day starts</context>`. The context of a selection lasts until the selection changes, and the context of an exclusion until the restore.
 
 ### Batches
 
@@ -163,7 +163,7 @@ For the same reason, nothing under the superseded item moves to the replacement.
 
 ## Queries
 
-Every query prints the contexts of the items it returns. `--target` names a question, follow-up or statement, not an option.
+`--target` names a question, follow-up or statement, not an option.
 
 | `--query` | Returns |
 |---|---|
@@ -171,6 +171,7 @@ Every query prints the contexts of the items it returns. `--target` names a ques
 | `status [--target ID]` | open, settled and deferred items in one compact hierarchy. It stops at deferred items and leaves out off-path, not-applicable and frozen items. A standing statement or promoted follow-up is not shown itself; the items under it are shown in its place. An item inside a decided option goes if that answer changes, and one beside `<decided>` stays. `--target` limits it to that item and what's under it, and prints an empty `<status></status>` for an item it leaves out. |
 | `tree [--state S]… [--target ID]` | the nested structure, with every option. It keeps the ancestors of a match. `--target` limits it to that item and what's under it. |
 | `items [--tag T] [--target ID [--trail]] [--state S]… [--limit N]` | a flat list: active items in walk order, then the hidden ones. `--target` finds one item in any state unless `--state` is given. `--limit` doesn't say whether more exist. |
+| `report` | the closed tree as markdown, for a person to read. Each settled question is shown with its chosen options and the reason for the selection, and each standing statement as a *Given* line with the context it was created with; both are nested under what they hang on. A **Deferred** list follows, with the reason for each deferral. It prints no other context and no option that was not chosen. Like `status`, it shows only the current path and stops at deferred items. It takes no `--target`. While anything is open it fails, naming the open items: `cannot report: Q3, F1 are open`. An empty tree prints nothing. |
 
 `S` is `open`, `settled`, `off-path`, `deferred`, `not-applicable`, `frozen` or `all`. It never filters options. Without `--state`, only open items are shown, so `tree --target ID` prints `<tree></tree>` for a decision with nothing open under it; read a decision with `--state all`. A statement is never open, so `items --tag T` finds none without a `--state`.
 
@@ -189,6 +190,6 @@ Every query prints the contexts of the items it returns. `--target` names a ques
 | A question's premise changed | `supersede-question`, asking it on the premise that holds now; see Superseding. `--query tree --target QID --state all` shows what it would freeze. |
 | An option's meaning changed | `supersede-option`, stating what it means now; see Superseding. `exclude` would leave what was decided under the old meaning restorable. |
 | A fact turned out wrong | `supersede-statement`, stating what holds now; see Superseding. |
-| Stopping before everything is decided | A pause needs nothing. To close the tree, `exclude --reason deferred` each open item, with the reason as `--context`, top-level items first. |
+| Stopping before everything is decided | A pause needs nothing. To close the tree, `exclude --reason deferred` each open item, with the reason as `--context`, top-level items first. A closed tree can be printed for a person with `--query report`. |
 | An option is ruled out | `exclude` on the option, with `--reason not-applicable`. If it was selected, the selection is cleared; to keep the other selected options, select them again in the same call. |
 | A question's answer is in doubt | `clear-selection`. `exclude` on the chosen option also reopens the question, but takes that option off the offer. |
