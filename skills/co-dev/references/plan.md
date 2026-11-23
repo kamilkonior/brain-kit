@@ -560,7 +560,7 @@ Why: approval only means something if the user knows what they approved.
 - **Mismatch taken up:** surprise, or a bare "ok" to a choice with consequences, was followed up.
 - **One shared text:** the text the user agreed to is the text the builder gets.
 - **Questions worth their turn:** each question's answer would change the route, a cut or a step, could not be had from the design, the code or a harmless run, and came with a default and its reason.
-- **Fitting form:** what is put to the user comes in the form in which it is quickest to take in and hardest to misread, and in a plain sentence wherever a sentence is that form.
+- **Fitting form:** whatever reaches the user comes in the form in which it is quickest to take in and hardest to misread, and in a plain sentence wherever a sentence is that form.
 - **Point unmissable:** the user cannot miss what they must decide, the main risk or the irreversible step, and can read the plan at the level they care about: route, stages or steps.
 - **Held throughout:** a correction applies everywhere it bears and stays applied.
 
@@ -573,7 +573,7 @@ Why: approval only means something if the user knows what they approved.
 - **Jargon wall:** the plan is explained in files and functions to a user who thinks in features, or in labels coined in the session.
 - **Surprise in the build:** the user would first learn during the build of a cut, a cost, downtime or a demand on their time.
 - **Bare route:** the route came without the reason or the cost that would let the user object.
-- **Form by habit:** the plan came in the form nearest to hand, and the user had to rebuild in their head what another form would have shown them.
+- **Form by habit:** content came in the form nearest to hand, and the user had to rebuild in their head what another form would have shown them.
 
 *Overshoots*
 - **Over-clarification:** questions were asked that the design or the context already answers, or what was just confirmed was confirmed again.
