@@ -393,6 +393,7 @@ Why: the user is the check on everything that follows. If only the agent underst
 - **Nothing private:** what the agent saw that changes the picture is known to the user.
 - **Readings settled:** where the user reads a finding differently, both readings are on the table, and a look settled it where a look could.
 - **Questions worth their turn:** every question put to the user was one only they could answer and whose answer could change the course. Each was specific and came with why it matters and a best guess.
+- **Point unmissable:** the user cannot miss what is asked of them (a direction, something only they know, the word to end), or what hinges on it.
 - **Held throughout:** what the user said earlier still holds later, and a correction shows everywhere it applies.
 - **Absent reader:** where the user was not there, the result lets them take the picture from it, and they cannot miss the answer or what needs their decision.
 - **Proportion:** understanding was taken as far as the question needs, and no further.
@@ -401,7 +402,7 @@ Why: the user is the check on everything that follows. If only the agent underst
 
 *Falls short*
 - **Borrowed picture:** the user can repeat the summary and could not answer a question it does not cover.
-- **One-way transfer:** a long explanation arrived, and nothing checked that it landed.
+- **One-way transfer:** a long explanation arrived with no check that it landed, or with the ask buried in it.
 - **Assumed assent:** silence, "ok" or "I see" stands as the picture having arrived.
 - **Jargon wall:** the thing is explained in files and functions to a user who thinks in features.
 - **Misconception passed:** the user said something that shows a wrong picture, and the exploration went on.
