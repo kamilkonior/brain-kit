@@ -10625,25 +10625,9 @@ const Tree = (() => {
 const Status = (() => {
   const options = {
     target: { type: "string" },
-    format: { type: "string" },
   }         ;
 
-  const formats = ["xml", "markdown"]         ;
-
-                                         
-
-  function chosenFormat(given         = "xml")         {
-    const match = formats.find((each) => each === given);
-    if (match === undefined) {
-      throw new DecisionTreeError(`format must be ${formats.join(" or ")}: ${given}`);
-    }
-
-    return match;
-  }
-
-  function run(log     , config                                       = {})               {
-    chosenFormat(config.format);
-
+  function run(log     , config                      = {})               {
     return Graph.status(log, config.target);
   }
 
@@ -11475,42 +11459,9 @@ const Status = (() => {
         },
       ]);
     });
-
-    test("status accepts xml and markdown formats", () => {
-      // given
-      const log = Log.memoryLog([{ type: "add-question", id: "Q1", text: "q" }]);
-
-      // when
-      const xmlItems = run(log, { format: "xml" });
-      const mdItems = run(log, { format: "markdown" });
-
-      // then
-      assert.deepEqual(xmlItems, mdItems);
-    });
-
-    for (const bad of ["nope", "md", "XML"]) {
-      test(`status refuses unknown format ${bad} before reading the log`, () => {
-        // given
-        const log      = {
-          read() {
-            throw new Error("should not read log");
-          },
-          append() {},
-        };
-
-        // when
-        const act = () => run(log, { format: bad });
-
-        // then
-        assert.throws(
-          act,
-          (error) => error instanceof DecisionTreeError && error.message === `format must be xml or markdown: ${bad}`,
-        );
-      });
-    }
   }
 
-  return { options, formats, chosenFormat, run, tests };
+  return { options, run, tests };
 })();
 
 const Xml = (() => {
@@ -14145,317 +14096,6 @@ const Xml = (() => {
   };
 })();
 
-const Markdown = (() => {
-  const creationLabels                                        = {
-    "add-question": "Added",
-    "add-option": "Added",
-    "add-follow-up": "Added",
-    "add-statement": "Added",
-    "promote-follow-up": "Promoted",
-    "supersede-question": "Superseded",
-    "supersede-option": "Superseded",
-    "supersede-statement": "Superseded",
-  };
-
-  function normalize(text        )         {
-    return text.replaceAll("\r\n", "\n").replaceAll("\r", "\n");
-  }
-
-  function indent(lines          )           {
-    return lines.map((line) => (line === "" ? "" : `  ${line}`));
-  }
-
-  function formatTag(tag        )         {
-    const content = `#${normalize(tag)}`;
-    const longest = Math.max(0, ...(content.match(/`+/g) ?? []).map((run) => run.length));
-    const fence = "`".repeat(longest + 1);
-    const padded = content.endsWith("`") ? ` ${content} ` : content;
-
-    return `${fence}${padded}${fence}`;
-  }
-
-  function bullet(prefix        , text        , tags           )           {
-    const tagSuffix = tags === undefined || tags.length === 0 ? "" : tags.map(formatTag).join(" ");
-    const body = normalize(text);
-    const combined =
-      tagSuffix === "" ? body : body.endsWith("\n") ? `${body}${tagSuffix}` : `${body} ${tagSuffix}`;
-    const [first, ...rest] = combined.split("\n");
-
-    return [`- ${prefix} ${first}`, ...indent(rest)];
-  }
-
-  function contextBullet(label        , text                    )           {
-    return text === undefined ? [] : bullet(`*${label}:*`, text);
-  }
-
-  function itemContextLines(context                         )           {
-    if (context === undefined) return [];
-
-    return [
-      ...(context.createdBy === undefined ? [] : contextBullet(creationLabels[context.createdBy], context.creation)),
-      ...contextBullet("Deferred", context.exclusion),
-    ];
-  }
-
-  function questionContextLines(context                             )           {
-    if (context === undefined) return [];
-
-    return [
-      ...itemContextLines(context),
-      ...contextBullet("Decided", context.selection),
-      ...contextBullet("Cleared", context.clearing),
-    ];
-  }
-
-  function openOptionLines(option            )           {
-    return [
-      ...bullet(`**${option.id}**`, option.text),
-      ...indent(itemContextLines(option.context)),
-    ];
-  }
-
-  function decidedOptionLines(option                                         )           {
-    return [
-      ...bullet(`**${option.id}** *(selected)*`, option.text),
-      ...indent([...itemContextLines(option.context), ...option.children.flatMap(statusLines)]),
-    ];
-  }
-
-  function statusLines(item            )           {
-    if (item.state === "deferred") {
-      const marker = item.kind === "question" ? "*(deferred)*" : `*(deferred, ${item.kind})*`;
-      const tags = item.kind === "option" ? undefined : item.tags;
-      const contexts = item.kind === "question" ? questionContextLines(item.context) : itemContextLines(item.context);
-
-      return [...bullet(`**${item.id}** ${marker}`, item.text, tags), ...indent(contexts)];
-    }
-
-    if (item.kind === "follow-up") {
-      return [...bullet(`**${item.id}** *(open, follow-up)*`, item.text, item.tags), ...indent(itemContextLines(item.context))];
-    }
-
-    const body =
-      item.state === "settled"
-        ? [...questionContextLines(item.context), ...item.decided.flatMap(decidedOptionLines), ...item.children.flatMap(statusLines)]
-        : [...questionContextLines(item.context), ...item.options.flatMap(openOptionLines), ...item.children.flatMap(statusLines)];
-
-    return [...bullet(`**${item.id}** *(${item.state})*`, item.text, item.tags), ...indent(body)];
-  }
-
-  function status(items              )         {
-    if (items.length === 0) return "";
-
-    return items.flatMap(statusLines).join("\n");
-  }
-
-  function tests() {
-    test("markdown status renders no items as an empty string", () => {
-      // given
-      const items               = [];
-
-      // when
-      const md = status(items);
-
-      // then
-      assert.equal(md, "");
-    });
-
-    test("markdown status renders settled, open, follow-up and deferred items in a flat nested list", () => {
-      // given
-      const items               = [
-        {
-          kind: "question",
-          state: "settled",
-          id: "Q1",
-          text: "When is the digest sent?",
-          tags: ["email", "ops"],
-          context: { creation: "Needed for v1 launch", createdBy: "add-question", selection: "Before the working day starts" },
-          decided: [
-            {
-              id: "Q1a",
-              text: "08:00",
-              context: { creation: "Earliest cron slot", createdBy: "add-option" },
-              children: [
-                {
-                  kind: "question",
-                  state: "open",
-                  id: "Q2",
-                  text: "Which timezone?",
-                  context: { clearing: "DST issue spotted" },
-                  options: [
-                    { id: "Q2a", text: "UTC" },
-                    { id: "Q2b", text: "User local", context: { creation: "Needs user profile field", createdBy: "add-option" } },
-                  ],
-                  children: [{ kind: "question", state: "open", id: "Q3", text: "Who owns the cron job?", options: [], children: [] }],
-                },
-              ],
-            },
-            { id: "Q1c", text: "12:00", children: [] },
-          ],
-          children: [
-            { kind: "follow-up", state: "open", id: "F1", text: "Check bounce handling" },
-            { kind: "option", state: "deferred", id: "Q1b", text: "18:00", context: { exclusion: "Wait for v2" } },
-          ],
-        },
-        {
-          kind: "statement",
-          state: "deferred",
-          id: "S1",
-          text: "Max 100 emails/min",
-          tags: ["limits"],
-          context: { exclusion: "Unverified quota" },
-        },
-      ];
-
-      // when
-      const md = status(items);
-
-      // then
-      assert.deepEqual(md.split("\n"), [
-        "- **Q1** *(settled)* When is the digest sent? `#email` `#ops`",
-        "  - *Added:* Needed for v1 launch",
-        "  - *Decided:* Before the working day starts",
-        "  - **Q1a** *(selected)* 08:00",
-        "    - *Added:* Earliest cron slot",
-        "    - **Q2** *(open)* Which timezone?",
-        "      - *Cleared:* DST issue spotted",
-        "      - **Q2a** UTC",
-        "      - **Q2b** User local",
-        "        - *Added:* Needs user profile field",
-        "      - **Q3** *(open)* Who owns the cron job?",
-        "  - **Q1c** *(selected)* 12:00",
-        "  - **F1** *(open, follow-up)* Check bounce handling",
-        "  - **Q1b** *(deferred, option)* 18:00",
-        "    - *Deferred:* Wait for v2",
-        "- **S1** *(deferred, statement)* Max 100 emails/min `#limits`",
-        "  - *Deferred:* Unverified quota",
-      ]);
-    });
-
-    test("markdown status renders every creation, exclusion, selection and clearing context label in order", () => {
-      // given
-      const items               = [
-        {
-          kind: "question",
-          state: "deferred",
-          id: "Q1",
-          text: "q1",
-          tags: ["t"],
-          context: { creation: "from follow-up", createdBy: "promote-follow-up", exclusion: "later", selection: "was a" },
-        },
-        {
-          kind: "question",
-          state: "deferred",
-          id: "Q2",
-          text: "q2",
-          context: { creation: "replaced old", createdBy: "supersede-question", exclusion: "blocked", clearing: "reopened" },
-        },
-        {
-          kind: "follow-up",
-          state: "deferred",
-          id: "F1",
-          text: "f1",
-          tags: ["u"],
-          context: { creation: "noted", createdBy: "add-follow-up", exclusion: "parked" },
-        },
-        {
-          kind: "statement",
-          state: "deferred",
-          id: "S1",
-          text: "s1",
-          context: { creation: "updated fact", createdBy: "supersede-statement" },
-        },
-        {
-          kind: "question",
-          state: "open",
-          id: "Q3",
-          text: "q3",
-          options: [{ id: "Q3b", text: "b", context: { creation: "refined", createdBy: "supersede-option" } }],
-          children: [],
-        },
-      ];
-
-      // when
-      const md = status(items);
-
-      // then
-      assert.deepEqual(md.split("\n"), [
-        "- **Q1** *(deferred)* q1 `#t`",
-        "  - *Promoted:* from follow-up",
-        "  - *Deferred:* later",
-        "  - *Decided:* was a",
-        "- **Q2** *(deferred)* q2",
-        "  - *Superseded:* replaced old",
-        "  - *Deferred:* blocked",
-        "  - *Cleared:* reopened",
-        "- **F1** *(deferred, follow-up)* f1 `#u`",
-        "  - *Added:* noted",
-        "  - *Deferred:* parked",
-        "- **S1** *(deferred, statement)* s1",
-        "  - *Superseded:* updated fact",
-        "- **Q3** *(open)* q3",
-        "  - **Q3b** b",
-        "    - *Superseded:* refined",
-      ]);
-    });
-
-    test("markdown status indents multiline text and contexts, normalizes line endings and keeps blank lines empty", () => {
-      // given
-      const items               = [
-        {
-          kind: "question",
-          state: "open",
-          id: "Q1",
-          text: "Line 1\r\n\r\nLine 2\rLine 3",
-          tags: ["ops"],
-          context: { creation: "Reason 1\r\nReason 2\n\nReason 3", createdBy: "add-question" },
-          options: [],
-          children: [],
-        },
-      ];
-
-      // when
-      const md = status(items);
-
-      // then
-      assert.deepEqual(md.split("\n"), [
-        "- **Q1** *(open)* Line 1",
-        "",
-        "  Line 2",
-        "  Line 3 `#ops`",
-        "  - *Added:* Reason 1",
-        "    Reason 2",
-        "",
-        "    Reason 3",
-      ]);
-    });
-
-    test("markdown status fences tags containing backticks and leaves prose unescaped", () => {
-      // given
-      const items               = [
-        {
-          kind: "follow-up",
-          state: "open",
-          id: "F1",
-          text: "Use `foo_bar` when x < 10 & *fast* is [on]",
-          tags: ["a`b", "end`", "two``ticks", "multi\nline"],
-        },
-      ];
-
-      // when
-      const md = status(items);
-
-      // then
-      assert.deepEqual(md.split("\n"), [
-        "- **F1** *(open, follow-up)* Use `foo_bar` when x < 10 & *fast* is [on] ``#a`b`` `` #end` `` ```#two``ticks``` `#multi",
-        "  line`",
-      ]);
-    });
-  }
-
-  return { status, tests };
-})();
-
 const Cli = (() => {
   const cliOptions = {
     op: { type: "string" },
@@ -14763,17 +14403,6 @@ const Cli = (() => {
 
       // then
       assert.equal(line, "STATE is open, settled, off-path, deferred, not-applicable, frozen or all, and open when no --state is given.");
-    });
-
-    test("help lists every format --format accepts and says xml is the default", () => {
-      // given
-      const text = helpText();
-
-      // when
-      const line = text.split("\n").find((each) => each.startsWith("FORMAT is "));
-
-      // then
-      assert.equal(line, "FORMAT is xml or markdown, and xml when no --format is given.");
     });
 
     test("--help reads as the help mode", () => {
@@ -16551,176 +16180,6 @@ const Cli = (() => {
       // then
       assert.equal(config.text, "a\tb\nc");
     });
-
-    test("status --format xml matches default XML output", () => {
-      // given
-      const log = Log.memoryLog([{ type: "add-question", id: "Q1", text: "q" }]);
-
-      // when
-      const plain = answer(log, "status", []);
-      const explicit = answer(log, "status", ["--format=xml"]);
-
-      // then
-      assert.equal(explicit, plain);
-    });
-
-    test("status --format markdown renders a populated log on stdout", (t) => {
-      // given
-      const dir = mkdtempSync(join(tmpdir(), "decision-tree-"));
-      t.after(() => rmSync(dir, { recursive: true }));
-      const path = join(dir, "log.jsonl");
-      writeFileSync(
-        path,
-        [
-          JSON.stringify(logHeader),
-          JSON.stringify({ type: "add-question", id: "Q1", text: "When is the digest sent?" }),
-          JSON.stringify({ type: "add-option", id: "Q1a", text: "08:00", origin: "Q1" }),
-          JSON.stringify({ type: "select-option", targets: ["Q1a"], context: "Before work" }),
-        ].join("\n") + "\n",
-      );
-
-      // when
-      const run = spawnSync(process.execPath, [process.argv[1], "--log", path, "--query", "status", "--format", "markdown"], {
-        encoding: "utf8",
-      });
-
-      // then
-      assert.deepEqual(
-        [run.status, run.stderr, run.stdout],
-        [
-          0,
-          "",
-          ["- **Q1** *(settled)* When is the digest sent?", "  - *Decided:* Before work", "  - **Q1a** *(selected)* 08:00"].join("\n") +
-            "\n",
-        ],
-      );
-    });
-
-    for (const [description, contents] of [
-      ["a zero-byte log", ""],
-      ["a header-only log", JSON.stringify(logHeader) + "\n"],
-    ]) {
-      test(`status --format markdown prints 0 bytes for ${description} and preserves its contents`, (t) => {
-        // given
-        const dir = mkdtempSync(join(tmpdir(), "decision-tree-"));
-        t.after(() => rmSync(dir, { recursive: true }));
-        const path = join(dir, "log.jsonl");
-        writeFileSync(path, contents);
-
-        // when
-        const run = spawnSync(process.execPath, [process.argv[1], "--log", path, "--query", "status", "--format", "markdown"], {
-          encoding: "utf8",
-        });
-
-        // then
-        assert.deepEqual([run.status, run.stdout, run.stderr], [0, "", ""]);
-        assert.equal(readFileSync(path, "utf8"), contents);
-      });
-    }
-
-    test("status --format markdown prints 0 bytes for an off-path target", (t) => {
-      // given
-      const dir = mkdtempSync(join(tmpdir(), "decision-tree-"));
-      t.after(() => rmSync(dir, { recursive: true }));
-      const path = join(dir, "log.jsonl");
-      writeFileSync(
-        path,
-        [
-          JSON.stringify(logHeader),
-          JSON.stringify({ type: "add-question", id: "Q1", text: "q1" }),
-          JSON.stringify({ type: "add-option", id: "Q1a", text: "a", origin: "Q1" }),
-          JSON.stringify({ type: "add-option", id: "Q1b", text: "b", origin: "Q1" }),
-          JSON.stringify({ type: "select-option", targets: ["Q1a"] }),
-          JSON.stringify({ type: "add-question", id: "Q2", text: "q2", origin: "Q1b" }),
-        ].join("\n") + "\n",
-      );
-
-      // when
-      const run = spawnSync(
-        process.execPath,
-        [process.argv[1], "--log", path, "--query", "status", "--target", "Q2", "--format", "markdown"],
-        { encoding: "utf8" },
-      );
-
-      // then
-      assert.deepEqual([run.status, run.stdout, run.stderr], [0, "", ""]);
-    });
-
-    test("status --format markdown reports a missing log file and preserves the filesystem", (t) => {
-      // given
-      const dir = mkdtempSync(join(tmpdir(), "decision-tree-"));
-      t.after(() => rmSync(dir, { recursive: true }));
-      const path = join(dir, "missing.jsonl");
-
-      // when
-      const run = spawnSync(process.execPath, [process.argv[1], "--log", path, "--query", "status", "--format", "markdown"], {
-        encoding: "utf8",
-      });
-
-      // then
-      assert.deepEqual([run.status, run.stdout, run.stderr], [1, "", `cannot use log ${path}: file does not exist\n`]);
-      assert.deepEqual(fs.readdirSync(dir), []);
-    });
-
-    for (const bad of ["nope", "md", "XML"]) {
-      test(`status refuses unknown format ${bad} on stderr and exits 1 even when the log is missing`, (t) => {
-        // given
-        const dir = mkdtempSync(join(tmpdir(), "decision-tree-"));
-        t.after(() => rmSync(dir, { recursive: true }));
-        const path = join(dir, "missing.jsonl");
-
-        // when
-        const run = spawnSync(process.execPath, [process.argv[1], "--log", path, "--query", "status", "--format", bad], {
-          encoding: "utf8",
-        });
-
-        // then
-        assert.deepEqual([run.status, run.stdout, run.stderr], [1, "", `format must be xml or markdown: ${bad}\n`]);
-      });
-    }
-
-    for (const other of ["next", "tree", "items"]) {
-      test(`--format on ${other} throws unknown flag`, () => {
-        // given
-        const log = Log.memoryLog();
-
-        // when
-        const act = () => answer(log, other, ["--format=markdown"]);
-
-        // then
-        assert.throws(act, (error) => error instanceof DecisionTreeError && error.message === "unknown flag: --format");
-      });
-    }
-
-    test("--format on an operation throws unknown flag", () => {
-      // given
-      const args = ["--op=add-question", "--text=q", "--format=markdown"];
-
-      // when
-      const act = () => parsed(groups(args));
-
-      // then
-      assert.throws(act, (error) => error instanceof DecisionTreeError && error.message === "unknown flag: --format");
-    });
-
-    test("status refuses duplicate, blank and missing-value --format", () => {
-      // given
-      const log = Log.memoryLog();
-
-      // then
-      assert.throws(
-        () => answer(log, "status", ["--format=xml", "--format=markdown"]),
-        (error) => error instanceof DecisionTreeError && error.message === "--format given more than once",
-      );
-      assert.throws(
-        () => answer(log, "status", ["--format=   "]),
-        (error) => error instanceof DecisionTreeError && error.message === "--format must not be blank",
-      );
-      assert.throws(
-        () => withValuesJoined(["--query", "status", "--format"]),
-        (error) => error instanceof DecisionTreeError && error.message === "--format requires a value",
-      );
-    });
   }
 
   function runTests() {
@@ -16748,7 +16207,6 @@ const Cli = (() => {
     Tree.tests();
     Status.tests();
     Xml.tests();
-    Markdown.tests();
   }
 
   function locatingErrors   (operation                                              , work         )    {
@@ -16860,8 +16318,7 @@ const Cli = (() => {
 
     if (mode.kind === "query") {
       const log = Log.fileLog(mode.log);
-      const output = Log.explainingFileErrors(mode.log, () => answer(log, mode.query, args));
-      if (output !== "") console.log(output);
+      console.log(Log.explainingFileErrors(mode.log, () => answer(log, mode.query, args)));
       return;
     }
 
@@ -16877,28 +16334,20 @@ const Cli = (() => {
 
   function query                                     (
     module              ,
-    print                                        ,
+    print                     ,
     summary        ,
   )        {
     return {
       options: module.options,
       summary,
-      answer: (log, args) => {
-        const config = readModeConfig(module.options, args);
-
-        return print(module.run(log, config), config);
-      },
+      answer: (log, args) => print(module.run(log, readModeConfig(module.options, args))),
     };
   }
 
   const queries                        = {
     next: query(Next, Xml.next, "The first open item; --trail adds the path to it. The only query a focus affects."),
     tree: query(Tree, Xml.tree, "The nested structure with every option, keeping the ancestors of a match."),
-    status: query(
-      Status,
-      (items, config) => (Status.chosenFormat(config.format) === "markdown" ? Markdown.status(items) : Xml.status(items)),
-      "Open, settled and deferred items in one compact hierarchy.",
-    ),
+    status: query(Status, Xml.status, "Open, settled and deferred items in one compact hierarchy."),
     items: query(Items, Xml.items, "A flat list in walk order; --target finds one item, in any state unless --state is given, and --trail requires --target."),
   };
 
@@ -17030,7 +16479,7 @@ const Cli = (() => {
       `  node ${script} --help`,
       "",
       "DECISION_TREE_LOG can stand in for --log, which wins if both are set.",
-      "Results are XML on stdout by default (status also supports --format markdown). A refused call prints one line on stderr, exits 1 and writes nothing.",
+      "Results are XML on stdout. A refused call prints one line on stderr, exits 1 and writes nothing.",
       "[--flag] is optional; a trailing … means it can be repeated.",
       "",
       "Operations:",
@@ -17043,7 +16492,6 @@ const Cli = (() => {
       ...section(answers),
       "",
       `STATE is ${Items.states.join(", ")} or all, and open when no --state is given.`,
-      `FORMAT is ${Status.formats.join(" or ")}, and xml when no --format is given.`,
     ].join("\n");
   }
 
