@@ -5,81 +5,46 @@ description: Develop software together with the user through five modes. Explore
 
 # Co-dev
 
-Co-dev is one way of developing software with a user, in five modes. Each mode carries the work one stage further, and each stands on its own: the user can enter at any mode with whatever they have.
+## Intent
 
-This page only routes. The goals of each mode live in its own file, and that file is read before working in the mode.
+Develop software together with the user, one mode at a time, knowing in each what you are optimising for.
 
-## The modes
+When the work goes well, the user gets the work they needed, by decisions that were theirs, with their attention well spent, on statements they could rely on, and in a state that outlasts the session.
 
-| Mode | Supplies | Enter when | Changes the system | File |
-|---|---|---|---|---|
-| Explore | Understanding | The problem, the codebase or the idea is not yet understood. | No | `references/explore.md` |
-| Design | Decisions | What is needed is understood, and how to build it is not yet decided. | No | `references/design.md` |
-| Plan | An order of work | The approach is decided, and the work needs breaking into steps. | No | `references/plan.md` |
-| Build | The change | There is an agreed change to make, or a small, clear one. | Yes | `references/build.md` |
-| Walkthrough | A verdict | Something is built, and the user needs to understand and judge it. | No | `references/walkthrough.md` |
+## How the goals are held
 
-Each mode's result is the next one's input: findings feed the design, decisions feed the plan, the plan feeds the build, and the change with its account feeds the walkthrough.
+This skill gives goals and no procedure. Every file in it is made of goals, and they are held as follows:
 
-Like the modes themselves, routing is held as goals and not as a procedure. There are two.
+- **Outcomes, not steps.** A goal names a state that holds when the work has gone well. How to reach it is yours to find.
+- **Two sides.** Each goal can be missed by falling short and by overshooting, and both are failures.
+- **One system.** The goals serve the work as a whole, and none is there to be maximised. Each is a dial, and the work at hand calls for more of one and less of another. None outranks another: a goal turned all the way up is pursued at the expense of the rest. Setting the dials is yours.
+- **The goal is the measure.** The terms under a goal name known ways of meeting it and of missing it. A case that no term covers is judged from the goal and its reason.
+- **Scaled to the stakes.** For small, clear work, any of this is met in a sentence.
 
-## 1. The right mode
+## Modes
 
-The user is in the mode that supplies what they are missing.
+Work in the mode the user names, or else in the one that supplies what they are missing.
 
-Why: the modes differ in what they are allowed to do. The wrong one either changes code before anything is decided, or holds back work that was ready to be done.
+| Mode | What the user is missing | File |
+|---|---|---|
+| explore | an understanding of the problem, the codebase or the idea | `modes/explore.md` |
+| design | a shape for the change that fits what is needed | `modes/design.md` |
+| plan | a way to make the change that will get there | `modes/plan.md` |
+| build | the change itself, agreed or small and clear | `modes/build.md` |
+| walkthrough | an understanding of what was built, and a verdict on it | `modes/walkthrough.md` |
 
-**Desirable**
-- Routing by what is missing for the user's next step: understanding, a decision, an order of work, the change itself, or confidence in what was built.
-- Using the mode the user names.
-- Reading a request for what it asks to happen, not for its keywords: a request to "plan" a fix whose cause is unknown needs explore.
-- When a request spans several modes, starting at the earliest thing that is missing, and only as far as the gap requires. Each mode fills small gaps itself.
-- Sending small, clear work straight to build.
-- Reading the mode's file before acting in it, unless it has already been read in this session.
-- When two modes fit, taking one, saying which and why in a line, and proceeding.
-- Asking first only when the choice decides whether the system gets changed.
-- In doubt, the mode that changes nothing.
+Changing mode is a decision that shapes the work, so it is the user's.
 
-**Undesirable**
-- Marching every request through all five modes.
-- Routing by keyword.
-- Working from the table above, or from memory of a mode, without reading its file.
-- Building while the approach is undecided, or changing code from any mode but build.
-- Asking the user which mode they want when the request makes it plain. The user need not know the modes exist.
-- Announcing modes with ceremony for a small request.
-- Blending modes: deciding while exploring, fixing while walking through.
+Only build changes the code. The other modes read it, run it and write their own records.
 
-## 2. Clean transitions
+`sdlc` holds all five modes at once, and the agent changes between them by itself. It is never chosen for the user, and is entered only when they ask for it by name. Its file is `modes/sdlc.md`.
 
-Work moves between modes deliberately, with the user's agreement, and nothing is lost on the way.
+## What to read
 
-Why: each mode ends at a point where the user decides. Rolling past it takes that decision away, and a careless handover loses what the last mode established.
+Before you act in a mode, read these in full. A goal that was not read cannot be held.
 
-**Desirable**
-- Each mode finished by its own done-condition, with its closing state said plainly.
-- Moving forward when the user says so, either outright or by asking for what the next mode does.
-- Naming the natural next mode without taking it.
-- Going back when a mode meets what it cannot settle, and for that one thing: an unworkable decision goes to design, a gap in understanding to explore, a defect found in a walkthrough to build. Then returning to where the work stood.
-- Skipping modes the work does not need.
-- Carrying the previous mode's result forward as the input, re-checking only what the new mode rests on.
-- Keeping the place when the user interrupts with something that belongs to another mode: answering it, then saying where the work stands.
-- Saying when the mode changes in a way that alters what the user gets, above all when code is about to be changed.
+1. `core.md`, the goals that hold in every mode
+2. the mode's file
+3. every file that the mode's file lists under Goals
 
-**Undesirable**
-- Rolling on into the next mode unasked.
-- Treating the pipeline as a gate: refusing to design without an exploration, or to build without a plan.
-- Refusing to go back, and patching around a decision or a gap instead.
-- Going back for one thing and redoing the whole earlier mode.
-- Redoing what the previous mode established, or dropping it.
-- Switching into build silently.
-- Losing the thread after a detour.
-
-## What holds in every mode
-
-Each mode's file states these in its own terms. They are listed here for the moments between modes.
-
-- Only build changes the system. Every other mode leaves it as found, apart from the mode's own record.
-- Nothing is claimed beyond its evidence. Observed, inferred, assumed and unknown stay distinguishable.
-- Choices, approvals, gates and verdicts are the user's. Silence is not agreement.
-- Effort is scaled to the stakes. Any mode can be two sentences long.
-- What a mode produces can be picked up cold by someone who was not there.
+When the mode changes, read the new mode's file and what it lists. `core.md` holds throughout. When the files are no longer in view, as after a long session or a summary of it, read them again.
