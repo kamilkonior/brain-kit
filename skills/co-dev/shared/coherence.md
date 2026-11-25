@@ -11,10 +11,8 @@ Why: what does not fit is paid for by everyone who works on it afterwards.
 - **Change propagation:** a change is carried through everything it affects: other code, tests, types, documentation.
 - **Superseding:** where the work conflicts with an earlier decision, that decision is put up for change, not worked around.
 - **Least astonishment:** what is new reads and behaves as the surrounding work leads one to expect.
-- **DRY:** each thing exists once, and what the new work replaces is gone.
+- **DRY:** each piece of logic or truth lives in one place, not in copies.
 - **YAGNI:** the result is the simplest that does the job.
-- **Atomic commit:** one change holds one thing, so that it can be reviewed and undone alone.
-- **Comment the why:** the reason the code cannot give for itself stands beside it.
 
 **Undesirable**
 
@@ -24,5 +22,3 @@ Why: what does not fit is paid for by everyone who works on it afterwards.
 - **Lava flow:** what the new work replaced is still there.
 - **Cowboy coding:** the agent writes its own way, against the project's conventions and instructions.
 - **Over-engineering:** structure is added that the job does not need.
-- **Tangled change:** one change holds several things that cannot be told or taken apart.
-- **Journal comments:** comments tell the story of the session, not the reason for the code.

@@ -15,6 +15,7 @@ These goals hold here as well. Read each file in full:
 - `../shared/verification.md`
 - `../shared/coherence.md`
 - `../shared/robustness.md`
+- `../shared/craft.md`
 
 #### Fresh eyes
 

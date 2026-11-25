@@ -17,6 +17,7 @@ Read each file in full:
 - `../shared/verification.md`
 - `../shared/coherence.md`
 - `../shared/robustness.md`
+- `../shared/craft.md`
 - `explore.md`
 - `design.md`
 - `plan.md`

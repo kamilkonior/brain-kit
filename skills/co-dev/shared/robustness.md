@@ -18,7 +18,7 @@ Why: real use is never only the case the builder had in mind, and what breaks th
 
 **Undesirable**
 
-- **Happy path:** only the main case is built, and the rest is taken to work.
+- **Happy path:** only the main case is handled, and the rest is taken to work.
 - **Race condition:** the result depends on which of two things happens first.
 - **Fail open:** when a check cannot be made, the thing it guards is let through.
 - **Silent failure:** an error is caught and dropped, or hidden behind a default.

@@ -15,8 +15,7 @@ Why: the user agreed to a particular thing, and a quiet departure gives them som
 **Undesirable**
 
 - **Drift:** what is delivered is near what was agreed, and is not it.
-- **Scope creep:** the work grows beyond what was agreed.
 - **Gold plating:** extras that nobody asked for are built in.
 - **Cutting corners:** the hard part is dropped or thinned without a word.
 - **Prototype in production:** something made as a trial is kept as the real thing.
-- **Moving the goalposts:** what was agreed is rewritten afterwards to fit what was built.
+- **Retcon:** what was agreed is rewritten afterwards to fit what was delivered.

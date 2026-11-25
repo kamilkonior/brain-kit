@@ -14,6 +14,7 @@ These goals hold here as well. Read each file in full:
 - `../shared/verification.md`
 - `../shared/coherence.md`
 - `../shared/robustness.md`
+- `../shared/craft.md`
 
 #### Increment
 
@@ -32,26 +33,6 @@ Why: builds get interrupted and steps turn out wrong. Both are cheap when the sy
 
 - **Nuke and pave:** a failed step is undone by wiping more than that step changed.
 - **Ceremony:** every small step gets the full round of checks, records and reports, whatever its risk.
-
-#### Craft
-
-The code can be read and changed by someone who was not there when it was written.
-
-*Falls short:* code that passes its check and that nobody would want to maintain. *Overshoots:* polish and cleverness that the job did not need.
-
-Why: the code is read and changed long after the session, by people who were not in it.
-
-**Desirable**
-
-- **Intention-revealing names:** a name says what the thing is and does, in the words of the domain.
-- **Information hiding:** nothing is public or configurable that nothing outside needs.
-- **Tests as documentation:** each test checks one behaviour, is named for it, and can be read without the code it tests.
-
-**Undesirable**
-
-- **Programming by coincidence:** the code passes, and nobody could say why a line of it is needed.
-- **Clever code:** a compact trick stands where plain code would do.
-- **Magic number:** a value is written into the code with nothing saying what it stands for.
 
 #### Adaptation
 

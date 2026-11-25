@@ -15,4 +15,5 @@ Why: findings that make no whole leave the user unable to reason about the thing
 
 **Undesirable**
 
+- **Laundry list:** findings stand side by side, with nothing saying how they connect.
 - **Architecture astronaut:** layers and patterns are drawn up for what is three functions.

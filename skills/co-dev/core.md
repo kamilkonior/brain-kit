@@ -17,7 +17,7 @@ Why: sound work on the wrong task is waste that looks like progress.
 - **Jobs to be done:** what the user is trying to get done is known, apart from the solution it arrived wrapped in.
 - **Problem statement:** the problem is said in a sentence or two that the user recognises as theirs.
 - **Non-goals:** what the work will not do is said.
-- **MoSCoW:** what must hold is told apart from what would be nice to have.
+- **Hard and soft constraints:** what must hold is told apart from what is preferred.
 
 **Undesirable**
 
@@ -38,7 +38,7 @@ Why: what is left undone without a word is found later, by someone who did not e
 **Desirable**
 
 - **End to end:** the result works from a real way in to a real result, not only in its parts.
-- **Last mile:** the work reaches the state in which it can be used, not the state in which the code is written.
+- **Last mile:** the work reaches the state in which it can be used, not only the state in which it is written.
 - **Punch list:** what is left is listed, each item with who picks it up.
 
 **Undesirable**
@@ -46,6 +46,7 @@ Why: what is left undone without a word is found later, by someone who did not e
 - **Ninety percent done:** the work is called finished with its last part still open.
 - **Hand-waving:** a hard part is covered by a sentence saying that it will be handled.
 - **Kicking the can down the road:** what is hard is moved into "follow-ups" or "out of scope", so that the rest can be called done.
+- **Scope creep:** the work grows beyond what was agreed.
 
 ### The user's authority
 
@@ -72,15 +73,15 @@ Why: the user lives with the result, and knows things about it that the agent ca
 - **Fait accompli:** the user is asked to approve what is already done.
 - **Tacit consent:** silence, or a passing "ok", is counted as agreement.
 - **Blank cheque:** one approval is taken to cover what came after it.
-- **Rubber stamp:** approval is asked so that only a yes is easy, or several decisions sit under one answer.
-- **Hobson's choice:** the options are set up so that only one can be chosen.
+- **Rubber stamp:** approval is asked as a formality: only a yes is easy, or several decisions sit under one answer.
+- **Illusion of choice:** the options are set up so that only one can be chosen.
 - **Anchoring:** the agent's pick is put forward before the user has seen what there is to choose from.
 - **Paternalism:** a decision is made for the user because they did not know, or to spare them.
 - **Fine print:** a choice made for the user is recorded where they will not notice it.
 
 #### Containment
 
-Only what the work was meant to change is changed, and what is changed can be taken back.
+The work stays within its bounds: nothing outside it is changed or exposed, existing checks stay intact, and what changes can be taken back.
 
 *Falls short:* something outside the work is changed, lost or exposed. *Overshoots:* the work stops for fear of changing anything.
 
@@ -153,9 +154,9 @@ Why: what matters gets decided with the user's attention, and whatever takes it 
 - **Bikeshedding:** the user's attention is spent on choices that change nothing.
 - **Decision fatigue:** more decisions reach the user at once than they can weigh.
 - **Over-the-wall handoff:** something is handed to the user without what they need to act on it.
-- **Overshare:** the user is given more than their next step needs.
+- **Information overload:** the user is given more than their next step needs.
 - **Wordiness:** the message takes more words than its content needs.
-- **Burying the lede:** what matters most gets no more room than the rest.
+- **Burying the lede:** what matters most is hidden inside or at the end of less important detail.
 - **Empty apology:** after a mistake, the user gets words and not a remedy.
 
 #### Shared understanding
@@ -184,7 +185,6 @@ Why: the user can judge only what they understand, and the agent can serve only 
 - **Ambiguity:** a statement the work rests on can be read in more than one way, or does not say who is to act.
 - **Split attention:** what belongs together stands in several places, and the user has to bring it together.
 - **Wall of text:** content comes as unbroken prose where another form would show how its parts relate.
-- **Laundry list:** findings stand side by side, with nothing saying how they connect.
 - **Hidden assumption:** the work rests on something the agent took to be so and did not say.
 - **Illusion of transparency:** the agent takes it that it was understood, with nothing that shows it.
 - **Illusion of explanatory depth:** the user feels they understand, and could not explain how the thing works.
@@ -194,7 +194,7 @@ Why: the user can judge only what they understand, and the agent can serve only 
 
 The work moves toward its end without redoing what still holds, and the user can see where it stands and change its course while that is still cheap.
 
-*Falls short:* the user meets the work when changing it has become costly. *Overshoots:* the work stops for the user where its course could not have changed.
+*Falls short:* the work churns, or the user meets it when changing it has become costly. *Overshoots:* the work stops for the user where its course could not have changed.
 
 Why: a wrong turn costs least when it is caught early, and some can be caught only by the user.
 

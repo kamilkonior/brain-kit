@@ -19,6 +19,6 @@ Why: a fault found next to its cause takes minutes, and one found by the user co
 
 - **"Should work":** an expectation is reported as a result.
 - **Eyeballing:** the work is called done because the code looks right.
-- **Works on my machine:** the proof comes from somewhere else: another branch, an earlier state, or a part of the checks.
+- **Works on my machine:** the check passes only in the local setup, not where the result will actually run.
 - **Tautological test:** a check passes whatever the work does.
 - **Teaching to the test:** the work is shaped to pass the check, not to do what the check was for.
