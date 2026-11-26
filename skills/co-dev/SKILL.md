@@ -1,6 +1,6 @@
 ---
 name: co-dev
-description: Develop software together with the user through five pipeline modes and side-kicks. Explore investigates a problem, codebase or idea. Design decides the shape of a change. Plan orders the work into verifiable steps. Build makes the change and proves it. Walkthrough shows the user what was built so they can judge it. Troubleshoot diagnoses why code, tests, CI, config, infra or a running system is failing before deciding what to do. Retro turns what a piece of work taught into a lasting, verified upgrade to how you and the user work. Use for any software development request, for example investigating a bug or outage, working out how something should be built, breaking work into steps, writing or changing code, explaining a change, branch or pull request, or improving the repo, tools, skills or workflow after friction or a win. Picks the mode that supplies what the user is missing, and moves between modes only with the user's agreement.
+description: Develop software together with the user through six pipeline modes and side-kicks. Explore investigates a problem, codebase or idea. Design decides the shape of a change. Plan orders the work into verifiable steps. Build makes the change and proves it. Walkthrough shows the user what was built so they can judge it. Ship lands an accepted change into its real destination and confirms it is healthy live. Troubleshoot diagnoses why code, tests, CI, config, infra or a running system is failing before deciding what to do. Retro turns what a piece of work taught into a lasting, verified upgrade to how you and the user work. Use for any software development request, for example investigating a bug or outage, working out how something should be built, breaking work into steps, writing or changing code, explaining a change, branch or pull request, releasing or deploying work, or improving the repo, tools, skills or workflow after friction or a win. Picks the mode that supplies what the user is missing, and moves between modes only with the user's agreement.
 ---
 
 # Co-dev
@@ -32,6 +32,7 @@ Work in the mode the user names, or else in the one that supplies what they are 
 | plan | a way to make the change that will get there | `modes/plan.md` |
 | build | the change itself, agreed or small and clear | `modes/build.md` |
 | walkthrough | an understanding of what was built, and a verdict on it | `modes/walkthrough.md` |
+| ship | the accepted change safely landed, live and confirmed healthy in its real destination | `modes/ship.md` |
 
 ### Side-kicks
 
@@ -44,9 +45,9 @@ A side-kick can be entered cold or from any mode, and returns to the work once d
 
 Changing mode is a decision that shapes the work, so it is the user's.
 
-Only build changes product code. Retro changes the working system — checks, scripts, templates, tools, skills, memory or instructions — with the user's agreement. The other modes read, run, probe and write their own records.
+Only build changes product code. Ship carries accepted changes through release mechanics and live rollout, and retro changes the working system — checks, scripts, templates, tools, skills, memory or instructions — both with the user's agreement. The other modes read, run, probe and write their own records.
 
-`sdlc` holds all five modes at once, and the agent changes between them by itself. It is never chosen for the user, and is entered only when they ask for it by name. Its file is `modes/sdlc.md`.
+`sdlc` holds all six pipeline modes at once, and the agent changes between them by itself. It is never chosen for the user, and is entered only when they ask for it by name. Its file is `modes/sdlc.md`.
 
 ## What to read
 
