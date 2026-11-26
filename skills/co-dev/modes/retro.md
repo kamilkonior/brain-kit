@@ -58,5 +58,5 @@ Why: a lesson nobody carries forward changes nothing, and a heavy guard paid on 
 - **Process accretion:** piling up instructions, hooks or checks episode after episode without pruning, until context and workflow buckle under their own weight.
 - **Process theater:** adding a ritual, template field or boilerplate rule that creates busywork without preventing recurrence.
 - **Wrong lever:** writing prose instructions for what a small lint or script would catch reliably, or building brittle automation for a soft matter of judgment.
-- **Shadow pipeline:** improvising a multi-step tooling, harness or skill overhaul inside retro instead of promoting it to `explore`, `design`, `plan` or `build`.
+- **Shadow pipeline:** improvising a multi-step tooling, harness or skill overhaul inside retro instead of promoting it into the main pipeline.
 - **Product creep:** quietly fixing the product bug or refactoring application code inside retro, tangling product and process diffs.

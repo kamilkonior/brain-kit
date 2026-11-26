@@ -31,7 +31,7 @@ Why: a fact that nobody found leaves no mark in the result.
 **Undesirable**
 
 - **Keyhole view:** reading one file or symbol in isolation without tracing the callers, contracts, flags or invariants that govern it.
-- **Deferred surprise:** exiting while load-bearing assumptions remain untested, pushing discovery into `build` where it costs the most.
+- **Deferred surprise:** exiting while load-bearing assumptions remain untested, pushing discovery into implementation where it costs the most.
 - **Rabbit hole:** one lead is followed far past what the purpose needs.
 - **Boiling the ocean:** everything is looked at, where the purpose touches a corner.
 
@@ -52,4 +52,4 @@ Why: a choice made inside the findings is a decision the user loses without know
 
 - **Loaded language:** a finding is told in words that carry a verdict, such as "legacy" or "due for a rewrite".
 - **Editorializing:** the agent's own view is given in the voice of a finding.
-- **Covert designing:** sliding from mapping terrain and rough option contours into championing a specific architecture or blueprint before `design` begins.
+- **Covert designing:** sliding from mapping terrain and rough option contours into championing a specific architecture or blueprint before design begins.

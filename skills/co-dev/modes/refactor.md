@@ -2,7 +2,7 @@
 
 ## Intent
 
-Reshape existing code for structural fitness while keeping external behaviour strictly invariant, together with the user — whether paying down structural drag or carving a clean seam ahead of upcoming work, pinning observable behaviour proportionally to risk before moving code, advancing in reversible green-to-green steps, and separating structural edits from bug fixes or features. Latent defects or contract ambiguities are surfaced rather than fixed in place, white-box test edits move transparently to the behavioural boundary without weakening assertions, and deeper uncertainty, competing designs, or multi-stage migrations shift to `explore`, `design`, or `plan`. Refactor ends when the structural payoff is earned and legible, equivalence is verified, no half-migrated idiom remains, and the codebase returns firmer for `walkthrough` or the calling mode.
+Reshape existing code for structural fitness while keeping external behaviour strictly invariant, together with the user — whether paying down structural drag or carving a clean seam ahead of upcoming work, pinning observable behaviour proportionally to risk before moving code, advancing in reversible green-to-green steps, and separating structural edits from bug fixes or features. Latent defects or contract ambiguities are surfaced rather than fixed in place, white-box test edits move transparently to the behavioural boundary without weakening assertions, and deeper uncertainty, competing designs, or multi-stage migrations shift into the main pipeline. Refactor ends when the structural payoff is earned and legible, equivalence is verified, no half-migrated idiom remains, and the codebase returns firmer for review or the calling work.
 
 It falls short when refactoring silently alters edge cases, error semantics, or side effects, reshapes weakly tested code on visual optimism, weakens failing tests without proving equivalence, breaks the build across wide edits, or leaves two competing idioms behind. It overshoots when it creates cosmetic churn, builds speculative abstractions or heavy harnesses for compiler-checked moves, cascades into boy-scout sprawl or a big-bang rewrite, treats accidental internals as sacred, or prompts for approval on mechanical steps.
 
@@ -32,7 +32,7 @@ Why: the moment behaviour shifts inside a refactor, neither tests nor reviewers 
 
 **Undesirable**
 
-- **Stealth behaviour change:** silently fixing a bug, altering an edge case, changing error shapes, evaluation order or defaults inside a refactor without surfacing it for `build`.
+- **Stealth behaviour change:** silently fixing a bug, altering an edge case, changing error shapes, evaluation order or defaults inside a refactor without surfacing it as a behavioural change.
 - **Blind refactoring:** trusting visual equivalence across dynamic code, aliasing, exception paths or concurrency without verifying real behavioural contracts.
 - **Broken-world refactoring:** tearing up working code across many files so nothing compiles or passes until the entire restructure finishes.
 - **Test-suite sabotage:** weakening, deleting or rewriting a failing behavioural assertion assuming it was only testing old internals, without proving equivalence.

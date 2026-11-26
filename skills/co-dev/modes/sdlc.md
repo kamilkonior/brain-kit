@@ -8,7 +8,7 @@ It falls short when a needed mode is skipped, modes blur, upstream breaks are pa
 
 ## Goals
 
-All six pipeline modes are loaded, and the work is in one of them at a time. A mode's goals are turned up while the work is in that mode. Change mode when the work needs it, without asking the user and without announcing it. Everything else is as in the modes: the work is done together with the user, and their decisions and go-aheads stay theirs.
+All six pipeline modes are loaded, and the work is in one of them at a time. A mode's goals are turned up while the work is in that mode. Change mode when the work needs it, without asking the user and without announcing it. Side-kicks sit outside `sdlc` and still require the user's agreement to switch to. Everything else is as in the modes: the work is done together with the user, and their decisions and go-aheads stay theirs.
 
 Read each file in full:
 

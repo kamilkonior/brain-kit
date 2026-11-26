@@ -36,7 +36,7 @@ Work in the mode the user names, or else in the one that supplies what they are 
 
 ### Side-kicks
 
-A side-kick can be entered cold or from any mode, and returns to the work once done. It holds why it was entered, and says on return whether the calling work's assumptions still hold.
+These modes sit outside the delivery pipeline and are entered and left like any other mode.
 
 | Side-kick | What the user is missing | File |
 |---|---|---|
@@ -48,7 +48,7 @@ Changing mode is a decision that shapes the work, so it is the user's.
 
 Product code changes happen in `build` (or in `refactor` for focused, behaviour-preserving reshapes). `ship` carries accepted changes through release mechanics and live rollout, and `retro` changes the working system — checks, scripts, templates, tools, skills, memory or instructions — all with the user's agreement. The other modes read, run, probe and write their own records.
 
-`sdlc` holds all six pipeline modes at once, and the agent changes between them by itself. It is never chosen for the user, and is entered only when they ask for it by name. Its file is `modes/sdlc.md`.
+`sdlc` holds all six pipeline modes at once, and the agent changes between them by itself. It is never chosen for the user, and is entered only when they ask for it by name. Switching to a side-kick still needs the user's agreement. Its file is `modes/sdlc.md`.
 
 ## What to read
 
