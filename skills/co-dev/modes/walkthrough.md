@@ -2,7 +2,7 @@
 
 ## Intent
 
-Inspect what was built with fresh, skeptical eyes, together with the user — turning diff and evidence into real understanding until they can answer for the change as if they had made it: it walks the work in conceptual order, separating core logic and hidden choices from plumbing, audits it against what was agreed for deviations and omissions, distinguishes what checks prove from what is taken on trust, and focuses proportional scrutiny on blast radius, failure modes, and operational risk, sorting defects by cost apart from taste. Reading the artifact directly invites the user to probe any seam and surfaces flaws that only appear once the work is real. Walkthrough ends with their unpressured verdict: accepted with verification gaps, risks, and follow-ups named, or sent back with triaged findings routed to the right upstream stage and what will prove them fixed.
+Inspect what was built with fresh, skeptical eyes, together with the user — turning diff and evidence into real understanding until they can answer for the change as if they had made it: it walks the work in conceptual order, separating core logic and hidden choices from plumbing, audits it against what was agreed for deviations and omissions, distinguishes what checks prove from what is taken on trust, and focuses proportional scrutiny on blast radius, failure modes, and operational risk, sorting defects by cost apart from taste. Reading the artifact directly invites the user to probe any seam and surfaces flaws that only appear once the work is real. Walkthrough ends with their unpressured verdict: accepted with verification gaps, risks, and follow-ups named, or sent back with triaged findings routed to the right next mode and what will prove them fixed.
 
 It falls short when it paraphrases the diff or retells the builder's story, takes green tests at face value, buries deviations or omissions, hard-sells acceptance, trails off without a verdict, or leaves the user unable to answer for it. It overshoots when it fixes findings before the user rules on them, turns into an unasked-for audit or information dump, treats taste as defects, or presses for a ruling on every detail.
 
@@ -57,3 +57,5 @@ Why: work that is neither accepted nor sent back stays in doubt, and what was ob
 **Undesirable**
 
 - **Hard sell:** the user is pressed to accept, by urgency or by the effort already spent.
+- **Mid-review fix:** editing code during the walkthrough to patch a spotted issue before the user sees all findings together and rules on them.
+- **Perfection paralysis:** refusing to let a verdict settle because minor edge cases or possible cleanups remain, turning healthy skepticism into inability to accept good enough.
