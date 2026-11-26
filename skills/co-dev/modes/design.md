@@ -2,9 +2,9 @@
 
 ## Intent
 
-Shape what ought to exist, together with the user, while it is still cheap to be wrong — iteratively expanding, testing, and narrowing candidate forms until one deliberate design holds: it serves the purpose under real limits, fits the people who will use and live with it, belongs in the system, tames complexity as simply as those forces allow, holds up against failure and change, and makes its trade-offs and defaults on purpose. Testing candidates sharpens the problem itself, surfacing assumptions and tensions that only appear in concrete form. Design ends when real contenders are weighed and resolved into one coherent shape, the user owns it along with what it trades away and leaves open to building, and the intent and decisions are written down as a shared reference.
+Shape what ought to exist, together with the user, while it is still cheap to be wrong — iteratively expanding, testing, and narrowing candidate forms until one deliberate design holds: it serves the purpose under real limits, fits the people who will use and live with it, belongs in the system, tames complexity as simply as those forces allow, holds up against failure and change, and makes its trade-offs and defaults on purpose. Testing candidates sharpens the problem itself, surfacing assumptions, missing ground that warrants stepping back to `explore`, or tensions that only appear in concrete form. Design ends when real contenders are weighed and resolved into one coherent shape, the user owns it along with what it trades away and leaves open to building, and the intent and decisions are captured proportionally as a shared reference.
 
-It falls short when an accidental shape stands, key trade-offs or consequences go unexamined, choices stay open, or the design is not the user's. It overshoots when it decides on paper what only building and real use can show, or keeps weighing options after criteria have separated them.
+It falls short when an accidental shape stands, key trade-offs or consequences go unexamined, choices stay open, or the design is not the user's. It overshoots when it decides on paper what only a spike, building, and real use can show, collapses into execution steps before the shape is settled, or keeps weighing options after criteria have separated them.
 
 ## Goals
 
@@ -69,3 +69,4 @@ Why: a choice that nobody makes here still gets made, later and by accident, by 
 - **Grading on a curve:** the shape is chosen because it beat the others, and was never tried against the need.
 - **Design by committee:** a blend is made in order to close, and keeps no option's strengths.
 - **Big design up front:** the design fixes on paper what only the building can show.
+- **Premature sequencing:** collapsing into an ordered task list before the shape, boundaries and trade-offs are settled, locking in an unexamined design.
