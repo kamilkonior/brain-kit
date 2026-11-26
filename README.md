@@ -9,7 +9,7 @@ npx skills add kamilkonior/brain-kit
 | Skill | What it does |
 |---|---|
 | `co-design` | Designs something with you: an architecture, a feature, a process, a strategy, a document. Both of you contribute ideas, you decide what is yours to decide, and the result is a written design that can be built from without the agent. |
-| `co-dev` | Develops software with you through six pipeline modes (explore, design, plan, build, walkthrough, ship) and six side-kicks (troubleshoot, refactor, retro, onboard, optimize, audit). Each mode sets what you are optimising for; the agent picks the one that supplies what you are missing, and moves between modes only with your agreement. |
+| `co-dev` | Develops software with you through six pipeline modes (explore, design, plan, build, walkthrough, ship) and seven side-kicks (troubleshoot, refactor, retro, onboard, optimize, audit, hunt). Each mode sets what you are optimising for; the agent picks the one that supplies what you are missing, and moves between modes only with your agreement. |
 | `grill-me` | Interviews you about a design, one question at a time, until it's settled. You decide; the agent looks things up, recommends and keeps the order. |
 | `decision-tree` | A CLI memory for decisions: questions, options, selections and follow-ups in an append-only log. It answers what to decide next and what's already settled. |
 | `decision-tree-v2` | The next version of `decision-tree`: it adds statements, a reason on every judgement, several operations in one call, and a write result that says what each change displaced or brought back. Its log format is not compatible with `decision-tree`'s. |
@@ -44,6 +44,7 @@ Side-kicks can be entered cold or mid-work and return when done:
 /co-dev onboard onto the billing service
 /co-dev optimize event replay latency under 100ms p99
 /co-dev audit tenant isolation across billing endpoints
+/co-dev hunt for races or state corruption in the payment retry loop
 ```
 
 To let the agent move across the six pipeline modes on its own while keeping decisions and go-aheads yours, ask for `/co-dev sdlc`.
