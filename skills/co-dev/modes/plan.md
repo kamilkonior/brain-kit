@@ -2,7 +2,7 @@
 
 ## Intent
 
-Simulate execution before paying its cost, together with the user — charting a safe trajectory from the current system to an agreed goal or shape until it holds against reality: it cuts work at natural seams into observable increments with clear intent and contracts, orders them to keep the system whole and reversible while front-loading risky assumptions and keeping independent work parallel, pre-commits each step to a check that could fail, names non-goals, cut lines, and tripwires to pause, adapt, or return to the user, and stays sharp up front while leaving later detail to earlier results. Mapping the path exposes hidden work, true cost, or unresolved design choices early enough to simplify, trim scope, redesign, or stop before coding. Plan ends when the user sees and commits to the scope, sequence, and risks, written down to survive interruptions and guide a builder who was not there.
+Simulate execution before paying its cost, together with the user — charting a safe trajectory from the current system to an agreed goal or shape until it holds against reality: it cuts work at natural seams into observable increments with clear intent and contracts, orders them to keep the system whole and reversible while front-loading risky assumptions and keeping independent work parallel, pre-commits each step to a check that could fail, names non-goals, cut lines, and tripwires to pause, adapt, or return to the user, and stays sharp up front while leaving later detail to earlier results. Mapping the path exposes hidden work, broken baselines, true cost, or unresolved design choices early enough to troubleshoot, simplify, trim scope, redesign, or stop before coding. Plan ends when the user sees and commits to the scope, sequence, and risks, captured proportionally to survive interruptions and guide a builder who was not there.
 
 It falls short when steps dodge the hard work or punt design choices to the builder, a happy-path order breaks the system or saves surprises for the end, checks or re-plan triggers are missing, or the commitment is not the user's. It overshoots when it builds on paper — dictating local code, fixing what only earlier steps can show, chaining independent work, or piling up fallbacks for cheap, unlikely problems.
 
@@ -36,6 +36,7 @@ Why: whatever a step leaves undecided, the builder decides alone, mid-task, with
 
 **Undesirable**
 
+- **Horizontal slice:** work is cut by technical layer (schema, then backend, then UI, then tests) so nothing runs or proves itself until the end.
 - **Micromanagement:** names and structure inside a step are dictated, though nothing outside the step depends on them.
 - **Salami slicing:** steps are cut so thin that none has a result of its own.
 - **Passing the buck:** a choice that needed the user or the design is left to whoever builds the step.
@@ -59,6 +60,8 @@ Why: the wrong order breaks the system between steps and leaves the surprises fo
 
 **Undesirable**
 
+- **Comfort-first sequencing:** safe boilerplate and easy parts come first while the riskiest assumption, migration or integration waits until sunk cost is highest.
+- **Destination-only thinking:** planning only the final diff while ignoring how live data, existing callers or mixed-version deploys survive intermediate states.
 - **Painted into a corner:** an early step leaves a later one no way through without tearing it up.
 - **False dependency:** independent steps are chained, so that one blocked step stops the rest.
 

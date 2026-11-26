@@ -46,7 +46,7 @@ A side-kick can be entered cold or from any mode, and returns to the work once d
 
 Changing mode is a decision that shapes the work, so it is the user's.
 
-Only build changes product behaviour, and refactor reshapes product code while keeping behaviour identical. Ship carries accepted changes through release mechanics and live rollout, and retro changes the working system — checks, scripts, templates, tools, skills, memory or instructions — all with the user's agreement. The other modes read, run, probe and write their own records.
+Product code changes happen in `build` (or in `refactor` for focused, behaviour-preserving reshapes). `ship` carries accepted changes through release mechanics and live rollout, and `retro` changes the working system — checks, scripts, templates, tools, skills, memory or instructions — all with the user's agreement. The other modes read, run, probe and write their own records.
 
 `sdlc` holds all six pipeline modes at once, and the agent changes between them by itself. It is never chosen for the user, and is entered only when they ask for it by name. Its file is `modes/sdlc.md`.
 
