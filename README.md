@@ -1,30 +1,42 @@
 # co-kit
 
-Agent skills for working through design decisions.
+The agent does the legwork. You make the calls.
+
+A small set of agent skills for working *with* an agent instead of handing work over to it. The agent reads the code, lays out the options, recommends one and does the work. Whatever shapes the result waits for you.
+
+The split is deliberate. An agent is fast, doesn't tire, and can keep a whole codebase in view. You know what the thing is for, and you are the one who has to live with it. These skills try to put each of you where you are strongest.
 
 ```
 npx skills add kamilkonior/co-kit
 ```
 
+## The skills
+
 | Skill | What it does |
 |---|---|
-| `co-design` | Designs something with you: an architecture, a feature, a process, a strategy, a document. Both of you contribute ideas, you decide what is yours to decide, and the result is a written design that can be built from without the agent. |
-| `co-dev` | Develops software with you through six pipeline modes (explore, design, plan, build, walkthrough, ship) and sixteen side-kicks (triage, troubleshoot, refactor, retro, onboard, optimize, audit, hunt, spike, test, migrate, harden, document, review, decommission, recover). Each mode sets what you are optimising for; the agent picks the one that supplies what you are missing, and moves between modes only with your agreement. |
+| `co-design` | Designs something with you: an architecture, a feature, a process, a strategy, a document. Both of you bring ideas, you decide what is yours to decide, and the result is a written design that can be built from without the agent. |
+| `co-dev` | Develops software with you, one mode at a time. Six pipeline modes carry a change from first look to live, and sixteen side-kicks cover the work around it. Each mode sets what you are optimising for, and the agent changes mode only with your agreement. |
 | `grill-me` | Interviews you about a design, one question at a time, until it's settled. You decide; the agent looks things up, recommends and keeps the order. |
 | `decision-tree` | A CLI memory for decisions: questions, options, selections and follow-ups in an append-only log. It answers what to decide next and what's already settled. |
 | `decision-tree-v2` | The next version of `decision-tree`: it adds statements, a reason on every judgement, several operations in one call, and a write result that says what each change displaced or brought back. Its log format is not compatible with `decision-tree`'s. |
 
 `grill-me` runs on `decision-tree`, so install those two together; that pair requires Node 20+. `decision-tree-v2` works on its own and also requires Node 20+. `co-design` and `co-dev` each work on their own.
 
+## What to expect
+
+The agent carries the work as far as it can on its own, and comes to you for what is yours: decisions that shape the result, and anything hard to undo.
+
 ## Usage
 
-To design something together:
+### Design something together
 
 ```
 /co-design how we should store events
 ```
 
-To develop software, say what you need, and the agent picks the mode. You can also name a mode or side-kick yourself:
+### Develop software
+
+Say what you need and the agent picks the mode, or name one yourself. The pipeline runs from first look to live:
 
 ```
 /co-dev explore how events are stored today
@@ -35,7 +47,7 @@ To develop software, say what you need, and the agent picks the mode. You can al
 /co-dev ship
 ```
 
-Side-kicks can be entered cold or mid-work and return when done:
+Side-kicks sit outside the pipeline. Enter one cold or mid-work, and return when it's done:
 
 ```
 /co-dev triage checkout 500s paging after release
@@ -56,15 +68,17 @@ Side-kicks can be entered cold or mid-work and return when done:
 /co-dev recover the 1,400 duplicated invoices created during yesterday's retry bug
 ```
 
-To let the agent move across the six pipeline modes on its own while keeping decisions and go-aheads yours, ask for `/co-dev sdlc`.
+To let the agent move through the six pipeline modes on its own, while decisions and go-aheads stay yours, ask for `/co-dev sdlc`.
 
-To pressure-test a plan you already have:
+### Pressure-test a plan
 
 ```
 /grill-me how we should store events
 ```
 
 Each design you are grilled on gets its own log at `.co-kit/grill-me/<topic>.jsonl`. To continue one later, ask the agent to pick that session back up.
+
+### Keep track of decisions
 
 To use `decision-tree` on its own, ask the agent to keep track of a set of decisions.
 
