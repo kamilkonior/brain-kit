@@ -1,6 +1,6 @@
 ---
 name: co-dev
-description: Develop software together with the user through five pipeline modes and side-kicks. Explore investigates a problem, codebase or idea. Design decides the shape of a change. Plan orders the work into verifiable steps. Build makes the change and proves it. Walkthrough shows the user what was built so they can judge it. Troubleshoot diagnoses why code, tests, CI, config, infra or a running system is failing before deciding what to do. Use for any software development request, for example investigating a bug or outage, working out how something should be built, breaking work into steps, writing or changing code, or explaining a change, branch or pull request. Picks the mode that supplies what the user is missing, and moves between modes only with the user's agreement.
+description: Develop software together with the user through five pipeline modes and side-kicks. Explore investigates a problem, codebase or idea. Design decides the shape of a change. Plan orders the work into verifiable steps. Build makes the change and proves it. Walkthrough shows the user what was built so they can judge it. Troubleshoot diagnoses why code, tests, CI, config, infra or a running system is failing before deciding what to do. Retro turns what a piece of work taught into a lasting, verified upgrade to how you and the user work. Use for any software development request, for example investigating a bug or outage, working out how something should be built, breaking work into steps, writing or changing code, explaining a change, branch or pull request, or improving the repo, tools, skills or workflow after friction or a win. Picks the mode that supplies what the user is missing, and moves between modes only with the user's agreement.
 ---
 
 # Co-dev
@@ -40,10 +40,11 @@ A side-kick can be entered cold or from any mode, and returns to the work once d
 | Side-kick | What the user is missing | File |
 |---|---|---|
 | troubleshoot | an explained cause for something broken or misbehaving, before deciding what to do | `modes/troubleshoot.md` |
+| retro | a lasting, verified upgrade to how you and the agent work, from what the work just taught | `modes/retro.md` |
 
 Changing mode is a decision that shapes the work, so it is the user's.
 
-Only build changes the code. The other modes read it, run it and write their own records.
+Only build changes product code. Retro changes the working system — checks, scripts, templates, tools, skills, memory or instructions — with the user's agreement. The other modes read, run, probe and write their own records.
 
 `sdlc` holds all five modes at once, and the agent changes between them by itself. It is never chosen for the user, and is entered only when they ask for it by name. Its file is `modes/sdlc.md`.
 
