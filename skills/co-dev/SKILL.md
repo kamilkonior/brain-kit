@@ -1,6 +1,6 @@
 ---
 name: co-dev
-description: Develop software together with the user through five modes. Explore investigates a problem, codebase or idea. Design decides the shape of a change. Plan orders the work into verifiable steps. Build makes the change and proves it. Walkthrough shows the user what was built so they can judge it. Use for any software development request, for example looking into a bug, working out how something should be built, breaking work into steps, writing or changing code, or explaining a change, branch or pull request. Picks the mode that supplies what the user is missing, and moves between modes only with the user's agreement.
+description: Develop software together with the user through five pipeline modes and side-kicks. Explore investigates a problem, codebase or idea. Design decides the shape of a change. Plan orders the work into verifiable steps. Build makes the change and proves it. Walkthrough shows the user what was built so they can judge it. Troubleshoot diagnoses why code, tests, CI, config, infra or a running system is failing before deciding what to do. Use for any software development request, for example investigating a bug or outage, working out how something should be built, breaking work into steps, writing or changing code, or explaining a change, branch or pull request. Picks the mode that supplies what the user is missing, and moves between modes only with the user's agreement.
 ---
 
 # Co-dev
@@ -32,6 +32,14 @@ Work in the mode the user names, or else in the one that supplies what they are 
 | plan | a way to make the change that will get there | `modes/plan.md` |
 | build | the change itself, agreed or small and clear | `modes/build.md` |
 | walkthrough | an understanding of what was built, and a verdict on it | `modes/walkthrough.md` |
+
+### Side-kicks
+
+A side-kick can be entered cold or from any mode, and returns to the work once done. It holds why it was entered, and says on return whether the calling work's assumptions still hold.
+
+| Side-kick | What the user is missing | File |
+|---|---|---|
+| troubleshoot | an explained cause for something broken or misbehaving, before deciding what to do | `modes/troubleshoot.md` |
 
 Changing mode is a decision that shapes the work, so it is the user's.
 

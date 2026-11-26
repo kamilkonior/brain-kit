@@ -12,6 +12,7 @@ These goals hold here as well. Read each file in full:
 
 - `../shared/fidelity.md`
 - `../shared/verification.md`
+- `../shared/diagnosis.md`
 - `../shared/modularity.md`
 - `../shared/coherence.md`
 - `../shared/robustness.md`
@@ -45,13 +46,9 @@ Why: no plan survives the code unchanged. What decides the outcome is whether a 
 
 **Desirable**
 
-- **Root cause analysis:** a failure is traced to its cause before the code is changed, and the fix removes that cause.
-- **Minimal reproduction:** the failure is made to happen on purpose, in the smallest case that shows it.
-- **One change at a time:** one explanation is tried at a time, so that what helped is known.
 - **Stop digging:** after two attempts that fail the same way, the approach is questioned, not tried a third time.
 
 **Undesirable**
 
-- **Band-aid:** the error is made to go away, and its cause stays.
 - **Yak shaving:** each workaround needs the next, and the work moves further from what it was for.
 - **Sunk-cost fallacy:** an approach is kept because of the effort already spent on it.
