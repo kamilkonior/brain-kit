@@ -1,5 +1,7 @@
 # co-kit
 
+**Co**llaborative **Kit**, a.k.a. human in the loop.
+
 The agent does the legwork. You make the calls.
 
 A small set of agent skills for working *with* an agent instead of handing work over to it. The agent reads the code, lays out the options, recommends one and does the work. Whatever shapes the result waits for you.
