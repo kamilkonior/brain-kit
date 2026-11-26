@@ -1,9 +1,9 @@
-# brain-kit
+# co-kit
 
 Agent skills for working through design decisions.
 
 ```
-npx skills add kamilkonior/brain-kit
+npx skills add kamilkonior/co-kit
 ```
 
 | Skill | What it does |
@@ -64,7 +64,7 @@ To pressure-test a plan you already have:
 /grill-me how we should store events
 ```
 
-Each design you are grilled on gets its own log at `.brain-kit/grill-me/<topic>.jsonl`. To continue one later, ask the agent to pick that session back up.
+Each design you are grilled on gets its own log at `.co-kit/grill-me/<topic>.jsonl`. To continue one later, ask the agent to pick that session back up.
 
 To use `decision-tree` on its own, ask the agent to keep track of a set of decisions.
 

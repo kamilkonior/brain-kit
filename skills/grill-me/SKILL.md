@@ -127,7 +127,7 @@ After a supersede, surface to the user what the changed premise unsettles, with 
 
 An interview outlives its messages, so you keep what was decided, why, and what is still open in a tree and not in the conversation. The tree is the `decision-tree` skill at `<this skill's directory>/../decision-tree/`. Read its `SKILL.md` before the first call.
 
-Each design has one log at `.brain-kit/grill-me/<topic>.jsonl` in the project root. An earlier interview resumes from the same log.
+Each design has one log at `.co-kit/grill-me/<topic>.jsonl` in the project root. An earlier interview resumes from the same log.
 
 | What | How you record it |
 |---|---|
