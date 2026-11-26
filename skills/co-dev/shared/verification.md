@@ -11,6 +11,7 @@ Why: a fault found next to its cause takes minutes, and one found by the user co
 - **Smoke test:** the real thing was run and looked at, not only its tests.
 - **Red, then green:** a check counts when it could have failed: it was seen to fail, or it is known why it would.
 - **Regression check:** what worked before the change was seen to work after it.
+- **Characterization test:** before changing unfamiliar or untested code, a check pins its actual current behaviour so regressions cannot slip in.
 - **Acceptance test:** what is checked is what the user needed, not only what was written.
 - **Reproducible:** the user can repeat the check: what to run, and what they should see.
 - **Trust, but verify:** a "done" from a helper or an earlier report is a claim until it was checked.
@@ -22,3 +23,4 @@ Why: a fault found next to its cause takes minutes, and one found by the user co
 - **Works on my machine:** the check passes only in the local setup, not where the result will actually run.
 - **Tautological test:** a check passes whatever the work does.
 - **Teaching to the test:** the work is shaped to pass the check, not to do what the check was for.
+- **Coverage theater:** checks are written to hit coverage numbers on trivial code rather than to catch failures that matter.

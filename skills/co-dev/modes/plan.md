@@ -53,6 +53,7 @@ Why: the wrong order breaks the system between steps and leaves the surprises fo
 - **Topological order:** no step needs what a later step builds.
 - **Walking skeleton:** the first slice runs from end to end, however thin, and later slices widen it.
 - **Keep the build green:** after every step the code builds, and what passed before still passes.
+- **Preparatory refactoring:** where existing structure resists the change, a behaviour-preserving refactor comes first so the new behaviour lands cleanly.
 - **Expand and contract:** where something live changes, the new is added first, then use moves over, then the old is removed.
 - **Long-lead items:** what waits on someone else is started early.
 
