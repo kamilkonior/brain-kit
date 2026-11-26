@@ -2,9 +2,9 @@
 
 ## Intent
 
-Find the shape for the change, together with the user, until it fits: it meets the need, respects the limits, belongs in the system, and is as simple as those allow. Design ends when the user has chosen it from more than one, can say why it is this one, and it is written down for whoever builds it.
+Shape what ought to exist, together with the user, while it is still cheap to be wrong — iteratively expanding, testing, and narrowing candidate forms until one deliberate design holds: it serves the purpose under real limits, fits the people who will use and live with it, belongs in the system it enters, tames complexity as simply as those forces allow, holds up against failure and change, and makes its trade-offs and defaults on purpose. Testing forms sharpens the problem itself, surfacing assumptions and tensions that only appear once an idea takes shape. Design ends when real contenders have been weighed and narrowed to one coherent shape, the user owns it along with what it gives up and what it deliberately leaves to building, and the intent and decisions are written down as a shared reference.
 
-It falls short when the shape does not fit, or is not the user's. It overshoots when it decides on paper what only the building can show.
+It falls short when the shape is accidental, leaves key trade-offs or consequences unexamined, stays unresolved, or is not the user's. It overshoots when it decides on paper what only building and real use can show.
 
 ## Goals
 
