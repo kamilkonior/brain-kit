@@ -9,7 +9,9 @@ Why: real use is never only the case the builder had in mind, and what breaks th
 **Desirable**
 
 - **Edge cases:** the failures and unusual inputs that will occur are dealt with.
-- **Trust boundary:** what comes from outside is checked where it enters.
+- **Trust boundary:** where untrusted input enters is explicit, and nothing crosses it unchecked.
+- **Parse, don't validate:** untrusted input is turned once at the boundary into a structured, valid representation so downstream code relies on it instead of re-checking.
+- **Make illegal states unrepresentable:** types, schemas and data structures are shaped so invalid combinations cannot be constructed, eliminating whole classes of runtime checks.
 - **Threat modeling:** where the result is exposed, who could misuse it and how was thought through.
 - **Idempotency:** what may run twice gives the same result when it does.
 - **Fail-safe:** when a part fails, the whole ends in a state that does no harm.
@@ -23,3 +25,6 @@ Why: real use is never only the case the builder had in mind, and what breaks th
 - **Fail open:** when a check cannot be made, the thing it guards is let through.
 - **Silent failure:** an error is caught and dropped, or hidden behind a default.
 - **Security theater:** a protection is added that looks safe and stops nothing.
+- **Primitive obsession:** domain states, identifiers or constraints travel as raw strings, numbers or booleans, letting invalid values pass and forcing repeated checks.
+- **Shotgun parsing:** input checking is mixed with processing logic throughout the code instead of parsed once at the boundary, leaving partial state on failure and redundant checks everywhere.
+- **Exception proliferation:** callers are forced to handle a sprawl of fine-grained or unactionable errors.

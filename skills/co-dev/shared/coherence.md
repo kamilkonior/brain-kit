@@ -11,8 +11,9 @@ Why: what does not fit is paid for by everyone who works on it afterwards.
 - **Change propagation:** a change is carried through everything it affects: other code, tests, types, documentation.
 - **Superseding:** where the work conflicts with an earlier decision, that decision is put up for change, not worked around.
 - **Least astonishment:** what is new reads and behaves as the surrounding work leads one to expect.
-- **DRY:** each piece of logic or truth lives in one place, not in copies.
-- **YAGNI:** the result is the simplest that does the job.
+- **Conceptual integrity:** similar things are done in similar ways across the system, and different things are done differently, so the whole reflects one consistent set of ideas.
+- **DRY:** each piece of knowledge or truth lives in one authoritative place, not in diverging copies.
+- **Chesterton's fence:** before removing or replacing something that looks odd or redundant, why it was put there is understood.
 
 **Undesirable**
 
@@ -21,4 +22,4 @@ Why: what does not fit is paid for by everyone who works on it afterwards.
 - **Reinventing the wheel:** something is built that the project already has.
 - **Lava flow:** what the new work replaced is still there.
 - **Cowboy coding:** the agent writes its own way, against the project's conventions and instructions.
-- **Over-engineering:** structure is added that the job does not need.
+- **Wrong abstraction:** shared structure is forced onto cases that differ, accumulating flags and special cases where separate code would be simpler.

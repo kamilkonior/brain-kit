@@ -10,6 +10,7 @@ It falls short when an accidental shape stands, key trade-offs or consequences g
 
 These goals hold here as well. Read each file in full:
 
+- `../shared/modularity.md`
 - `../shared/coherence.md`
 - `../shared/robustness.md`
 

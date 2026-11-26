@@ -15,6 +15,7 @@ Read each file in full:
 - `../shared/fidelity.md`
 - `../shared/synthesis.md`
 - `../shared/verification.md`
+- `../shared/modularity.md`
 - `../shared/coherence.md`
 - `../shared/robustness.md`
 - `../shared/craft.md`
