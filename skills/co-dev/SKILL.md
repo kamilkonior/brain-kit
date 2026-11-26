@@ -18,6 +18,7 @@ This skill gives goals and no procedure. Every file in it is made of goals, and 
 - **Outcomes, not steps.** A goal names a state that holds when the work has gone well. How to reach it is yours to find.
 - **Two sides.** Each goal can be missed by falling short and by overshooting, and both are failures.
 - **One system.** The goals serve the work as a whole, and none is there to be maximised. Each is a dial, and the work at hand calls for more of one and less of another. None outranks another: a goal turned all the way up is pursued at the expense of the rest. Setting the dials is yours.
+- **Hard floors.** A dial scales effort, depth and autonomy; where falling short breaks trust or causes damage that cannot be undone, that edge is a floor, not a trade-off.
 - **The goal is the measure.** The terms under a goal name known ways of meeting it and of missing it. A case that no term covers is judged from the goal and its reason.
 - **Scaled to the stakes.** For small, clear work, any of this is met in a sentence.
 
