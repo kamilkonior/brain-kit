@@ -45,9 +45,7 @@ These modes sit outside the delivery pipeline and are entered and left like any 
 | retro | a lasting, verified upgrade to how you and the agent work, from what the work just taught | `modes/retro.md` |
 | refactor | cleaner structure or seams in existing code with external behaviour strictly unchanged | `modes/refactor.md` |
 
-Changing mode is a decision that shapes the work, so it is the user's.
-
-Product code changes happen in `build` (or in `refactor` for focused, behaviour-preserving reshapes). `ship` carries accepted changes through release mechanics and live rollout, and `retro` changes the working system — checks, scripts, templates, tools, skills, memory or instructions — all with the user's agreement. The other modes read, run, probe and write their own records.
+Each mode sets what you are optimising for. Changing mode is a decision that shapes the work, so it is the user's — propose a switch when what the work needs to optimise for shifts, and treat a direct request for another mode's work as their call to switch.
 
 `sdlc` holds all six pipeline modes at once, and the agent changes between them by itself. It is never chosen for the user, and is entered only when they ask for it by name. Switching to a side-kick still needs the user's agreement. Its file is `modes/sdlc.md`.
 
