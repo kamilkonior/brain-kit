@@ -9,7 +9,7 @@ npx skills add kamilkonior/brain-kit
 | Skill | What it does |
 |---|---|
 | `co-design` | Designs something with you: an architecture, a feature, a process, a strategy, a document. Both of you contribute ideas, you decide what is yours to decide, and the result is a written design that can be built from without the agent. |
-| `co-dev` | Develops software with you in five modes: explore, design, plan, build and walkthrough. The agent picks the mode that supplies what you are missing (understanding, decisions, an order of work, the change itself, or a verdict on what was built), and moves between modes only with your agreement. Only build changes the system. |
+| `co-dev` | Develops software with you through six pipeline modes (explore, design, plan, build, walkthrough, ship) and three side-kicks (troubleshoot, refactor, retro). The agent picks the mode that supplies what you are missing, and moves between modes only with your agreement. Product behaviour changes only in build; refactor reshapes structure without changing behaviour, ship handles release and live rollout, and retro updates the working system itself. |
 | `grill-me` | Interviews you about a design, one question at a time, until it's settled. You decide; the agent looks things up, recommends and keeps the order. |
 | `decision-tree` | A CLI memory for decisions: questions, options, selections and follow-ups in an append-only log. It answers what to decide next and what's already settled. |
 | `decision-tree-v2` | The next version of `decision-tree`: it adds statements, a reason on every judgement, several operations in one call, and a write result that says what each change displaced or brought back. Its log format is not compatible with `decision-tree`'s. |
@@ -24,7 +24,7 @@ To design something together:
 /co-design how we should store events
 ```
 
-To develop software, say what you need, and the agent picks the mode. You can also name the mode yourself:
+To develop software, say what you need, and the agent picks the mode. You can also name a mode or side-kick yourself:
 
 ```
 /co-dev explore how events are stored today
@@ -32,7 +32,18 @@ To develop software, say what you need, and the agent picks the mode. You can al
 /co-dev plan
 /co-dev build
 /co-dev walkthrough
+/co-dev ship
 ```
+
+Side-kicks can be entered cold or mid-work and return when done:
+
+```
+/co-dev troubleshoot why CI fails on event replay
+/co-dev refactor split event storage from transport
+/co-dev retro why that migration check was missed
+```
+
+To let the agent move across the six pipeline modes on its own while keeping decisions and go-aheads yours, ask for `/co-dev sdlc`.
 
 To pressure-test a plan you already have:
 
