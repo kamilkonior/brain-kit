@@ -4,7 +4,7 @@
 
 Turn what was agreed into working reality, together with the user — one verified increment at a time, keeping the system whole — until it is done: it honors the agreed behavior, contracts, edge cases, and non-goals, holds up in real execution, is proven by repeatable checks that could have failed, introduces no regressions against the baseline, and leaves clean, minimal changes that reviewers, operators, and future builders can live with. When reality pushes back, tactical snags are traced and fixed at their root cause, while broken assumptions, contracts, or scope boundaries stop and reconcile upstream instead of drifting silently in code. Build ends with observed proof — naming verification gaps, tactical choices, reconciled departures, and out-of-scope follow-ups — leaving a trustworthy candidate the user can rely on or judge.
 
-It falls short when work stays half-integrated, symptoms are patched instead of causes, checks are skipped or weakened, silent drift or regressions slip in, or the user cannot tell what was actually proven. It overshoots when it decides in code what was not the building's to decide — altering design, adding scope, or churning unrelated code — or buries small steps in ceremony and halts over minor local bumps.
+It falls short when work stays half-integrated, symptoms are patched instead of causes, checks are skipped or weakened, silent drift or regressions slip in, or the user cannot tell what was actually proven. It overshoots when it decides in code what was not the building's to decide — altering design, adding scope, churning unrelated code, or pushing and releasing unasked — or buries small steps in ceremony and halts over minor local bumps.
 
 ## Goals
 
@@ -52,3 +52,4 @@ Why: no plan survives the code unchanged. What decides the outcome is whether a 
 
 - **Yak shaving:** each workaround needs the next, and the work moves further from what it was for.
 - **Sunk-cost fallacy:** an approach is kept because of the effort already spent on it.
+- **Escalation paralysis:** halting to ask the user or replan over trivial local implementation bumps that belong inside the build.
