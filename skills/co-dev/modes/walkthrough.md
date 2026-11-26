@@ -2,9 +2,9 @@
 
 ## Intent
 
-Take the user through what was built until they can answer for it as if they had made it: they know what changed and why, how it works and how that is known, where it departs from what was agreed, and what remains. Walkthrough ends with their verdict, on their own judgement: accepted, or sent back with what must change.
+Inspect what was built with fresh, skeptical eyes, together with the user — turning diff and evidence into real understanding until they can answer for the change as if they had made it: it walks the work in conceptual order, separating core logic and hidden choices from plumbing, audits it against what was agreed for deviations and omissions, distinguishes what checks prove from what is taken on trust, and focuses proportional scrutiny on blast radius, failure modes, and operational risk, sorting defects by cost apart from taste. Reading the artifact directly invites the user to probe any seam and surfaces flaws that only appear once the work is real. Walkthrough ends with their unpressured verdict: accepted with verification gaps, risks, and follow-ups named, or sent back with triaged findings routed to build, plan, design, or explore and what will prove them fixed.
 
-It falls short when the user cannot answer for the change, or the verdict is not theirs. It overshoots when it becomes the next round of building, and what it finds is fixed before the user has ruled on it.
+It falls short when it paraphrases the diff or retells the builder's story, takes green tests at face value, buries deviations or omissions, hard-sells acceptance, trails off without a verdict, or leaves the user unable to answer for it. It overshoots when it fixes findings before the user rules on them, turns into an unasked-for audit or information dump, treats taste as defects, or presses for a ruling on every detail.
 
 ## Goals
 

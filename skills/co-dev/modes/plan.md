@@ -2,9 +2,9 @@
 
 ## Intent
 
-Work out how the change will be made, together with the user, until the plan will get there: it starts from the system as it is, covers what the work needs, puts it in an order that works, and says how done will be known. Plan ends when the user knows what the work involves and has committed to it, and it is written down for whoever builds.
+Simulate execution before paying its cost, together with the user — charting a safe trajectory from the current system to an agreed goal or shape until it holds against reality: it cuts work at natural seams into observable increments with clear intent and contracts, orders them to keep the system whole and reversible while front-loading risky assumptions and keeping independent work parallel, pre-commits each step to a check that could fail, names non-goals, cut lines, and tripwires to pause, adapt, or return to the user, and stays sharp up front while leaving later detail to earlier results. Mapping the path exposes hidden work, true cost, or unresolved design choices early enough to simplify, trim scope, redesign, or stop before coding. Plan ends when the user sees and commits to the scope, sequence, and risks, written down to survive interruptions and guide a builder who was not there.
 
-It falls short when the plan would not get there, or is not the user's. It overshoots when it does the building on paper, and fixes what only the earlier steps can show.
+It falls short when steps dodge the hard work or punt design choices to the builder, a happy-path order breaks the system or saves surprises for the end, checks or re-plan triggers are missing, or the commitment is not the user's. It overshoots when it builds on paper — dictating local code, fixing what only earlier steps can show, chaining independent work, or piling up fallbacks for cheap, unlikely problems.
 
 ## Goals
 

@@ -2,9 +2,9 @@
 
 ## Intent
 
-Shape what ought to exist, together with the user, while it is still cheap to be wrong — iteratively expanding, testing, and narrowing candidate forms until one deliberate design holds: it serves the purpose under real limits, fits the people who will use and live with it, belongs in the system it enters, tames complexity as simply as those forces allow, holds up against failure and change, and makes its trade-offs and defaults on purpose. Testing forms sharpens the problem itself, surfacing assumptions and tensions that only appear once an idea takes shape. Design ends when real contenders have been weighed and narrowed to one coherent shape, the user owns it along with what it gives up and what it deliberately leaves to building, and the intent and decisions are written down as a shared reference.
+Shape what ought to exist, together with the user, while it is still cheap to be wrong — iteratively expanding, testing, and narrowing candidate forms until one deliberate design holds: it serves the purpose under real limits, fits the people who will use and live with it, belongs in the system, tames complexity as simply as those forces allow, holds up against failure and change, and makes its trade-offs and defaults on purpose. Testing candidates sharpens the problem itself, surfacing assumptions and tensions that only appear in concrete form. Design ends when real contenders are weighed and resolved into one coherent shape, the user owns it along with what it trades away and leaves open to building, and the intent and decisions are written down as a shared reference.
 
-It falls short when the shape is accidental, leaves key trade-offs or consequences unexamined, stays unresolved, or is not the user's. It overshoots when it decides on paper what only building and real use can show.
+It falls short when an accidental shape stands, key trade-offs or consequences go unexamined, choices stay open, or the design is not the user's. It overshoots when it decides on paper what only building and real use can show, or keeps weighing options after criteria have separated them.
 
 ## Goals
 

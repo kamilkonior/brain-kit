@@ -2,9 +2,9 @@
 
 ## Intent
 
-Find out what is there, together with the user, until the picture holds: it rests on what was seen, hangs together as one, reaches as far as their purpose needs, and names what is still open. Explore ends when the user holds that picture themselves, knows what they are dealing with, and can choose their next move on their own judgement.
+Close the gap between assumption and reality, together with the user, before commitments become costly — probing how things actually behave, not how they look or are described, until a working picture holds: it rests on direct evidence kept apart from inference and opinion, has been tried where it could fail, hangs together as one model of how things connect and why, maps what the ground allows and rules out, reaches as far as the decision turns on, and names what remains unknown and whether it could change the choice. Confronting reality may sharpen or overturn the starting question, exposing hidden invariants, dead ends, or existing leverage. Explore ends when the picture is captured clearly enough to share, the user holds it themselves, and the next move remains open to their own judgement.
 
-It falls short when the picture does not hold, or is not the user's. It overshoots when the next move is chosen for them along the way.
+It falls short when the first plausible story or unverified assumptions stand, facts blur with verdict, key constraints or unknowns go unnamed, or the picture stays with the agent. It overshoots when a decision or commitment is smuggled into the findings, or when looking runs past diminishing returns — chasing certainty that will not change the choice, or theorizing where a small reversible step would teach faster.
 
 ## Goals
 
