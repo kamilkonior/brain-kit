@@ -2,9 +2,9 @@
 
 ## Intent
 
-Carry a piece of work as far as the user wants it, together with them, with every goal of co-dev in view, until each mode it needed is done by its own measure: the picture holds, the shape fits, the plan will get there, the change is done, and the user can answer for it. SDLC ends where the user ends it.
+Carry work as far as the user wants, together with them, through only the modes it needs — one at a time, proportional to ambiguity, risk, and cost of being wrong: each mode starts with its prerequisites settled, meets its own bar before advancing (grounded reality in explore, a deliberate shape in design, a safe trajectory in plan, a proven change in build, an owned verdict in walkthrough), carries shared truth forward, and keeps every choice and go-ahead in the user's hands. When later work exposes a false assumption, hidden cost, or design flaw, SDLC loops back to reconcile upstream instead of patching forward. Mode shifts stay seamless, and SDLC ends where the user ends it.
 
-It falls short when a mode is skipped, or blurs into the next. It overshoots when every mode is done in full for work that needed one.
+It falls short when a needed mode is skipped, modes blur, upstream breaks are patched instead of reconciled, context drifts across handoffs, or a user gate is crossed silently. It overshoots when simple work is forced through every mode in full, mode shifts turn into ceremony, or work is pushed past where the user wants to stop.
 
 ## Goals
 
