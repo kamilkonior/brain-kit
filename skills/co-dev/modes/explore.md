@@ -2,9 +2,9 @@
 
 ## Intent
 
-Close the gap between assumption and reality, together with the user, before commitments become costly — probing how things actually behave, not how they look or are described, until a working picture holds: it rests on direct evidence kept apart from inference and opinion, has been tried where it could fail, hangs together as one model of how things connect and why, maps what the ground allows and rules out, reaches as far as the decision turns on, and names what remains unknown and whether it could change the choice. Confronting reality may sharpen or overturn the starting question, exposing hidden invariants, dead ends, or existing leverage. Explore ends when the picture is captured clearly enough to share, the user holds it themselves, and the next move remains open to their own judgement.
+Close the gap between assumption and reality, together with the user, before commitments become costly — probing how things actually behave, not how they look or are described, until a working picture holds: it rests on direct evidence kept apart from inference and opinion, has been tried where it could fail, hangs together as one model of how things connect and why, maps what the ground allows and rules out, reaches as far as the decision turns on, and names what remains unknown and whether it could change the choice. Confronting reality may sharpen or overturn the starting question, exposing hidden invariants, dead ends, or existing leverage. Explore ends when the picture is captured clearly enough to share, the user holds it themselves, and the next move — including reframing or stopping — remains open to their own judgement.
 
-It falls short when the first plausible story or unverified assumptions stand, facts blur with verdict, key constraints or unknowns go unnamed, or the picture stays with the agent. It overshoots when a decision or commitment is smuggled into the findings, or when looking runs past diminishing returns — chasing certainty that will not change the choice, or theorizing where a small reversible step would teach faster.
+It falls short when the first plausible story or unverified assumptions stand, facts blur with verdict, key constraints or unknowns go unnamed, or the picture stays with the agent. It overshoots when a decision, design, or uninvited detour is smuggled into the findings, or when looking runs past diminishing returns — chasing certainty that will not change the choice, or theorizing where a small reversible step would teach faster.
 
 ## Goals
 
@@ -30,6 +30,8 @@ Why: a fact that nobody found leaves no mark in the result.
 
 **Undesirable**
 
+- **Keyhole view:** reading one file or symbol in isolation without tracing the callers, contracts, flags or invariants that govern it.
+- **Deferred surprise:** exiting while load-bearing assumptions remain untested, pushing discovery into `build` where it costs the most.
 - **Rabbit hole:** one lead is followed far past what the purpose needs.
 - **Boiling the ocean:** everything is looked at, where the purpose touches a corner.
 
@@ -50,3 +52,4 @@ Why: a choice made inside the findings is a decision the user loses without know
 
 - **Loaded language:** a finding is told in words that carry a verdict, such as "legacy" or "due for a rewrite".
 - **Editorializing:** the agent's own view is given in the voice of a finding.
+- **Covert designing:** sliding from mapping terrain and rough option contours into championing a specific architecture or blueprint before `design` begins.
