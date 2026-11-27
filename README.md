@@ -38,39 +38,46 @@ The agent carries the work as far as it can on its own, and comes to you for wha
 
 ### Develop software
 
-Say what you need and the agent picks the mode, or name one yourself. The pipeline runs from first look to live:
+Say what you need and the agent picks the mode, or name one yourself: `/co-dev <mode> <what you need>`.
 
-```
-/co-dev explore how events are stored today
-/co-dev design how we should store events
-/co-dev plan
-/co-dev build
-/co-dev walkthrough
-/co-dev ship
-```
+**Pipeline.** Carries a change from first look to live: `explore` → `design` → `plan` → `build` → `walkthrough` → `ship`
 
-Side-kicks sit outside the pipeline. Enter one cold or mid-work, and return when it's done:
+| Mode | Use it when | Example |
+|---|---|---|
+| `explore` | you need to understand the problem, the code or the idea | `/co-dev explore how events are stored today` |
+| `design` | you need a shape for the change | `/co-dev design how we should store events` |
+| `plan` | you need the steps that will get there | `/co-dev plan` |
+| `build` | you want the change made | `/co-dev build` |
+| `walkthrough` | you want to understand what was built, and judge it | `/co-dev walkthrough` |
+| `ship` | you want it released, live and confirmed healthy | `/co-dev ship` |
 
-```
-/co-dev triage checkout 500s paging after release
-/co-dev troubleshoot why CI fails on event replay
-/co-dev refactor split event storage from transport
-/co-dev retro why that migration check was missed
-/co-dev onboard onto the billing service
-/co-dev optimize event replay latency under 100ms p99
-/co-dev audit tenant isolation across billing endpoints
-/co-dev hunt for races or state corruption in the payment retry loop
-/co-dev spike whether NATS JetStream handles our replay volume and auth
-/co-dev test add contract and failure-mode tests for webhook retries
-/co-dev migrate billing IDs from int32 to UUIDv7 with zero downtime
-/co-dev harden the payment webhook consumer before launch
-/co-dev document the event replay runbook and recovery steps
-/co-dev review PR #412 for billing webhook idempotency
-/co-dev decommission the legacy v1 export worker and its flags, queues and alerts
-/co-dev recover the 1,400 duplicated invoices created during yesterday's retry bug
-```
+To let the agent move through the six on its own, while decisions and go-aheads stay yours, ask for `/co-dev sdlc`.
 
-To let the agent move through the six pipeline modes on its own, while decisions and go-aheads stay yours, ask for `/co-dev sdlc`.
+**Side-kicks.** These sit outside the pipeline. Enter one cold or mid-work, and return when it's done:
+
+| Side-kick | Use it when | Example |
+|---|---|---|
+| **Find out** | | |
+| `onboard` | you are new to a repo, service or subsystem | `/co-dev onboard onto the billing service` |
+| `spike` | a risky unknown needs a quick, throwaway experiment | `/co-dev spike whether NATS JetStream handles our replay volume and auth` |
+| **Change what exists** | | |
+| `refactor` | the structure needs cleaning and behaviour must not change | `/co-dev refactor split event storage from transport` |
+| `optimize` | something is too slow or costly and you want a measured gain | `/co-dev optimize event replay latency under 100ms p99` |
+| `migrate` | live data, schemas or APIs must cross a breaking change | `/co-dev migrate billing IDs from int32 to UUIDv7 with zero downtime` |
+| `harden` | it must survive faults, abuse and load spikes | `/co-dev harden the payment webhook consumer before launch` |
+| `decommission` | dead code, flags or services should go completely | `/co-dev decommission the legacy v1 export worker and its flags, queues and alerts` |
+| **Check it** | | |
+| `test` | tests need writing, strengthening or deflaking | `/co-dev test add contract and failure-mode tests for webhook retries` |
+| `review` | someone else's PR, patch or RFC needs a verdict | `/co-dev review PR #412 for billing webhook idempotency` |
+| `audit` | you need assurance against security, reliability or quality standards | `/co-dev audit tenant isolation across billing endpoints` |
+| `hunt` | tricky code may hide races or bugs worth proving | `/co-dev hunt for races or state corruption in the payment retry loop` |
+| **Something is wrong** | | |
+| `troubleshoot` | something is broken and you need to know why | `/co-dev troubleshoot why CI fails on event replay` |
+| `triage` | a live outage or alert storm needs containing | `/co-dev triage checkout 500s paging after release` |
+| `recover` | live data went wrong and needs putting right | `/co-dev recover the 1,400 duplicated invoices created during yesterday's retry bug` |
+| **Capture what was learned** | | |
+| `document` | docs need writing or updating for a future reader | `/co-dev document the event replay runbook and recovery steps` |
+| `retro` | the way you work with the agent should improve after friction | `/co-dev retro why that migration check was missed` |
 
 ### Pressure-test a plan
 
