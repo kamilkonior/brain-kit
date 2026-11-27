@@ -17,3 +17,4 @@ Why: findings that make no whole leave the user unable to reason about the thing
 
 - **Laundry list:** findings stand side by side, with nothing saying how they connect.
 - **Architecture astronaut:** layers and patterns are drawn up for what is three functions.
+- **Spherical cow:** a tidy, idealised model strips away the messy special cases, contradictions or real-world constraints that actually govern behaviour.

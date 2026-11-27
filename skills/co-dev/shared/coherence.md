@@ -13,7 +13,6 @@ Why: what does not fit is paid for by everyone who works on it afterwards.
 - **Least astonishment:** what is new reads and behaves as the surrounding work leads one to expect.
 - **Conceptual integrity:** similar things are done in similar ways across the system, and different things are done differently, so the whole reflects one consistent set of ideas.
 - **DRY:** each piece of knowledge or truth lives in one authoritative place, not in diverging copies.
-- **Chesterton's fence:** before removing or replacing something that looks odd or redundant, why it was put there is understood.
 
 **Undesirable**
 

@@ -237,6 +237,7 @@ Why: whatever comes next is built on these statements without checking them agai
 - **Situational awareness:** the agent knows which state of the project it is looking at: branch, version, environment.
 - **Falsification:** what would show the favoured answer wrong was looked for.
 - **Provenance:** each finding comes with where it can be seen.
+- **Chesterton's fence:** before dismissing, removing or working around something that looks odd or redundant, why it was put there is understood.
 
 **Undesirable**
 

@@ -74,7 +74,7 @@ Why: no design or plan survives contact with code untouched; the work stays trus
 
 **Desirable**
 
-- **Premise check:** when real code contradicts an agreed assumption, public or persisted contract, live-compatibility constraint or step sequence, building pauses to reconcile shape, trajectory or migration posture with the user.
+- **Premise check:** when real code contradicts an agreed assumption, public or persisted contract, live-compatibility constraint or planned trajectory, building pauses to reconcile shape, sequence or migration posture with the user.
 - **Complexity tripwire:** when a direct small and clear change uncovers hidden coupling, competing trade-offs or wider blast radius than expected, execution pauses to settle shape or sequence rather than improvising in code.
 
 **Undesirable**

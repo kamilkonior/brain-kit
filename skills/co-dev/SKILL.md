@@ -28,7 +28,7 @@ Work in the mode the user names, or else in the one that supplies what they are 
 
 | Mode | What the user is missing | File |
 |---|---|---|
-| explore | an understanding of the problem, the codebase or the idea | `modes/explore.md` |
+| explore | a grounded understanding of the problem, codebase or idea before deciding what to do next | `modes/explore.md` |
 | design | a shape for the change that fits what is needed | `modes/design.md` |
 | plan | a way to make the change that will get there | `modes/plan.md` |
 | build | the change itself, agreed or small and clear | `modes/build.md` |
