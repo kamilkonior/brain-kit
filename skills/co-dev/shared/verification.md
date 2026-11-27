@@ -24,5 +24,6 @@ Why: a fault found next to its cause takes minutes, and one found by the user co
 - **Works on my machine:** the check passes only in the local setup, not where the result will actually run.
 - **Tautological check:** a check passes whatever the work does, or swallows the failure it checks.
 - **Teaching to the test:** the work is shaped to pass the check, not to do what the check was for.
+- **Lowered bar:** a failing check is weakened, loosened or rewritten so broken work passes instead of fixing the fault or confirming an agreed change in expectations.
 - **Verification theater:** checks are added or run for metrics or appearances rather than to catch failures that matter.
 - **Over-checking:** checking costs more than the risk warrants, repeats settled checks unchanged, or chases certainty past what the decision needs.
