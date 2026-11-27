@@ -34,7 +34,7 @@ Why: builds get interrupted and steps turn out wrong. Both are cheap when the sy
 **Undesirable**
 
 - **Nuke and pave:** a failed step is undone by wiping more than that step changed.
-- **Ceremony:** every small step gets the full round of checks, records and reports, whatever its risk.
+- **Ceremony:** every small step gets heavyweight checks, formal sign-offs or verbose reports whatever its risk, past what keeps the system proven and the active record true.
 
 #### Adaptation
 

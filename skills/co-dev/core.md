@@ -282,25 +282,30 @@ Why: a wrong fact that is marked as uncertain can be caught, and one that reads 
 
 #### Durability
 
-What was reached can be picked up without this session, by the user or by whoever comes next.
+What matters — and why — stands on its own in its natural home, true to where the work actually is, so anyone can pick it up cold without this session.
 
-*Falls short:* what was reached lives only in the conversation. *Overshoots:* records are written that nobody asked for and nobody will read.
+*Falls short:* what matters stays in the conversation, is thinned into shorthand only this thread can decode, or lags behind active work. *Overshoots:* records nobody needs, raw session history, or back-editing earlier records instead of letting downstream truth supersede them.
 
-Why: the conversation ends, and what is only in it ends with it.
+Why: the conversation ends and context resets between stages; what relies on live memory dies with it, while what is duplicated or unneeded rots.
 
 **Desirable**
 
-- **Handover:** at the end, the user knows what is done, what is open and what is theirs to do next.
-- **Cold start:** someone who was not there can pick the work up from the record alone.
-- **Single source of truth:** one record is current, and it changed when the work did.
+- **Handover:** at the end of a stage or session, the user knows what is done, what is open and what is theirs to do next.
+- **Cold start:** someone who was not there can pick the work up and act from the record alone, with zero session memory.
+- **Load-bearing why:** a recorded decision keeps its constraints, reasons and ruled-out paths, not only its conclusion.
+- **Resume point:** while work is under way, the active record stays true as increments land so stopping mid-flight leaves a trustworthy place to continue.
+- **Right carrier:** truth lives in the durable home that naturally owns it (code, tests, commits, specs, plans or runbooks), not in a redundant prose copy.
+- **Single source of truth:** one active record owns current state; downstream truth supersedes upstream scaffolding rather than demanding lockstep back-edits to settled snapshots.
 - **Audit trail:** the history shows what each step changed and why.
-- **Runbook:** how to run the result, check it and undo it is written where the project keeps such things.
-- **Bus factor:** nothing that matters is known only to this session.
 
 **Undesirable**
 
-- **Tribal knowledge:** what was reached exists only in the conversation.
+- **Tribal knowledge:** what matters exists only in the conversation.
+- **Chat shorthand:** a written record is compressed like a live message, leaving context, constraints or open edges implicit in this thread.
+- **Orphaned conclusion:** a decision or outcome is recorded without the reasons, limits or rejected paths that hold it up.
+- **Silent drift:** an active working record stays frozen while steps land or deviate, turning the map into a trap.
 - **Cliffhanger:** the work ends with its last answer, and nothing says where things stand.
+- **Back-edit tax:** rewriting earlier-stage snapshots on every minor downstream tweak instead of letting the active record or code supersede them.
 - **Doc rot:** a record no longer matches what it describes.
-- **Brain dump:** the story of the session is kept in place of what was decided and done.
+- **Brain dump:** the winding story of the session is kept in place of what was decided and done.
 - **Shelfware:** records are written that nobody asked for and nobody will read.

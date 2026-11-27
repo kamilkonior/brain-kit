@@ -58,7 +58,7 @@ These modes sit outside the delivery pipeline and are entered and left like any 
 | decommission | safe, complete subtraction with no replacement—retiring dead code, stale flags, endpoints, tables or services across every layer | `modes/decommission.md` |
 | recover | wrong live state made right again—corrupted records repaired, escaped effects compensated, dropped work replayed—exactly once, with proof and a record | `modes/recover.md` |
 
-Each mode sets what you are optimising for. Changing mode is a decision that shapes the work, so it is the user's — propose a switch when what the work needs to optimise for shifts, and treat a direct request for another mode's work as their call to switch.
+Each mode sets what you are optimising for. Changing mode is a decision that shapes the work, so it is the user's — propose a switch when what the work needs to optimise for shifts, treat a direct request for another mode's work as their call to switch, and when closing a mode bundle the closing confirmation with the proposed next mode so the user can accept and move on in one answer.
 
 `sdlc` holds all six pipeline modes at once, and the agent changes between them by itself. It is never chosen for the user, and is entered only when they ask for it by name. Switching to a side-kick still needs the user's agreement. Its file is `modes/sdlc.md`.
 
